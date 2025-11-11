@@ -49,6 +49,14 @@ class Operator extends Model
     }
 
     /**
+     * Get SIM activation packages for this operator
+     */
+    public function simActivationPackages()
+    {
+        return $this->hasMany(SimActivationPackage::class);
+    }
+
+    /**
      * Get reload sales for this operator
      */
     public function reloadSales()

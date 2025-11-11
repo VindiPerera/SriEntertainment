@@ -602,6 +602,15 @@
       </form>
     </div>
   </Modal>
+
+  <!-- Success Modal -->
+  <ReloadSuccessModal 
+    v-if="completedReloadSale"
+    :open="showSuccessModal" 
+    @update:open="showSuccessModal = $event"
+    :reloadSale="completedReloadSale"
+    :cashier="$page.props.auth.user"
+  />
 </template>
 
 <script setup>
@@ -610,6 +619,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import Banner from '@/Components/Banner.vue';
 import Header from '@/Components/custom/Header.vue';
 import Modal from '@/Components/Modal.vue';
+import ReloadSuccessModal from '@/Components/custom/ReloadSuccessModal.vue';
 import axios from 'axios';
 import dayjs from 'dayjs';
 
@@ -648,6 +658,10 @@ const sellForm = ref({
   notes: '',
   processing: false,
 });
+
+// Success modal state
+const showSuccessModal = ref(false);
+const completedReloadSale = ref(null);
 
 // Operator management state
 const showAddOperatorModal = ref(false);
@@ -846,8 +860,26 @@ const submitSell = async () => {
     const response = await axios.post('/api/wallet/sell', sellForm.value);
     
     if (response.data.success) {
-      alert(response.data.message);
-      window.location.reload();
+      // Store the completed reload sale
+      completedReloadSale.value = response.data.reloadSale;
+      
+      // Show success modal
+      showSuccessModal.value = true;
+      
+      // Reset sell form
+      sellForm.value = {
+        operator_id: null,
+        reload_package_id: '',
+        msisdn: '',
+        notes: '',
+        processing: false,
+      };
+      quoteData.value = null;
+      selectedPackageDisplay.value = null;
+      packageSearchQuery.value = '';
+      
+      // Refresh wallet data
+      await fetchWallets();
     }
   } catch (error) {
     alert('Sale failed: ' + (error.response?.data?.message || error.message));

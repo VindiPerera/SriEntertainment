@@ -234,6 +234,9 @@ class WalletController extends Controller
                     'transaction_date' => now(),
                 ]);
 
+                // Load relationships for receipt
+                $reloadSale->load('user', 'operator', 'reloadPackage');
+
                 return response()->json([
                     'success' => true,
                     'message' => "Reload sale successful! Rs. {$faceValue} to {$msisdn}",

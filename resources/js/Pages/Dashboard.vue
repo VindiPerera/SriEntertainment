@@ -1,282 +1,283 @@
 <template>
   <Head title="Dashboard" />
   <div
-    class="flex flex-col items-center justify-start min-h-screen py-8 space-y-8 bg-gray-100 md:px-36 px-16"
+    class="flex flex-col items-center justify-start min-h-screen py-8 space-y-8 bg-gradient-to-br from-gray-50 to-gray-100 md:px-36 px-16"
   >
     <!-- Include the Header -->
     <Header />
 
-    <div class="grid w-full h-full md:grid-cols-4 grid-cols-1 gap-8 auto-rows-fr">
+    <div class="grid w-full h-full md:grid-cols-4 grid-cols-2 gap-6 auto-rows-fr">
       <Link href="/pos" v-if="HasRole(['Admin', 'Cashier'])">
-        <div class="dashboard-card bg-[#4d7c0f]">
+        <div class="dashboard-card group bg-gradient-to-br from-lime-600 to-lime-700 hover:from-lime-500 hover:to-lime-600">
           <div class="card-content">
             <div class="icon-container">
               <img
                 src="/images/dashboard/checkout.png"
                 class="icon"
-                alt="dresshub.lk"
+                alt="POS"
               />
             </div>
             <div class="text-container">
-              <p class="title">Pos</p>
+              <p class="title">POS</p>
               <p class="description">
-                Simplify sales with an intuitive interface for quick billing and
-                payment processing.
+                Quick billing and payment processing
               </p>
             </div>
           </div>
+          <div class="card-glow"></div>
         </div>
       </Link>
 
       <Link href="/sim-reload" v-if="HasRole(['Admin', 'Cashier'])">
-        <div class="dashboard-card bg-[#10b981]">
+        <div class="dashboard-card group bg-gradient-to-br from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500">
           <div class="card-content">
             <div class="icon-container">
               <img
                 src="/images/dashboard/cashier.png"
                 class="icon"
-                alt="dresshub.lk"
+                alt="SIM Reload"
               />
             </div>
             <div class="text-container">
               <p class="title">SIM & Reload</p>
               <p class="description">
-                Manage SIM card sales and mobile reloads with quick processing for customer top-ups and new activations.
+                Mobile reloads and SIM activations
               </p>
             </div>
           </div>
+          <div class="card-glow"></div>
         </div>
       </Link>
 
       <Link href="/categories" v-if="HasRole(['Admin', 'Manager'])">
-        <div class="dashboard-card bg-[#003161]">
+        <div class="dashboard-card group bg-gradient-to-br from-blue-800 to-blue-900 hover:from-blue-700 hover:to-blue-800">
           <div class="card-content">
             <div class="icon-container">
               <img
                 src="/images/dashboard/app.png"
                 class="icon"
-                alt="dresshub.lk"
+                alt="Categories"
               />
             </div>
             <div class="text-container">
               <p class="title">Categories</p>
               <p class="description">
-                Group products into categories for better organization and easy
-                navigation.
+                Organize products efficiently
               </p>
             </div>
           </div>
+          <div class="card-glow"></div>
         </div>
       </Link>
 
       <Link href="/products" v-if="HasRole(['Admin', 'Manager'])">
-        <div class="dashboard-card bg-[#C62E2E]">
+        <div class="dashboard-card group bg-gradient-to-br from-red-600 to-red-700 hover:from-red-500 hover:to-red-600">
           <div class="card-content">
             <div class="icon-container">
               <img
                 src="/images/dashboard/products.png"
                 class="icon"
-                alt="dresshub.lk"
+                alt="Products"
               />
             </div>
             <div class="text-container">
               <p class="title">Products</p>
               <p class="description">
-                Add, update, and manage product details, including pricing and
-                stock levels.
+                Manage inventory and pricing
               </p>
             </div>
           </div>
+          <div class="card-glow"></div>
         </div>
       </Link>
 
       <Link href="/newspapers" v-if="HasRole(['Admin', 'Manager'])">
-        <div class="dashboard-card bg-[#008B8B]">
+        <div class="dashboard-card group bg-gradient-to-br from-teal-600 to-teal-700 hover:from-teal-500 hover:to-teal-600">
           <div class="card-content">
             <div class="icon-container">
               <img
                 src="/images/dashboard/newspapers.png"
                 class="icon"
-                alt="dresshub.lk"
+                alt="Newspapers"
               />
             </div>
             <div class="text-container">
               <p class="title">Newspapers</p>
               <p class="description">
-                Add, update, and manage newspapers details, including pricing and
-                stock levels.
+                Manage newspaper inventory
               </p>
             </div>
           </div>
+          <div class="card-glow"></div>
         </div>
       </Link>
 
        <Link href="/services" v-if="HasRole(['Admin', 'Manager'])">
-        <div class="dashboard-card bg-[#e893b8]">
+        <div class="dashboard-card group bg-gradient-to-br from-pink-400 to-pink-500 hover:from-pink-300 hover:to-pink-400">
           <div class="card-content">
             <div class="icon-container">
               <img
                 src="/images/dashboard/printout.png"
                 class="icon"
-                alt="dresshub.lk"
+                alt="Services"
               />
             </div>
             <div class="text-container">
               <p class="title">Services</p>
               <p class="description">
-                Add, update, and manage print services, including laminating, laminating and
-                binding.
+                Print, laminating & binding services
               </p>
             </div>
           </div>
+          <div class="card-glow"></div>
         </div>
       </Link>
 
       <Link href="/suppliers" v-if="HasRole(['Admin', 'Manager'])">
-        <div class="dashboard-card bg-[#914F1E]">
+        <div class="dashboard-card group bg-gradient-to-br from-amber-700 to-amber-800 hover:from-amber-600 hover:to-amber-700">
           <div class="card-content">
             <div class="icon-container">
               <img
                 src="/images/dashboard/team-building.png"
                 class="icon"
-                alt="dresshub.lk"
+                alt="Suppliers"
               />
             </div>
             <div class="text-container">
               <p class="title">Suppliers</p>
               <p class="description">
-                Manage supplier information, purchase orders, and inventory
-                updates seamlessly.
+                Manage supplier and purchase orders
               </p>
             </div>
           </div>
+          <div class="card-glow"></div>
         </div>
       </Link>
 
       <Link href="/customers" v-if="HasRole(['Admin', 'Manager'])">
-        <div class="dashboard-card bg-[#CB9DF0]">
+        <div class="dashboard-card group bg-gradient-to-br from-purple-400 to-purple-500 hover:from-purple-300 hover:to-purple-400">
           <div class="card-content">
             <div class="icon-container">
               <img
                 src="/images/dashboard/customers.png"
                 class="icon"
-                alt="dresshub.lk"
+                alt="Customers"
               />
             </div>
             <div class="text-container">
               <p class="title">Customers</p>
               <p class="description">
-                Maintain customer profiles, track purchases, and enhance loyalty
-                programs effectively.
+                Customer profiles and loyalty programs
               </p>
             </div>
           </div>
+          <div class="card-glow"></div>
         </div>
       </Link>
 
       <Link href="/reports" v-if="HasRole(['Admin'])">
-        <div class="dashboard-card bg-[#FF8000]">
+        <div class="dashboard-card group bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500">
           <div class="card-content">
             <div class="icon-container">
               <img
                 src="/images/dashboard/report.png"
                 class="icon"
-                alt="dresshub.lk"
+                alt="Reports"
               />
             </div>
             <div class="text-container">
               <p class="title">Reports</p>
               <p class="description">
-                Generate insights on sales, inventory, and performance to aid
-                decision-making.
+                Sales and inventory insights
               </p>
             </div>
           </div>
+          <div class="card-glow"></div>
         </div>
       </Link>
 
       <Link href="/colors" v-if="HasRole(['Admin', 'Manager'])">
-        <div class="dashboard-card bg-[#9a9c9c]">
+        <div class="dashboard-card group bg-gradient-to-br from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600">
           <div class="card-content">
             <div class="icon-container">
               <img
                 src="/images/dashboard/color-wheel.png"
                 class="icon"
-                alt="dresshub.lk"
+                alt="Colors"
               />
             </div>
             <div class="text-container">
               <p class="title">Colors</p>
               <p class="description">
-                Easily manage product color options to keep inventory accurate
-                and ensure customers can select their preferred variations.
+                Product color variations
               </p>
             </div>
           </div>
+          <div class="card-glow"></div>
         </div>
       </Link>
 
       <Link href="/sizes" v-if="HasRole(['Admin', 'Manager'])">
-        <div class="dashboard-card bg-[#36f5f5]">
+        <div class="dashboard-card group bg-gradient-to-br from-cyan-400 to-cyan-500 hover:from-cyan-300 hover:to-cyan-400">
           <div class="card-content">
             <div class="icon-container">
               <img
                 src="/images/dashboard/measuring-tape.png"
                 class="icon"
-                alt="dresshub.lk"
+                alt="Sizes"
               />
             </div>
             <div class="text-container">
               <p class="title">Sizes</p>
               <p class="description">
-                Organize and update product sizes to streamline inventory
-                tracking and simplify the sales process.
+                Manage product size options
               </p>
             </div>
           </div>
+          <div class="card-glow"></div>
         </div>
       </Link>
 
       <Link href="/stock-transition" v-if="HasRole(['Admin'])">
-        <div class="dashboard-card bg-[#3426ff]">
+        <div class="dashboard-card group bg-gradient-to-br from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600">
           <div class="card-content">
             <div class="icon-container">
               <img
                 src="/images/dashboard/stock_transtion.png"
                 class="icon"
-                alt="dresshub.lk"
+                alt="Stock Transition"
               />
             </div>
             <div class="text-container">
               <p class="title">Stock Transition</p>
               <p class="description">
-                View and manage stock changes, including additions, deductions,
-                and returns, all in one place.
+                Track stock changes and returns
               </p>
             </div>
           </div>
+          <div class="card-glow"></div>
         </div>
       </Link>
 
 
       <Link href="/coupons" v-if="HasRole(['Admin'])">
-        <div class="dashboard-card bg-[#FF1744]">
+        <div class="dashboard-card group bg-gradient-to-br from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600">
           <div class="card-content">
             <div class="icon-container">
               <img
                 src="/images/dashboard/coupons.png"
                 class="icon"
-                alt="dresshub.lk"
+                alt="Coupons"
               />
             </div>
             <div class="text-container">
               <p class="title">Coupons</p>
               <p class="description">
-                Effortlessly manage coupons with options for additions, deductions, and returns—all
-                in one centralized platform.
+                Manage discount coupons
               </p>
             </div>
           </div>
+          <div class="card-glow"></div>
         </div>
       </Link>
 
@@ -284,106 +285,110 @@
 
 
       <Link href="/company-info" v-if="HasRole(['Admin'])">
-        <div class="dashboard-card bg-[#76e02f]">
+        <div class="dashboard-card group bg-gradient-to-br from-green-500 to-green-600 hover:from-green-400 hover:to-green-500">
           <div class="card-content">
             <div class="icon-container">
               <img
                 src="/images/dashboard/building.png"
                 class="icon"
-                alt="dresshub.lk"
+                alt="Company Info"
               />
             </div>
             <div class="text-container">
               <p class="title">Company Info</p>
               <p class="description">
-                 Manage essential business details like name, address, contact info, and logo for branding on invoices and reports.
+                Business details and branding
               </p>
             </div>
           </div>
+          <div class="card-glow"></div>
         </div>
       </Link>
 
 
       <Link href="/employees" v-if="HasRole(['Admin'])">
-        <div class="dashboard-card bg-[#e02f82]">
+        <div class="dashboard-card group bg-gradient-to-br from-pink-600 to-pink-700 hover:from-pink-500 hover:to-pink-600">
           <div class="card-content">
             <div class="icon-container">
               <img
                 src="/images/dashboard/employee.png"
                 class="icon"
-                alt="dresshub.lk"
+                alt="Employees"
               />
             </div>
             <div class="text-container">
               <p class="title">Employees</p>
               <p class="description">
-                Handle staff roles, contact details, and access permissions for secure and efficient operations.
+                Staff roles and permissions
               </p>
             </div>
           </div>
+          <div class="card-glow"></div>
         </div>
       </Link>
 
       <Link href="/transactionHistory" v-if="HasRole(['Admin'])">
-        <div class="dashboard-card bg-[#FFBF00]">
+        <div class="dashboard-card group bg-gradient-to-br from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400">
           <div class="card-content">
             <div class="icon-container">
               <img
                 src="/images/dashboard/history.png"
                 class="icon"
-                alt="dresshub.lk"
+                alt="Order History"
               />
             </div>
             <div class="text-container">
               <p class="title">Order History</p>
               <p class="description">
-                View and manage past orders with details like date, items, total amount, and payment status for easy tracking and reference.
+                View and track past orders
               </p>
             </div>
           </div>
+          <div class="card-glow"></div>
         </div>
       </Link>
 
       <Link href="/manualpos" v-if="HasRole(['Admin', 'Cashier'])">
-        <div class="dashboard-card bg-[#009990]">
+        <div class="dashboard-card group bg-gradient-to-br from-teal-500 to-teal-600 hover:from-teal-400 hover:to-teal-500">
           <div class="card-content">
             <div class="icon-container">
               <img
                 src="/images/dashboard/checkout.png"
                 class="icon"
-                alt="dresshub.lk"
+                alt="Manual POS"
               />
             </div>
             <div class="text-container">
-              <p class="title">Manual Pos</p>
+              <p class="title">Manual POS</p>
               <p class="description">
-                Simplify sales with an intuitive interface for quick billing and
-                payment processing.
+                Quick manual billing
               </p>
             </div>
           </div>
+          <div class="card-glow"></div>
         </div>
       </Link>
 
 
 
       <!-- <Link href="/return-bill" v-if="HasRole(['Admin'])">
-        <div class="dashboard-card bg-[#7d2cff]">
+        <div class="dashboard-card group bg-gradient-to-br from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600">
           <div class="card-content">
             <div class="icon-container">
               <img
                 src="/images/dashboard/return-bill.png"
                 class="icon"
-                alt="dresshub.lk"
+                alt="Return Bill"
               />
             </div>
             <div class="text-container">
               <p class="title">Return Bill</p>
               <p class="description">
-                View and manage past orders with details like date, items, total amount, and payment status for easy tracking and reference.
+                Manage product returns
               </p>
             </div>
           </div>
+          <div class="card-glow"></div>
         </div>
       </Link> -->
 
@@ -395,21 +400,23 @@
 
 
       <Link href="/quotation" v-if="HasRole(['Admin'])">
-        <div class="dashboard-card bg-[#216b85]">
+        <div class="dashboard-card group bg-gradient-to-br from-sky-700 to-sky-800 hover:from-sky-600 hover:to-sky-700">
           <div class="card-content">
             <div class="icon-container">
               <img
                 src="/images/dashboard/quote.png"
                 class="icon"
-                alt="dresshub.lk"
+                alt="Quotations"
               />
             </div>
             <div class="text-container">
-              <p class="title">Create Quotations</p>
+              <p class="title">Quotations</p>
               <p class="description">
-                Track and organize transactions with details like date, items, total cost, and payment status for easy management and quick reference.</p>
+                Create and manage quotes
+              </p>
             </div>
           </div>
+          <div class="card-glow"></div>
         </div>
       </Link>
 
@@ -428,32 +435,36 @@ import { Head } from "@inertiajs/vue3";
 import { HasRole } from "@/Utils/Permissions";
 </script>
 
-<style>
+<style scoped>
 .dashboard-card {
-  @apply py-8 text-center border rounded-xl shadow-lg transform transition-transform duration-300 hover:-translate-y-4 h-full flex items-center justify-center;
+  @apply relative py-6 px-4 text-center rounded-2xl shadow-xl transform transition-all duration-300 hover:scale-105 hover:shadow-2xl h-full flex items-center justify-center overflow-hidden;
+}
+
+.card-glow {
+  @apply absolute inset-0 bg-gradient-to-t from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none;
 }
 
 .card-content {
-  @apply flex flex-col items-center justify-center space-y-8;
+  @apply relative z-10 flex flex-col items-center justify-center space-y-4;
 }
 
 .icon-container {
-  @apply flex flex-col items-center justify-center p-8 bg-white rounded-full;
+  @apply flex flex-col items-center justify-center p-6 bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300;
 }
 
 .icon {
-  @apply w-48 h-48;
+  @apply w-20 h-20 md:w-24 md:h-24;
 }
 
 .text-container {
-  @apply flex flex-col items-center justify-center w-full px-4 space-y-2;
+  @apply flex flex-col items-center justify-center w-full px-3 space-y-1;
 }
 
 .title {
-  @apply text-3xl font-bold text-white uppercase;
+  @apply text-xl md:text-2xl font-bold text-white uppercase tracking-wide;
 }
 
 .description {
-  @apply text-xl text-white;
+  @apply text-sm md:text-base text-white/90 leading-snug;
 }
 </style>
