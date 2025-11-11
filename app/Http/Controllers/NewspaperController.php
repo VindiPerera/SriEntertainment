@@ -55,6 +55,19 @@ class NewspaperController extends Controller
     }
 
     /**
+     * Get newspapers available for return (stock > 0)
+     */
+    public function getAvailableForReturn()
+    {
+        $newspapers = Newspaper::where('stock_quantity', '>', 0)
+            ->select('id', 'name', 'stock_quantity')
+            ->orderBy('name')
+            ->get();
+            
+        return response()->json($newspapers);
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create()
@@ -172,6 +185,9 @@ class NewspaperController extends Controller
             // Update newspaper stock
             $newspaper = Newspaper::find($validated['newspaper_id']);
             $newspaper->increment('return', $validated['quantity']);
+
+            // Deduct returned quantity from newspaper stock
+            $newspaper->decrement('stock_quantity', $validated['quantity']);
         });
 
         return back()->with('success', 'Newspaper return processed successfully');

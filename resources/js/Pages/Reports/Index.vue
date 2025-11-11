@@ -473,10 +473,65 @@
   </div>
 </div>
 
+    </div>
 
+    <!-- Return Items Table -->
+    <div class="w-full bg-white border-4 border-black rounded-xl p-6">
+      <h2 class="text-2xl font-semibold text-slate-700 text-center pb-4">
+        Return Items Table
+      </h2>
 
+      <!-- Download Button -->
+      <div class="flex justify-start items-center pb-4">
+        <button
+          @click="downloadReturnItemsPDF"
+          class="px-4 py-2 text-md font-semibold text-white bg-orange-600 rounded-lg hover:bg-orange-700 shadow-md"
+        >
+          Download PDF
+        </button>
+      </div>
 
+      <div class="overflow-x-auto max-h-[400px] border rounded-xl mt-4">
+        <table
+          id="returnItemsTbl"
+          class="w-full text-gray-800 bg-white border border-gray-300 rounded-lg shadow-md table-auto"
+        >
+          <thead>
+            <tr class="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-700 text-white text-[14px] border-b border-blue-800">
+              <th class="p-3 text-left font-semibold">#</th>
+              <th class="p-3 text-left font-semibold">Return Date</th>
+              <th class="p-3 text-left font-semibold">Customer</th>
+              <th class="p-3 text-left font-semibold">Product/Newspaper</th>
+              <th class="p-3 text-center font-semibold">Quantity</th>
+              <th class="p-3 text-left font-semibold">Reason</th>
+              <th class="p-3 text-left font-semibold">Sale ID</th>
+            </tr>
+          </thead>
 
+          <tbody class="text-[12px] font-medium">
+            <tr
+              v-for="(returnItem, index) in returnItems"
+              :key="returnItem.id"
+              class="border-b transition duration-200 hover:bg-gray-100"
+            >
+              <td class="p-3 text-center">{{ index + 1 }}</td>
+              <td class="p-3">{{ new Date(returnItem.return_date).toLocaleDateString() }}</td>
+              <td class="p-3 font-bold">{{ returnItem.customer?.name || "N/A" }}</td>
+              <td class="p-3">
+                {{ returnItem.product?.name || returnItem.newspaper?.name || "N/A" }}
+              </td>
+              <td class="p-3 text-center">{{ returnItem.quantity }}</td>
+              <td class="p-3">{{ returnItem.reason }}</td>
+              <td class="p-3 text-center">{{ returnItem.sale_id || "N/A" }}</td>
+            </tr>
+            <tr v-if="returnItems.length === 0">
+              <td colspan="7" class="p-8 text-center text-gray-500">
+                No return items found for the selected date range
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
 <!-- Batch Management -->
@@ -538,6 +593,10 @@ const props = defineProps({
   endDate: { type: String, default: "" },
   categorySales: { type: Object, required: true },
   employeeSalesSummary: { type: Object, required: true },
+  returnItems: { type: Array, required: true },
+  totalReturnedQuantity: { type: Number, required: true },
+  totalReturnItems: { type: Number, required: true },
+  returnReasons: { type: Object, required: true },
 });
 
 const totalPrice = computed(() => {
@@ -579,6 +638,7 @@ const endDate = ref(props.endDate);
 
 const products = ref(props.products);
 const sales = ref(props.sales);
+const returnItems = ref(props.returnItems);
 const totalQty = computed(() => {
   return products.value.reduce(
     (sum, product) => sum + (product.stock_quantity || 0),
@@ -681,8 +741,64 @@ const downloadPDFTable = () => {
   doc.save("Top_Products_Stock.pdf");
 };
 
+const downloadReturnItemsPDF = () => {
+  const doc = new jsPDF("p", "mm", "a4"); // Portrait, A4 size
 
+  // Title for the PDF
+  doc.setFontSize(18);
+  doc.text("Return Items Table", 14, 15);
 
+  // Add date range if available
+  if (startDate.value && endDate.value) {
+    doc.setFontSize(12);
+    doc.text(`Date Range: ${startDate.value} to ${endDate.value}`, 14, 25);
+  }
+
+  // Prepare table headers
+  const tableColumn = [
+    "#",
+    "Return Date",
+    "Customer",
+    "Product/Newspaper",
+    "Quantity",
+    "Reason",
+    "Sale ID",
+  ];
+
+  // Prepare table data
+  const tableRows = returnItems.value.map((returnItem, index) => [
+    index + 1,
+    new Date(returnItem.return_date).toLocaleDateString(),
+    returnItem.customer?.name || "N/A",
+    returnItem.product?.name || returnItem.newspaper?.name || "N/A",
+    returnItem.quantity,
+    returnItem.reason,
+    returnItem.sale_id || "N/A",
+  ]);
+
+  // Add table
+  doc.autoTable({
+    head: [tableColumn],
+    body: tableRows,
+    startY: startDate.value && endDate.value ? 35 : 25,
+    theme: "striped",
+    styles: { fontSize: 10 },
+    headStyles: { fillColor: [44, 62, 80] },
+    columnStyles: {
+      0: { cellWidth: 8 },   // #
+      1: { cellWidth: 25 },  // Return Date
+      2: { cellWidth: 30 },  // Customer
+      3: { cellWidth: 35 },  // Product/Newspaper
+      4: { cellWidth: 15 },  // Quantity
+      5: { cellWidth: 40 },  // Reason
+      6: { cellWidth: 15 },  // Sale ID
+    },
+    margin: { left: 5, right: 10, top: 20 },
+  });
+
+  // Save the PDF
+  doc.save("Return_Items_Table.pdf");
+};
 
 const downloadTable = () => {
   // Map the products data with calculations
@@ -1254,6 +1370,32 @@ $(document).ready(function () {
       searchInput.on("keypress", function (e) {
         if (e.which == 13) {
           table.search(this.value).draw();
+        }
+      });
+    },
+    language: {
+      search: "",
+    },
+  });
+
+  // Initialize DataTable for Return Items
+  let returnTable = $("#returnItemsTbl").DataTable({
+    dom: "Bfrtip",
+    buttons: [],
+    paging: false, // Disable pagination
+    columnDefs: [
+      {
+        targets: 0, // Adjust the target column if needed
+        searchable: false,
+        orderable: false, // Disable sorting for this specific column
+      },
+    ],
+    initComplete: function () {
+      let searchInput = $("div.dataTables_filter input");
+      searchInput.attr("placeholder", "Search ...");
+      searchInput.on("keypress", function (e) {
+        if (e.which == 13) {
+          returnTable.search(this.value).draw();
         }
       });
     },

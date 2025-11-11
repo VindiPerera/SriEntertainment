@@ -13,6 +13,7 @@ class ReturnItem extends Model
         'sale_id',
         'customer_id',
         'product_id',
+        'newspaper_id',
         'quantity',
         'reason',
         'return_date',
@@ -32,5 +33,10 @@ class ReturnItem extends Model
     public function product()
     {
         return $this->belongsTo(Product::class, 'product_id','id');
+    }
+
+    public function newspaper()
+    {
+        return $this->belongsTo(Newspaper::class, 'newspaper_id','id');
     }
 }

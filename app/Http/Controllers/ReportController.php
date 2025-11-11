@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Report;
+use App\Models\ReturnItem;
 use App\Models\Sale;
 use App\Models\SaleItem;
 use Illuminate\Http\Request;
@@ -131,7 +132,31 @@ class ReportController extends Controller
     $totalCustomer = $salesQuery->distinct('customer_id')->count('customer_id');
 
     // =========================
-    // 10. Return to Vue via Inertia
+    // 10. Return Items Data
+    // =========================
+    $returnItemsQuery = ReturnItem::with(['product', 'customer', 'sale', 'newspaper']);
+    
+    if ($startDate && $endDate) {
+        $returnItemsQuery->whereBetween('return_date', [$startDate, $endDate]);
+    }
+    
+    $returnItems = $returnItemsQuery->orderBy('return_date', 'desc')->get();
+    
+    // Calculate return items statistics
+    $totalReturnedQuantity = $returnItems->sum('quantity');
+    $totalReturnItems = $returnItems->count();
+    
+    // Group return items by reason
+    $returnReasons = $returnItems->groupBy('reason')
+        ->map(function ($group) {
+            return [
+                'count' => $group->count(),
+                'quantity' => $group->sum('quantity')
+            ];
+        })->toArray();
+
+    // =========================
+    // 11. Return to Vue via Inertia
     // =========================
     return Inertia::render('Reports/Index', [
         'products' => $products,
@@ -147,6 +172,10 @@ class ReportController extends Controller
         'endDate' => $endDate,
         'categorySales' => $categorySales,
         'employeeSalesSummary' => $employeeSalesSummary,
+        'returnItems' => $returnItems,
+        'totalReturnedQuantity' => $totalReturnedQuantity,
+        'totalReturnItems' => $totalReturnItems,
+        'returnReasons' => $returnReasons,
     ]);
 }
 

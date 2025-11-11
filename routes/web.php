@@ -223,6 +223,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
     
     Route::get('/newspapers/batch', [NewspaperController::class, 'getNextBatchNumber']);
+    Route::get('/newspapers/available-for-return', [NewspaperController::class, 'getAvailableForReturn'])->name('newspapers.availableForReturn');
     Route::resource('newspapers', NewspaperController::class);
     Route::resource('services', ServiceController::class);
     Route::resource('photocopy-services', PhotocopyServiceController::class);
@@ -266,6 +267,8 @@ Route::get('/binding-services', [BindingController::class, 'index'])->name('bind
     Route::get('/api/photocopy/products', [PhotocopyServiceController::class, 'fetchProducts']);
     
     Route::get('/api/printout/products', [PrintoutController::class, 'fetchProducts']);
+
+    Route::post('/newspapers/return', [NewspaperController::class, 'return'])->name('newspapers.return');
 });
 
 

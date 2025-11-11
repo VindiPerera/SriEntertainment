@@ -13,7 +13,7 @@
             required
           >
             <option value="" disabled>Select a newspaper</option>
-            <option v-for="paper in newspapers" :key="paper.id" :value="paper.id">
+            <option v-for="paper in availableNewspapers" :key="paper.id" :value="paper.id">
               {{ paper.name }} — (In stock: {{ paper.stock_quantity ?? 0 }})
             </option>
           </select>
@@ -65,18 +65,16 @@
 import { ref, computed, watch } from 'vue';
 import Modal from '@/Components/Modal.vue';
 import { useForm } from '@inertiajs/vue3';
+import axios from 'axios';
 
 const props = defineProps({
   open: Boolean,
-  newspapers: {
-    type: Array,
-    default: () => [],
-  },
 });
 
 const emit = defineEmits(['close', 'update:open']);
 
 const processing = ref(false);
+const availableNewspapers = ref([]);
 
 const form = useForm({
   newspaper_id: '',
@@ -86,16 +84,26 @@ const form = useForm({
 
 const selectedStock = ref(null);
 
-watch(() => props.newspapers, (list) => {
-  // if only one paper available, preselect it
-  if (list && list.length === 1) {
-    form.newspaper_id = list[0].id;
-    selectedStock.value = Number(list[0].stock_quantity || 0);
+// Fetch available newspapers when modal opens
+watch(() => props.open, async (isOpen) => {
+  if (isOpen) {
+    try {
+      const response = await axios.get(route('newspapers.availableForReturn'));
+      availableNewspapers.value = response.data;
+      
+      // if only one paper available, preselect it
+      if (availableNewspapers.value.length === 1) {
+        form.newspaper_id = availableNewspapers.value[0].id;
+        selectedStock.value = Number(availableNewspapers.value[0].stock_quantity || 0);
+      }
+    } catch (error) {
+      console.error('Error fetching available newspapers:', error);
+    }
   }
 });
 
 const onSelectChange = () => {
-  const selected = props.newspapers.find(p => String(p.id) === String(form.newspaper_id));
+  const selected = availableNewspapers.value.find(p => String(p.id) === String(form.newspaper_id));
   selectedStock.value = selected ? Number(selected.stock_quantity || 0) : null;
   if (form.quantity < 1) form.quantity = 1;
   if (selectedStock.value !== null && form.quantity > selectedStock.value) form.quantity = selectedStock.value;
