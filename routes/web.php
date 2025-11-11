@@ -177,17 +177,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/sell', [WalletController::class, 'sell']);
         Route::post('/quote', [WalletController::class, 'quote']);
         Route::get('/transactions', [WalletController::class, 'transactions']);
+        Route::post('/transactions/export-pdf', [WalletController::class, 'exportTransactionsPDF']);
         Route::get('/packages', [WalletController::class, 'getPackages']);
     });
     
     // Reload Packages API Routes
     Route::prefix('api/reload-packages')->group(function () {
-        Route::get('/', [\App\Http\Controllers\ReloadPackageController::class, 'index']);
-        Route::post('/', [\App\Http\Controllers\ReloadPackageController::class, 'store']);
-        Route::get('/{id}', [\App\Http\Controllers\ReloadPackageController::class, 'show']);
-        Route::put('/{id}', [\App\Http\Controllers\ReloadPackageController::class, 'update']);
-        Route::delete('/{id}', [\App\Http\Controllers\ReloadPackageController::class, 'destroy']);
-        Route::get('/operator/{operatorId}', [\App\Http\Controllers\ReloadPackageController::class, 'byOperator']);
+        Route::get('/', [ReloadPackageController::class, 'index']);
+        Route::post('/', [ReloadPackageController::class, 'store']);
+        Route::get('/{id}', [ReloadPackageController::class, 'show']);
+        Route::put('/{id}', [ReloadPackageController::class, 'update']);
+        Route::delete('/{id}', [ReloadPackageController::class, 'destroy']);
+        Route::get('/operator/{operatorId}', [ReloadPackageController::class, 'byOperator']);
     });
     
     

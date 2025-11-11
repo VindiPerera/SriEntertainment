@@ -398,7 +398,7 @@ const openSellModal = async (wallet) => {
   
   // Load packages for this operator
   try {
-    const response = await axios.get(`/wallet/packages?operator_id=${wallet.operator_id}`);
+    const response = await axios.get(`/api/wallet/packages?operator_id=${wallet.operator_id}`);
     reloadPackages.value = response.data.packages;
   } catch (error) {
     console.error('Failed to load packages:', error);

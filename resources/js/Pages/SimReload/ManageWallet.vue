@@ -737,7 +737,7 @@ const clearFilters = () => {
 
 const exportTransactionsPDF = async () => {
   try {
-    const response = await axios.post('/wallet/transactions/export-pdf', {
+    const response = await axios.post('/api/wallet/transactions/export-pdf', {
       from_date: transactionFilters.value.from_date,
       to_date: transactionFilters.value.to_date,
       operator_id: transactionFilters.value.operator_id,
@@ -774,7 +774,7 @@ const loadPackagesForSell = async () => {
   }
   
   try {
-    const response = await axios.get(`/wallet/packages?operator_id=${sellForm.value.operator_id}`);
+    const response = await axios.get(`/api/wallet/packages?operator_id=${sellForm.value.operator_id}`);
     reloadPackages.value = response.data.packages;
     packageSearchQuery.value = ''; // Reset search when loading new packages
     selectedPackageDisplay.value = null;
@@ -801,7 +801,7 @@ const submitDeposit = async () => {
   depositForm.value.processing = true;
   
   try {
-    const response = await axios.post('/wallet/deposit', depositForm.value);
+    const response = await axios.post('/api/wallet/deposit', depositForm.value);
     
     if (response.data.success) {
       alert(response.data.message);
@@ -821,7 +821,7 @@ const getQuote = async () => {
   }
   
   try {
-    const response = await axios.post('/wallet/quote', {
+    const response = await axios.post('/api/wallet/quote', {
       operator_id: sellForm.value.operator_id,
       reload_package_id: sellForm.value.reload_package_id,
     });
@@ -843,7 +843,7 @@ const submitSell = async () => {
   sellForm.value.processing = true;
   
   try {
-    const response = await axios.post('/wallet/sell', sellForm.value);
+    const response = await axios.post('/api/wallet/sell', sellForm.value);
     
     if (response.data.success) {
       alert(response.data.message);

@@ -60,6 +60,7 @@ class WalletController extends Controller
             'operator_id' => 'required|exists:operators,id',
             'amount' => 'required|numeric|min:1|max:1000000',
             'notes' => 'nullable|string|max:500',
+            'selected_percentage' => 'nullable|numeric|min:0|max:100',
         ]);
 
         try {
@@ -93,7 +94,8 @@ class WalletController extends Controller
 
                 // Calculate bonus for Airtel/Hutch (deposit_bonus model)
                 if ($operator->usesDepositBonus()) {
-                    $percentage = $operator->getEffectiveRate($user->id, 'deposit_bonus');
+                    // Use the selected percentage from the request if provided, otherwise get the effective rate
+                    $percentage = $request->selected_percentage ?? $operator->getEffectiveRate($user->id, 'deposit_bonus');
                     $bonusAmount = ($amount * $percentage) / 100;
                     $creditAmount = $amount + $bonusAmount;
                 }

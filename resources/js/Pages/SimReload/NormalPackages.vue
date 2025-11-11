@@ -293,19 +293,6 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Cost Price (Rs.) *</label>
-          <input 
-            v-model="packageForm.cost_price"
-            type="number"
-            step="0.01"
-            min="0"
-            required
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="e.g., 450.00"
-          />
-        </div>
-
-        <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Description (Optional)</label>
           <textarea 
             v-model="packageForm.description"
@@ -375,7 +362,6 @@ const packageForm = ref({
   operator_id: '',
   name: '',
   face_value: '',
-  cost_price: '',
   description: '',
   is_active: true,
   processing: false,
@@ -425,7 +411,7 @@ const getQuote = async () => {
   }
   
   try {
-    const response = await axios.post('/wallet/quote', {
+    const response = await axios.post('/api/wallet/quote', {
       operator_id: purchaseForm.value.operator_id,
       reload_package_id: purchaseForm.value.reload_package_id,
     });
@@ -456,7 +442,7 @@ const submitPurchase = async () => {
   purchaseForm.value.processing = true;
   
   try {
-    const response = await axios.post('/wallet/sell', purchaseForm.value);
+    const response = await axios.post('/api/wallet/sell', purchaseForm.value);
     
     if (response.data.success) {
       alert(response.data.message);
@@ -518,7 +504,6 @@ const openEditPackageModal = (pkg) => {
     operator_id: pkg.operator_id,
     name: pkg.name,
     face_value: pkg.face_value,
-    cost_price: pkg.cost_price || pkg.face_value,
     description: pkg.description || '',
     is_active: pkg.is_active !== undefined ? pkg.is_active : true,
     processing: false,
@@ -538,7 +523,6 @@ const resetPackageForm = () => {
     operator_id: '',
     name: '',
     face_value: '',
-    cost_price: '',
     description: '',
     is_active: true,
     processing: false,
