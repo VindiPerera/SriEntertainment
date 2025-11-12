@@ -271,6 +271,11 @@ Route::get('/binding-services', [BindingController::class, 'index'])->name('bind
     Route::post('/newspapers/return', [NewspaperController::class, 'return'])->name('newspapers.return');
 });
 
+Route::get('/api/product-price', [PhotocopyServiceController::class, 'fetchProductPrice'])->name('product.price');
+Route::get('/api/product-price', [PrintoutController::class, 'fetchProductPrice'])->name('printout.product.price');
+Route::get('/api/total-price', [BindingController::class, 'fetchTotalPrice'])->name('binding.total.price');
+Route::get('/api/laminating-total-price', [LaminatingController::class, 'fetchTotalPrice'])->name('laminating.total.price');
+
 
 
 

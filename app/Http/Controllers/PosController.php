@@ -236,7 +236,9 @@ class PosController extends Controller
                 'employee_id' => $request->input('employee_id'),
                 'user_id' => $request->input('userId'),
                 'order_id' => $request->input('orderid'),
-                'total_amount' => $totalAmount,
+               'total_amount' => $request->input('paymentMethod') === 'card' 
+        ? $totalAmount * 0.975 
+        : $totalAmount,
                 'discount' => $totalDiscount,
                 'total_cost' => $totalCost,
                 'payment_method' => $request->input('paymentMethod'),

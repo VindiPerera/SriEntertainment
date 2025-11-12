@@ -222,4 +222,25 @@ class BindingController extends Controller
 
         return response()->json($products);
     }
+
+    /**
+     * Fetch the total price of selected products.
+     */
+    public function fetchTotalPrice(Request $request)
+    {
+        $productIds = $request->query('product_ids');
+
+        \Log::info('Fetching total price for products', ['product_ids' => $productIds]);
+
+        if (!$productIds || !is_array($productIds)) {
+            \Log::error('Invalid product IDs', ['product_ids' => $productIds]);
+            return response()->json(['error' => 'Product IDs are required'], 400);
+        }
+
+        $totalPrice = Product::whereIn('id', $productIds)->sum('selling_price');
+
+        \Log::info('Total price calculated', ['total_price' => $totalPrice]);
+
+        return response()->json(['total_price' => $totalPrice]);
+    }
 }

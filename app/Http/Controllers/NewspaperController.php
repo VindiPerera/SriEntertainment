@@ -165,31 +165,39 @@ class NewspaperController extends Controller
      */
     public function return(Request $request)
     {
+         $validated = $request->validate([
+        'newspaper_ids' => 'required|array|min:1',
+        'newspaper_ids.*' => 'required|exists:newspapers,id',
+        'reason' => 'required|string',
+    ]);
 
-       
-        $validated = $request->validate([
-            'newspaper_id' => 'required|exists:newspapers,id',
-            'quantity' => 'required|integer|min:1',
-            'reason' => 'required|string',
-        ]);
+    DB::transaction(function () use ($validated) {
+        foreach ($validated['newspaper_ids'] as $newspaperId) {
+            $newspaper = Newspaper::find($newspaperId);
+            
+            // Get the current stock quantity (this is what we're returning)
+            $returnQuantity = $newspaper->stock_quantity;
+            
+            // Only process if there's stock to return
+            if ($returnQuantity > 0) {
+                // Create return record for each newspaper
+                ReturnItem::create([
+                    'newspaper_id' => $newspaperId,
+                    'quantity' => $returnQuantity,
+                    'reason' => $validated['reason'],
+                    'return_date' => now(),
+                ]);
 
-        DB::transaction(function () use ($validated) {
-            // Create return record
-            ReturnItem::create([
-                'newspaper_id' => $validated['newspaper_id'],
-                'quantity' => $validated['quantity'],
-                'reason' => $validated['reason'],
-                'return_date' => now(),
-            ]);
+                // Increment the return field by the stock quantity
+                $newspaper->increment('return', $returnQuantity);
 
-            // Update newspaper stock
-            $newspaper = Newspaper::find($validated['newspaper_id']);
-            $newspaper->increment('return', $validated['quantity']);
+                // Set stock quantity to 0 (all stock returned)
+                $newspaper->update(['stock_quantity' => 0]);
+            }
+        }
+    });
 
-            // Deduct returned quantity from newspaper stock
-            $newspaper->decrement('stock_quantity', $validated['quantity']);
-        });
+    return back()->with('success', 'Newspapers returned successfully');
 
-        return back()->with('success', 'Newspaper return processed successfully');
-    }
+         }
 }

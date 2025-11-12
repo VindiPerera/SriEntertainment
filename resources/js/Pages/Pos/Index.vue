@@ -73,7 +73,7 @@
                 <div class="flex md:w-1/2 w-full p-8 border-4 border-black rounded-3xl">
                     <div class="flex flex-col items-start justify-center w-full md:px-12 px-4">
                         <div class="flex items-center justify-between w-full">
-                            <h2 class="md:text-5xl text-4xl font-bold text-black">Billing Details1</h2>
+                            <h2 class="md:text-5xl text-4xl font-bold text-black">Billing Details</h2>
                             <div class="flex items-center">
                               <select
                                 v-model="selectedManualType"
