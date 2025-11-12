@@ -473,10 +473,429 @@
   </div>
 </div>
 
+    </div>
 
+    <!-- Return Items Table -->
+    <div class="w-full bg-white border-4 border-black rounded-xl p-6">
+      <h2 class="text-2xl font-semibold text-slate-700 text-center pb-4">
+        Return Items Table
+      </h2>
 
+      <!-- Download Button -->
+      <div class="flex justify-start items-center pb-4">
+        <button
+          @click="downloadReturnItemsPDF"
+          class="px-4 py-2 text-md font-semibold text-white bg-orange-600 rounded-lg hover:bg-orange-700 shadow-md"
+        >
+          Download PDF
+        </button>
+      </div>
 
+      <div class="overflow-x-auto max-h-[400px] border rounded-xl mt-4">
+        <table
+          id="returnItemsTbl"
+          class="w-full text-gray-800 bg-white border border-gray-300 rounded-lg shadow-md table-auto"
+        >
+          <thead>
+            <tr class="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-700 text-white text-[14px] border-b border-blue-800">
+              <th class="p-3 text-left font-semibold">#</th>
+              <th class="p-3 text-left font-semibold">Return Date</th>
+              <th class="p-3 text-left font-semibold">Customer</th>
+              <th class="p-3 text-left font-semibold">Product/Newspaper</th>
+              <th class="p-3 text-center font-semibold">Quantity</th>
+              <th class="p-3 text-left font-semibold">Reason</th>
+              <th class="p-3 text-left font-semibold">Sale ID</th>
+            </tr>
+          </thead>
 
+          <tbody class="text-[12px] font-medium">
+            <tr
+              v-for="(returnItem, index) in returnItems"
+              :key="returnItem.id"
+              class="border-b transition duration-200 hover:bg-gray-100"
+            >
+              <td class="p-3 text-center">{{ index + 1 }}</td>
+              <td class="p-3">{{ new Date(returnItem.return_date).toLocaleDateString() }}</td>
+              <td class="p-3 font-bold">{{ returnItem.customer?.name || "N/A" }}</td>
+              <td class="p-3">
+                {{ returnItem.product?.name || returnItem.newspaper?.name || "N/A" }}
+              </td>
+              <td class="p-3 text-center">{{ returnItem.quantity }}</td>
+              <td class="p-3">{{ returnItem.reason }}</td>
+              <td class="p-3 text-center">{{ returnItem.sale_id || "N/A" }}</td>
+            </tr>
+            <tr v-if="returnItems.length === 0">
+              <td colspan="7" class="p-8 text-center text-gray-500">
+                No return items found for the selected date range
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Binding Service Summary -->
+    <div class="w-full bg-white border-4 border-black rounded-xl p-6">
+      <h2 class="text-2xl font-semibold text-slate-700 text-center pb-4">
+        Binding Service Summary
+      </h2>
+
+      <!-- Download Button -->
+      <div class="flex justify-start items-center pb-4">
+        <button
+          @click="downloadBindingServicePDF"
+          class="px-4 py-2 text-md font-semibold text-white bg-orange-600 rounded-lg hover:bg-orange-700 shadow-md"
+        >
+          Download PDF
+        </button>
+      </div>
+
+      <div class="overflow-x-auto max-h-[400px] border rounded-xl mt-4">
+        <table
+          id="bindingServiceTbl"
+          class="w-full text-gray-800 bg-white border border-gray-300 rounded-lg shadow-md table-auto"
+        >
+          <thead>
+            <tr class="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-700 text-white text-[14px] border-b border-blue-800">
+              <th class="p-3 text-left font-semibold">#</th>
+              <th class="p-3 text-left font-semibold">Service Name</th>
+              <th class="p-3 text-center font-semibold">Price (LKR)</th>
+              <th class="p-3 text-center font-semibold">Times Used</th>
+              <th class="p-3 text-center font-semibold">Total Revenue (LKR)</th>
+              <th class="p-3 text-left font-semibold">Raw Materials Used</th>
+              <th class="p-3 text-center font-semibold">Remaining Stock</th>
+            </tr>
+          </thead>
+
+          <tbody class="text-[12px] font-medium">
+            <tr
+              v-for="(service, index) in bindingServices"
+              :key="service.id"
+              class="border-b transition duration-200 hover:bg-gray-100"
+            >
+              <td class="p-3 text-center">{{ index + 1 }}</td>
+              <td class="p-3 font-bold">{{ service.name || "N/A" }}</td>
+              <td class="p-3 text-center">{{ service.price || "0.00" }}</td>
+              <td class="p-3 text-center">{{ service.times_used || 0 }}</td>
+              <td class="p-3 text-center">{{ ((service.price || 0) * (service.times_used || 0)).toFixed(2) }}</td>
+              <td class="p-3">
+                <div v-if="service.raw_materials && service.raw_materials.length > 0">
+                  <div v-for="material in service.raw_materials" :key="material.id" class="mb-1">
+                    {{ material.product?.name || 'N/A' }} (Qty: {{ material.quantity_used || 0 }})
+                  </div>
+                </div>
+                <span v-else class="text-gray-500">No raw materials</span>
+              </td>
+              <td class="p-3 text-center">
+                <div v-if="service.refill_stock && service.refill_stock.length > 0">
+                  <div v-for="stock in service.refill_stock" :key="stock.id" class="mb-1">
+                    {{ stock.product?.name || 'N/A' }}: {{ stock.stock || 0 }}
+                  </div>
+                </div>
+                <span v-else class="text-gray-500">No stock data</span>
+              </td>
+            </tr>
+            <tr v-if="bindingServices.length === 0">
+              <td colspan="7" class="p-8 text-center text-gray-500">
+                No binding services found for the selected date range
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Summary Statistics -->
+      <div class="grid md:grid-cols-3 grid-cols-1 gap-4 mt-6">
+        <div class="bg-blue-100 border border-blue-300 rounded-lg p-4 text-center">
+          <h3 class="text-lg font-semibold text-blue-800">Total Services</h3>
+          <p class="text-2xl font-bold text-blue-900">{{ bindingServices.length }}</p>
+        </div>
+        <div class="bg-green-100 border border-green-300 rounded-lg p-4 text-center">
+          <h3 class="text-lg font-semibold text-green-800">Total Revenue</h3>
+          <p class="text-2xl font-bold text-green-900">
+            {{ bindingServices.reduce((sum, service) => sum + ((service.price || 0) * (service.times_used || 0)), 0).toFixed(2) }} LKR
+          </p>
+        </div>
+        <div class="bg-orange-100 border border-orange-300 rounded-lg p-4 text-center">
+          <h3 class="text-lg font-semibold text-orange-800">Total Usage</h3>
+          <p class="text-2xl font-bold text-orange-900">
+            {{ bindingServices.reduce((sum, service) => sum + (service.times_used || 0), 0) }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Laminating Service Summary -->
+    <div class="w-full bg-white border-4 border-black rounded-xl p-6">
+      <h2 class="text-2xl font-semibold text-slate-700 text-center pb-4">
+        Laminating Service Summary
+      </h2>
+
+      <!-- Download Button -->
+      <div class="flex justify-start items-center pb-4">
+        <button
+          @click="downloadLaminatingServicePDF"
+          class="px-4 py-2 text-md font-semibold text-white bg-orange-600 rounded-lg hover:bg-orange-700 shadow-md"
+        >
+          Download PDF
+        </button>
+      </div>
+
+      <div class="overflow-x-auto max-h-[400px] border rounded-xl mt-4">
+        <table
+          id="laminatingServiceTbl"
+          class="w-full text-gray-800 bg-white border border-gray-300 rounded-lg shadow-md table-auto"
+        >
+          <thead>
+            <tr class="bg-gradient-to-r from-green-700 via-green-600 to-green-700 text-white text-[14px] border-b border-green-800">
+              <th class="p-3 text-left font-semibold">#</th>
+              <th class="p-3 text-left font-semibold">Service Name</th>
+              <th class="p-3 text-center font-semibold">Price (LKR)</th>
+              <th class="p-3 text-center font-semibold">Times Used</th>
+              <th class="p-3 text-center font-semibold">Total Revenue (LKR)</th>
+              <th class="p-3 text-left font-semibold">Raw Materials Used</th>
+              <th class="p-3 text-center font-semibold">Remaining Stock</th>
+            </tr>
+          </thead>
+
+          <tbody class="text-[12px] font-medium">
+            <tr
+              v-for="(service, index) in laminatingServices"
+              :key="service.id"
+              class="border-b transition duration-200 hover:bg-gray-100"
+            >
+              <td class="p-3 text-center">{{ index + 1 }}</td>
+              <td class="p-3 font-bold">{{ service.name || "N/A" }}</td>
+              <td class="p-3 text-center">{{ service.price || "0.00" }}</td>
+              <td class="p-3 text-center">{{ service.times_used || 0 }}</td>
+              <td class="p-3 text-center">{{ ((service.price || 0) * (service.times_used || 0)).toFixed(2) }}</td>
+              <td class="p-3">
+                <div v-if="service.raw_materials && service.raw_materials.length > 0">
+                  <div v-for="material in service.raw_materials" :key="material.id" class="mb-1">
+                    {{ material.product?.name || 'N/A' }} (Qty: {{ material.quantity_used || 0 }})
+                  </div>
+                </div>
+                <span v-else class="text-gray-500">No raw materials</span>
+              </td>
+              <td class="p-3 text-center">
+                <div v-if="service.refill_stock && service.refill_stock.length > 0">
+                  <div v-for="stock in service.refill_stock" :key="stock.id" class="mb-1">
+                    {{ stock.product?.name || 'N/A' }}: {{ stock.stock || 0 }}
+                  </div>
+                </div>
+                <span v-else class="text-gray-500">No stock data</span>
+              </td>
+            </tr>
+            <tr v-if="laminatingServices.length === 0">
+              <td colspan="7" class="p-8 text-center text-gray-500">
+                No laminating services found for the selected date range
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Summary Statistics -->
+      <div class="grid md:grid-cols-3 grid-cols-1 gap-4 mt-6">
+        <div class="bg-green-100 border border-green-300 rounded-lg p-4 text-center">
+          <h3 class="text-lg font-semibold text-green-800">Total Services</h3>
+          <p class="text-2xl font-bold text-green-900">{{ laminatingServices.length }}</p>
+        </div>
+        <div class="bg-emerald-100 border border-emerald-300 rounded-lg p-4 text-center">
+          <h3 class="text-lg font-semibold text-emerald-800">Total Revenue</h3>
+          <p class="text-2xl font-bold text-emerald-900">
+            {{ laminatingServices.reduce((sum, service) => sum + ((service.price || 0) * (service.times_used || 0)), 0).toFixed(2) }} LKR
+          </p>
+        </div>
+        <div class="bg-lime-100 border border-lime-300 rounded-lg p-4 text-center">
+          <h3 class="text-lg font-semibold text-lime-800">Total Usage</h3>
+          <p class="text-2xl font-bold text-lime-900">
+            {{ laminatingServices.reduce((sum, service) => sum + (service.times_used || 0), 0) }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Photocopy Service Summary -->
+    <div class="w-full bg-white border-4 border-black rounded-xl p-6">
+      <h2 class="text-2xl font-semibold text-slate-700 text-center pb-4">
+        Photocopy Service Summary
+      </h2>
+
+      <!-- Download Button -->
+      <div class="flex justify-start items-center pb-4">
+        <button
+          @click="downloadPhotocopyServicePDF"
+          class="px-4 py-2 text-md font-semibold text-white bg-orange-600 rounded-lg hover:bg-orange-700 shadow-md"
+        >
+          Download PDF
+        </button>
+      </div>
+
+      <div class="overflow-x-auto max-h-[400px] border rounded-xl mt-4">
+        <table
+          id="photocopyServiceTbl"
+          class="w-full text-gray-800 bg-white border border-gray-300 rounded-lg shadow-md table-auto"
+        >
+          <thead>
+            <tr class="bg-gradient-to-r from-purple-700 via-purple-600 to-purple-700 text-white text-[14px] border-b border-purple-800">
+              <th class="p-3 text-left font-semibold">#</th>
+              <th class="p-3 text-left font-semibold">Service Name</th>
+              <th class="p-3 text-center font-semibold">Price (LKR)</th>
+              <th class="p-3 text-center font-semibold">Times Used</th>
+              <th class="p-3 text-center font-semibold">Total Revenue (LKR)</th>
+              <th class="p-3 text-left font-semibold">Raw Materials Used</th>
+              <th class="p-3 text-center font-semibold">Remaining Stock</th>
+            </tr>
+          </thead>
+
+          <tbody class="text-[12px] font-medium">
+            <tr
+              v-for="(service, index) in photocopyServices"
+              :key="service.id"
+              class="border-b transition duration-200 hover:bg-gray-100"
+            >
+              <td class="p-3 text-center">{{ index + 1 }}</td>
+              <td class="p-3 font-bold">{{ service.name || "N/A" }}</td>
+              <td class="p-3 text-center">{{ service.price || "0.00" }}</td>
+              <td class="p-3 text-center">{{ service.times_used || 0 }}</td>
+              <td class="p-3 text-center">{{ ((service.price || 0) * (service.times_used || 0)).toFixed(2) }}</td>
+              <td class="p-3">
+                <div v-if="service.raw_materials && service.raw_materials.length > 0">
+                  <div v-for="material in service.raw_materials" :key="material.id" class="mb-1">
+                    {{ material.product?.name || 'N/A' }} (Qty: {{ material.quantity_used || 0 }})
+                  </div>
+                </div>
+                <span v-else class="text-gray-500">No raw materials</span>
+              </td>
+              <td class="p-3 text-center">
+                <div v-if="service.refill_stock && service.refill_stock.length > 0">
+                  <div v-for="stock in service.refill_stock" :key="stock.id" class="mb-1">
+                    {{ stock.product?.name || 'N/A' }}: {{ stock.stock || 0 }}
+                  </div>
+                </div>
+                <span v-else class="text-gray-500">No stock data</span>
+              </td>
+            </tr>
+            <tr v-if="photocopyServices.length === 0">
+              <td colspan="7" class="p-8 text-center text-gray-500">
+                No photocopy services found for the selected date range
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Summary Statistics -->
+      <div class="grid md:grid-cols-3 grid-cols-1 gap-4 mt-6">
+        <div class="bg-purple-100 border border-purple-300 rounded-lg p-4 text-center">
+          <h3 class="text-lg font-semibold text-purple-800">Total Services</h3>
+          <p class="text-2xl font-bold text-purple-900">{{ photocopyServices.length }}</p>
+        </div>
+        <div class="bg-violet-100 border border-violet-300 rounded-lg p-4 text-center">
+          <h3 class="text-lg font-semibold text-violet-800">Total Revenue</h3>
+          <p class="text-2xl font-bold text-violet-900">
+            {{ photocopyServices.reduce((sum, service) => sum + ((service.price || 0) * (service.times_used || 0)), 0).toFixed(2) }} LKR
+          </p>
+        </div>
+        <div class="bg-indigo-100 border border-indigo-300 rounded-lg p-4 text-center">
+          <h3 class="text-lg font-semibold text-indigo-800">Total Usage</h3>
+          <p class="text-2xl font-bold text-indigo-900">
+            {{ photocopyServices.reduce((sum, service) => sum + (service.times_used || 0), 0) }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Printout Service Summary -->
+    <div class="w-full bg-white border-4 border-black rounded-xl p-6">
+      <h2 class="text-2xl font-semibold text-slate-700 text-center pb-4">
+        Printout Service Summary
+      </h2>
+
+      <!-- Download Button -->
+      <div class="flex justify-start items-center pb-4">
+        <button
+          @click="downloadPrintoutServicePDF"
+          class="px-4 py-2 text-md font-semibold text-white bg-orange-600 rounded-lg hover:bg-orange-700 shadow-md"
+        >
+          Download PDF
+        </button>
+      </div>
+
+      <div class="overflow-x-auto max-h-[400px] border rounded-xl mt-4">
+        <table
+          id="printoutServiceTbl"
+          class="w-full text-gray-800 bg-white border border-gray-300 rounded-lg shadow-md table-auto"
+        >
+          <thead>
+            <tr class="bg-gradient-to-r from-red-700 via-red-600 to-red-700 text-white text-[14px] border-b border-red-800">
+              <th class="p-3 text-left font-semibold">#</th>
+              <th class="p-3 text-left font-semibold">Service Name</th>
+              <th class="p-3 text-center font-semibold">Price (LKR)</th>
+              <th class="p-3 text-center font-semibold">Times Used</th>
+              <th class="p-3 text-center font-semibold">Total Revenue (LKR)</th>
+              <th class="p-3 text-left font-semibold">Raw Materials Used</th>
+              <th class="p-3 text-center font-semibold">Remaining Stock</th>
+            </tr>
+          </thead>
+
+          <tbody class="text-[12px] font-medium">
+            <tr
+              v-for="(service, index) in printoutServices"
+              :key="service.id"
+              class="border-b transition duration-200 hover:bg-gray-100"
+            >
+              <td class="p-3 text-center">{{ index + 1 }}</td>
+              <td class="p-3 font-bold">{{ service.name || "N/A" }}</td>
+              <td class="p-3 text-center">{{ service.price || "0.00" }}</td>
+              <td class="p-3 text-center">{{ service.times_used || 0 }}</td>
+              <td class="p-3 text-center">{{ ((service.price || 0) * (service.times_used || 0)).toFixed(2) }}</td>
+              <td class="p-3">
+                <div v-if="service.raw_materials && service.raw_materials.length > 0">
+                  <div v-for="material in service.raw_materials" :key="material.id" class="mb-1">
+                    {{ material.product?.name || 'N/A' }} (Qty: {{ material.quantity_used || 0 }})
+                  </div>
+                </div>
+                <span v-else class="text-gray-500">No raw materials</span>
+              </td>
+              <td class="p-3 text-center">
+                <div v-if="service.refill_stock && service.refill_stock.length > 0">
+                  <div v-for="stock in service.refill_stock" :key="stock.id" class="mb-1">
+                    {{ stock.product?.name || 'N/A' }}: {{ stock.stock || 0 }}
+                  </div>
+                </div>
+                <span v-else class="text-gray-500">No stock data</span>
+              </td>
+            </tr>
+            <tr v-if="printoutServices.length === 0">
+              <td colspan="7" class="p-8 text-center text-gray-500">
+                No printout services found for the selected date range
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Summary Statistics -->
+      <div class="grid md:grid-cols-3 grid-cols-1 gap-4 mt-6">
+        <div class="bg-red-100 border border-red-300 rounded-lg p-4 text-center">
+          <h3 class="text-lg font-semibold text-red-800">Total Services</h3>
+          <p class="text-2xl font-bold text-red-900">{{ printoutServices.length }}</p>
+        </div>
+        <div class="bg-rose-100 border border-rose-300 rounded-lg p-4 text-center">
+          <h3 class="text-lg font-semibold text-rose-800">Total Revenue</h3>
+          <p class="text-2xl font-bold text-rose-900">
+            {{ printoutServices.reduce((sum, service) => sum + ((service.price || 0) * (service.times_used || 0)), 0).toFixed(2) }} LKR
+          </p>
+        </div>
+        <div class="bg-pink-100 border border-pink-300 rounded-lg p-4 text-center">
+          <h3 class="text-lg font-semibold text-pink-800">Total Usage</h3>
+          <p class="text-2xl font-bold text-pink-900">
+            {{ printoutServices.reduce((sum, service) => sum + (service.times_used || 0), 0) }}
+          </p>
+        </div>
+      </div>
     </div>
 
 <!-- Batch Management -->
@@ -538,6 +957,14 @@ const props = defineProps({
   endDate: { type: String, default: "" },
   categorySales: { type: Object, required: true },
   employeeSalesSummary: { type: Object, required: true },
+  returnItems: { type: Array, required: true },
+  totalReturnedQuantity: { type: Number, required: true },
+  totalReturnItems: { type: Number, required: true },
+  returnReasons: { type: Object, required: true },
+  bindingServices: { type: Array, default: () => [] },
+  laminatingServices: { type: Array, default: () => [] },
+  photocopyServices: { type: Array, default: () => [] },
+  printoutServices: { type: Array, default: () => [] },
 });
 
 const totalPrice = computed(() => {
@@ -579,6 +1006,11 @@ const endDate = ref(props.endDate);
 
 const products = ref(props.products);
 const sales = ref(props.sales);
+const returnItems = ref(props.returnItems);
+const bindingServices = ref(props.bindingServices);
+const laminatingServices = ref(props.laminatingServices);
+const photocopyServices = ref(props.photocopyServices);
+const printoutServices = ref(props.printoutServices);
 const totalQty = computed(() => {
   return products.value.reduce(
     (sum, product) => sum + (product.stock_quantity || 0),
@@ -681,8 +1113,428 @@ const downloadPDFTable = () => {
   doc.save("Top_Products_Stock.pdf");
 };
 
+const downloadReturnItemsPDF = () => {
+  const doc = new jsPDF("p", "mm", "a4"); // Portrait, A4 size
 
+  // Title for the PDF
+  doc.setFontSize(18);
+  doc.text("Return Items Table", 14, 15);
 
+  // Add date range if available
+  if (startDate.value && endDate.value) {
+    doc.setFontSize(12);
+    doc.text(`Date Range: ${startDate.value} to ${endDate.value}`, 14, 25);
+  }
+
+  // Prepare table headers
+  const tableColumn = [
+    "#",
+    "Return Date",
+    "Customer",
+    "Product/Newspaper",
+    "Quantity",
+    "Reason",
+    "Sale ID",
+  ];
+
+  // Prepare table data
+  const tableRows = returnItems.value.map((returnItem, index) => [
+    index + 1,
+    new Date(returnItem.return_date).toLocaleDateString(),
+    returnItem.customer?.name || "N/A",
+    returnItem.product?.name || returnItem.newspaper?.name || "N/A",
+    returnItem.quantity,
+    returnItem.reason,
+    returnItem.sale_id || "N/A",
+  ]);
+
+  // Add table
+  doc.autoTable({
+    head: [tableColumn],
+    body: tableRows,
+    startY: startDate.value && endDate.value ? 35 : 25,
+    theme: "striped",
+    styles: { fontSize: 10 },
+    headStyles: { fillColor: [44, 62, 80] },
+    columnStyles: {
+      0: { cellWidth: 8 },   // #
+      1: { cellWidth: 25 },  // Return Date
+      2: { cellWidth: 30 },  // Customer
+      3: { cellWidth: 35 },  // Product/Newspaper
+      4: { cellWidth: 15 },  // Quantity
+      5: { cellWidth: 40 },  // Reason
+      6: { cellWidth: 15 },  // Sale ID
+    },
+    margin: { left: 5, right: 10, top: 20 },
+  });
+
+  // Save the PDF
+  doc.save("Return_Items_Table.pdf");
+};
+
+const downloadBindingServicePDF = () => {
+  const doc = new jsPDF("l", "mm", "a4"); // Landscape, A4 size for wider table
+
+  // Title for the PDF
+  doc.setFontSize(18);
+  doc.text("Binding Service Summary", 14, 15);
+
+  // Add date range if available
+  if (startDate.value && endDate.value) {
+    doc.setFontSize(12);
+    doc.text(`Date Range: ${startDate.value} to ${endDate.value}`, 14, 25);
+  }
+
+  // Prepare table headers
+  const tableColumn = [
+    "#",
+    "Service Name",
+    "Price (LKR)",
+    "Times Used",
+    "Total Revenue (LKR)",
+    "Raw Materials Used",
+    "Remaining Stock",
+  ];
+
+  // Prepare table data
+  const tableRows = bindingServices.value.map((service, index) => [
+    index + 1,
+    service.name || "N/A",
+    service.price || "0.00",
+    service.times_used || 0,
+    ((service.price || 0) * (service.times_used || 0)).toFixed(2),
+    service.raw_materials && service.raw_materials.length > 0
+      ? service.raw_materials.map(material => 
+          `${material.product?.name || 'N/A'} (${material.quantity_used || 0})`
+        ).join(', ')
+      : "No raw materials",
+    service.refill_stock && service.refill_stock.length > 0
+      ? service.refill_stock.map(stock => 
+          `${stock.product?.name || 'N/A'}: ${stock.stock || 0}`
+        ).join(', ')
+      : "No stock data",
+  ]);
+
+  // Calculate totals
+  const totalRevenue = bindingServices.value.reduce((sum, service) => sum + ((service.price || 0) * (service.times_used || 0)), 0);
+  const totalUsage = bindingServices.value.reduce((sum, service) => sum + (service.times_used || 0), 0);
+
+  // Add totals row
+  tableRows.push([
+    "",
+    "TOTALS",
+    "",
+    totalUsage,
+    totalRevenue.toFixed(2),
+    "",
+    "",
+  ]);
+
+  // Add table
+  doc.autoTable({
+    head: [tableColumn],
+    body: tableRows,
+    startY: startDate.value && endDate.value ? 35 : 25,
+    theme: "striped",
+    styles: { fontSize: 8 },
+    headStyles: { fillColor: [44, 62, 80] },
+    columnStyles: {
+      0: { cellWidth: 10 },  // #
+      1: { cellWidth: 40 },  // Service Name
+      2: { cellWidth: 25 },  // Price
+      3: { cellWidth: 20 },  // Times Used
+      4: { cellWidth: 30 },  // Total Revenue
+      5: { cellWidth: 80 },  // Raw Materials
+      6: { cellWidth: 70 },  // Remaining Stock
+    },
+    margin: { left: 5, right: 10, top: 20 },
+  });
+
+  // Add summary statistics
+  const finalY = doc.lastAutoTable.finalY + 10;
+  doc.setFontSize(14);
+  doc.text("Summary Statistics:", 14, finalY);
+  doc.setFontSize(12);
+  doc.text(`Total Services: ${bindingServices.value.length}`, 14, finalY + 10);
+  doc.text(`Total Revenue: ${totalRevenue.toFixed(2)} LKR`, 14, finalY + 20);
+  doc.text(`Total Usage: ${totalUsage}`, 14, finalY + 30);
+
+  // Save the PDF
+  doc.save("Binding_Service_Summary.pdf");
+};
+
+const downloadLaminatingServicePDF = () => {
+  const doc = new jsPDF("l", "mm", "a4"); // Landscape, A4 size for wider table
+
+  // Title for the PDF
+  doc.setFontSize(18);
+  doc.text("Laminating Service Summary", 14, 15);
+
+  // Add date range if available
+  if (startDate.value && endDate.value) {
+    doc.setFontSize(12);
+    doc.text(`Date Range: ${startDate.value} to ${endDate.value}`, 14, 25);
+  }
+
+  // Prepare table headers
+  const tableColumn = [
+    "#",
+    "Service Name",
+    "Price (LKR)",
+    "Times Used",
+    "Total Revenue (LKR)",
+    "Raw Materials Used",
+    "Remaining Stock",
+  ];
+
+  // Prepare table data
+  const tableRows = laminatingServices.value.map((service, index) => [
+    index + 1,
+    service.name || "N/A",
+    service.price || "0.00",
+    service.times_used || 0,
+    ((service.price || 0) * (service.times_used || 0)).toFixed(2),
+    service.raw_materials && service.raw_materials.length > 0
+      ? service.raw_materials.map(material => 
+          `${material.product?.name || 'N/A'} (${material.quantity_used || 0})`
+        ).join(', ')
+      : "No raw materials",
+    service.refill_stock && service.refill_stock.length > 0
+      ? service.refill_stock.map(stock => 
+          `${stock.product?.name || 'N/A'}: ${stock.stock || 0}`
+        ).join(', ')
+      : "No stock data",
+  ]);
+
+  // Calculate totals
+  const totalRevenue = laminatingServices.value.reduce((sum, service) => sum + ((service.price || 0) * (service.times_used || 0)), 0);
+  const totalUsage = laminatingServices.value.reduce((sum, service) => sum + (service.times_used || 0), 0);
+
+  // Add totals row
+  tableRows.push([
+    "",
+    "TOTALS",
+    "",
+    totalUsage,
+    totalRevenue.toFixed(2),
+    "",
+    "",
+  ]);
+
+  // Add table
+  doc.autoTable({
+    head: [tableColumn],
+    body: tableRows,
+    startY: startDate.value && endDate.value ? 35 : 25,
+    theme: "striped",
+    styles: { fontSize: 8 },
+    headStyles: { fillColor: [34, 197, 94] },
+    columnStyles: {
+      0: { cellWidth: 10 },  // #
+      1: { cellWidth: 40 },  // Service Name
+      2: { cellWidth: 25 },  // Price
+      3: { cellWidth: 20 },  // Times Used
+      4: { cellWidth: 30 },  // Total Revenue
+      5: { cellWidth: 80 },  // Raw Materials
+      6: { cellWidth: 70 },  // Remaining Stock
+    },
+    margin: { left: 5, right: 10, top: 20 },
+  });
+
+  // Add summary statistics
+  const finalY = doc.lastAutoTable.finalY + 10;
+  doc.setFontSize(14);
+  doc.text("Summary Statistics:", 14, finalY);
+  doc.setFontSize(12);
+  doc.text(`Total Services: ${laminatingServices.value.length}`, 14, finalY + 10);
+  doc.text(`Total Revenue: ${totalRevenue.toFixed(2)} LKR`, 14, finalY + 20);
+  doc.text(`Total Usage: ${totalUsage}`, 14, finalY + 30);
+
+  // Save the PDF
+  doc.save("Laminating_Service_Summary.pdf");
+};
+
+const downloadPhotocopyServicePDF = () => {
+  const doc = new jsPDF("l", "mm", "a4"); // Landscape, A4 size for wider table
+
+  // Title for the PDF
+  doc.setFontSize(18);
+  doc.text("Photocopy Service Summary", 14, 15);
+
+  // Add date range if available
+  if (startDate.value && endDate.value) {
+    doc.setFontSize(12);
+    doc.text(`Date Range: ${startDate.value} to ${endDate.value}`, 14, 25);
+  }
+
+  // Prepare table headers
+  const tableColumn = [
+    "#",
+    "Service Name",
+    "Price (LKR)",
+    "Times Used",
+    "Total Revenue (LKR)",
+    "Raw Materials Used",
+    "Remaining Stock",
+  ];
+
+  // Prepare table data
+  const tableRows = photocopyServices.value.map((service, index) => [
+    index + 1,
+    service.name || "N/A",
+    service.price || "0.00",
+    service.times_used || 0,
+    ((service.price || 0) * (service.times_used || 0)).toFixed(2),
+    service.raw_materials && service.raw_materials.length > 0
+      ? service.raw_materials.map(material => 
+          `${material.product?.name || 'N/A'} (${material.quantity_used || 0})`
+        ).join(', ')
+      : "No raw materials",
+    service.refill_stock && service.refill_stock.length > 0
+      ? service.refill_stock.map(stock => 
+          `${stock.product?.name || 'N/A'}: ${stock.stock || 0}`
+        ).join(', ')
+      : "No stock data",
+  ]);
+
+  // Calculate totals
+  const totalRevenue = photocopyServices.value.reduce((sum, service) => sum + ((service.price || 0) * (service.times_used || 0)), 0);
+  const totalUsage = photocopyServices.value.reduce((sum, service) => sum + (service.times_used || 0), 0);
+
+  // Add totals row
+  tableRows.push([
+    "",
+    "TOTALS",
+    "",
+    totalUsage,
+    totalRevenue.toFixed(2),
+    "",
+    "",
+  ]);
+
+  // Add table
+  doc.autoTable({
+    head: [tableColumn],
+    body: tableRows,
+    startY: startDate.value && endDate.value ? 35 : 25,
+    theme: "striped",
+    styles: { fontSize: 8 },
+    headStyles: { fillColor: [147, 51, 234] },
+    columnStyles: {
+      0: { cellWidth: 10 },  // #
+      1: { cellWidth: 40 },  // Service Name
+      2: { cellWidth: 25 },  // Price
+      3: { cellWidth: 20 },  // Times Used
+      4: { cellWidth: 30 },  // Total Revenue
+      5: { cellWidth: 80 },  // Raw Materials
+      6: { cellWidth: 70 },  // Remaining Stock
+    },
+    margin: { left: 5, right: 10, top: 20 },
+  });
+
+  // Add summary statistics
+  const finalY = doc.lastAutoTable.finalY + 10;
+  doc.setFontSize(14);
+  doc.text("Summary Statistics:", 14, finalY);
+  doc.setFontSize(12);
+  doc.text(`Total Services: ${photocopyServices.value.length}`, 14, finalY + 10);
+  doc.text(`Total Revenue: ${totalRevenue.toFixed(2)} LKR`, 14, finalY + 20);
+  doc.text(`Total Usage: ${totalUsage}`, 14, finalY + 30);
+
+  // Save the PDF
+  doc.save("Photocopy_Service_Summary.pdf");
+};
+
+const downloadPrintoutServicePDF = () => {
+  const doc = new jsPDF("l", "mm", "a4"); // Landscape, A4 size for wider table
+
+  // Title for the PDF
+  doc.setFontSize(18);
+  doc.text("Printout Service Summary", 14, 15);
+
+  // Add date range if available
+  if (startDate.value && endDate.value) {
+    doc.setFontSize(12);
+    doc.text(`Date Range: ${startDate.value} to ${endDate.value}`, 14, 25);
+  }
+
+  // Prepare table headers
+  const tableColumn = [
+    "#",
+    "Service Name",
+    "Price (LKR)",
+    "Times Used",
+    "Total Revenue (LKR)",
+    "Raw Materials Used",
+    "Remaining Stock",
+  ];
+
+  // Prepare table data
+  const tableRows = printoutServices.value.map((service, index) => [
+    index + 1,
+    service.name || "N/A",
+    service.price || "0.00",
+    service.times_used || 0,
+    ((service.price || 0) * (service.times_used || 0)).toFixed(2),
+    service.raw_materials && service.raw_materials.length > 0
+      ? service.raw_materials.map(material => 
+          `${material.product?.name || 'N/A'} (${material.quantity_used || 0})`
+        ).join(', ')
+      : "No raw materials",
+    service.refill_stock && service.refill_stock.length > 0
+      ? service.refill_stock.map(stock => 
+          `${stock.product?.name || 'N/A'}: ${stock.stock || 0}`
+        ).join(', ')
+      : "No stock data",
+  ]);
+
+  // Calculate totals
+  const totalRevenue = printoutServices.value.reduce((sum, service) => sum + ((service.price || 0) * (service.times_used || 0)), 0);
+  const totalUsage = printoutServices.value.reduce((sum, service) => sum + (service.times_used || 0), 0);
+
+  // Add totals row
+  tableRows.push([
+    "",
+    "TOTALS",
+    "",
+    totalUsage,
+    totalRevenue.toFixed(2),
+    "",
+    "",
+  ]);
+
+  // Add table
+  doc.autoTable({
+    head: [tableColumn],
+    body: tableRows,
+    startY: startDate.value && endDate.value ? 35 : 25,
+    theme: "striped",
+    styles: { fontSize: 8 },
+    headStyles: { fillColor: [220, 38, 38] },
+    columnStyles: {
+      0: { cellWidth: 10 },  // #
+      1: { cellWidth: 40 },  // Service Name
+      2: { cellWidth: 25 },  // Price
+      3: { cellWidth: 20 },  // Times Used
+      4: { cellWidth: 30 },  // Total Revenue
+      5: { cellWidth: 80 },  // Raw Materials
+      6: { cellWidth: 70 },  // Remaining Stock
+    },
+    margin: { left: 5, right: 10, top: 20 },
+  });
+
+  // Add summary statistics
+  const finalY = doc.lastAutoTable.finalY + 10;
+  doc.setFontSize(14);
+  doc.text("Summary Statistics:", 14, finalY);
+  doc.setFontSize(12);
+  doc.text(`Total Services: ${printoutServices.value.length}`, 14, finalY + 10);
+  doc.text(`Total Revenue: ${totalRevenue.toFixed(2)} LKR`, 14, finalY + 20);
+  doc.text(`Total Usage: ${totalUsage}`, 14, finalY + 30);
+
+  // Save the PDF
+  doc.save("Printout_Service_Summary.pdf");
+};
 
 const downloadTable = () => {
   // Map the products data with calculations
@@ -1254,6 +2106,136 @@ $(document).ready(function () {
       searchInput.on("keypress", function (e) {
         if (e.which == 13) {
           table.search(this.value).draw();
+        }
+      });
+    },
+    language: {
+      search: "",
+    },
+  });
+
+  // Initialize DataTable for Return Items
+  let returnTable = $("#returnItemsTbl").DataTable({
+    dom: "Bfrtip",
+    buttons: [],
+    paging: false, // Disable pagination
+    columnDefs: [
+      {
+        targets: 0, // Adjust the target column if needed
+        searchable: false,
+        orderable: false, // Disable sorting for this specific column
+      },
+    ],
+    initComplete: function () {
+      let searchInput = $("div.dataTables_filter input");
+      searchInput.attr("placeholder", "Search ...");
+      searchInput.on("keypress", function (e) {
+        if (e.which == 13) {
+          returnTable.search(this.value).draw();
+        }
+      });
+    },
+    language: {
+      search: "",
+    },
+  });
+
+  // Initialize DataTable for Binding Services
+  let bindingTable = $("#bindingServiceTbl").DataTable({
+    dom: "Bfrtip",
+    buttons: [],
+    paging: false, // Disable pagination
+    columnDefs: [
+      {
+        targets: 0, // Adjust the target column if needed
+        searchable: false,
+        orderable: false, // Disable sorting for this specific column
+      },
+    ],
+    initComplete: function () {
+      let searchInput = $("div.dataTables_filter input");
+      searchInput.attr("placeholder", "Search ...");
+      searchInput.on("keypress", function (e) {
+        if (e.which == 13) {
+          bindingTable.search(this.value).draw();
+        }
+      });
+    },
+    language: {
+      search: "",
+    },
+  });
+
+  // Initialize DataTable for Laminating Services
+  let laminatingTable = $("#laminatingServiceTbl").DataTable({
+    dom: "Bfrtip",
+    buttons: [],
+    paging: false, // Disable pagination
+    columnDefs: [
+      {
+        targets: 0, // Adjust the target column if needed
+        searchable: false,
+        orderable: false, // Disable sorting for this specific column
+      },
+    ],
+    initComplete: function () {
+      let searchInput = $("div.dataTables_filter input");
+      searchInput.attr("placeholder", "Search ...");
+      searchInput.on("keypress", function (e) {
+        if (e.which == 13) {
+          laminatingTable.search(this.value).draw();
+        }
+      });
+    },
+    language: {
+      search: "",
+    },
+  });
+
+  // Initialize DataTable for Photocopy Services
+  let photocopyTable = $("#photocopyServiceTbl").DataTable({
+    dom: "Bfrtip",
+    buttons: [],
+    paging: false, // Disable pagination
+    columnDefs: [
+      {
+        targets: 0, // Adjust the target column if needed
+        searchable: false,
+        orderable: false, // Disable sorting for this specific column
+      },
+    ],
+    initComplete: function () {
+      let searchInput = $("div.dataTables_filter input");
+      searchInput.attr("placeholder", "Search ...");
+      searchInput.on("keypress", function (e) {
+        if (e.which == 13) {
+          photocopyTable.search(this.value).draw();
+        }
+      });
+    },
+    language: {
+      search: "",
+    },
+  });
+
+  // Initialize DataTable for Printout Services
+  let printoutTable = $("#printoutServiceTbl").DataTable({
+    dom: "Bfrtip",
+    buttons: [],
+    paging: false, // Disable pagination
+    columnDefs: [
+      {
+        targets: 0, // Adjust the target column if needed
+        searchable: false,
+        orderable: false, // Disable sorting for this specific column
+      },
+    ],
+    initComplete: function () {
+      let searchInput = $("div.dataTables_filter input");
+      searchInput.attr("placeholder", "Search ...");
+      searchInput.on("keypress", function (e) {
+        if (e.which == 13) {
+          printoutTable.search(this.value).draw();
         }
       });
     },

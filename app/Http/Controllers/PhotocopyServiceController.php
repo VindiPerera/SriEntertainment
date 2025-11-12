@@ -219,4 +219,24 @@ public function store(Request $request)
                           
         return response()->json($products);
     }
+
+    /**
+     * Fetch the price of a selected product.
+     */
+    public function fetchProductPrice(Request $request)
+    {
+        $productId = $request->query('product_id');
+
+        if (!$productId) {
+            return response()->json(['error' => 'Product ID is required'], 400);
+        }
+
+        $product = Product::find($productId);
+
+        if (!$product) {
+            return response()->json(['error' => 'Product not found'], 404);
+        }
+
+        return response()->json(['price' => $product->selling_price]);
+    }
 }

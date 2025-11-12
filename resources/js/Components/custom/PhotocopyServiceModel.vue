@@ -99,22 +99,7 @@
                 <span v-if="createForm.errors.color" class="error">{{ createForm.errors.color }}</span>
               </div>
 
-              <div class="form-group">
-                <label for="price">Price</label>
-                <input v-model.number="createForm.price" type="number" id="price" placeholder="Enter price" step="0.01" />
-                <span v-if="createForm.errors.price" class="error">{{ createForm.errors.price }}</span>
-              </div>
-              <div class="form-group">
-                <label for="service_charge">Service Charge</label>
-                <input v-model.number="createForm.service_charge" type="number" id="service_charge" placeholder="Enter service charge" step="0.01" />
-                <span v-if="createForm.errors.service_charge" class="error">{{ createForm.errors.service_charge }}</span>
-              </div>
-              <div class="form-group" style="display: flex; gap: 12px; align-items: center;">
-              <label style="margin: 0; font-weight: bold;">Total Price :</label>
-              <div class="info-value" style="font-weight: bold; color: #2563eb;">{{ totalPriceDisplay }}</div>
-            </div>
-
-              <!-- Category and Product Selection -->
+               <!-- Category and Product Selection -->
               <div class="form-group">
                 <label for="category">Category</label>
                 <select v-model="selectedCategoryId" id="category" @change="fetchProductsByCategory(selectedCategoryId)">
@@ -150,6 +135,23 @@
                 </div>
                 <span v-if="createForm.errors.products" class="error">{{ createForm.errors.products }}</span>
               </div>
+
+              <div class="form-group">
+                <label for="price">Price</label>
+                <input v-model.number="createForm.price" type="number" id="price" placeholder="Enter price" step="0.01" />
+                <span v-if="createForm.errors.price" class="error">{{ createForm.errors.price }}</span>
+              </div>
+              <div class="form-group">
+                <label for="service_charge">Service Charge</label>
+                <input v-model.number="createForm.service_charge" type="number" id="service_charge" placeholder="Enter service charge" step="0.01" />
+                <span v-if="createForm.errors.service_charge" class="error">{{ createForm.errors.service_charge }}</span>
+              </div>
+              <div class="form-group" style="display: flex; gap: 12px; align-items: center;">
+              <label style="margin: 0; font-weight: bold;">Total Price :</label>
+              <div class="info-value" style="font-weight: bold; color: #2563eb;">{{ totalPriceDisplay }}</div>
+            </div>
+
+             
 
               <div class="form-actions">
                 <button @click="submitForm" class="submit-button" :disabled="createForm.processing">
@@ -408,12 +410,21 @@ const availableProducts = computed(() => {
 });
 
 // Add product to selected list
-const addProduct = () => {
+const addProduct = async () => {
   if (selectedProductId.value) {
     const product = products.value.find(p => p.id === selectedProductId.value);
     if (product && !selectedProducts.value.some(p => p.id === product.id)) {
       selectedProducts.value.push(product);
       selectedProductId.value = null; // Reset selection
+
+      // Fetch and set the price of the selected product
+      try {
+        const response = await axios.get(`/api/product-price?product_id=${product.id}`);
+        const price = response.data.price;
+        createForm.price = price; // Set the price in the form
+      } catch (error) {
+        console.error('Error fetching product price:', error);
+      }
     }
   }
 };

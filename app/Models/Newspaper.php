@@ -57,4 +57,9 @@ class Newspaper extends Model
     {
         return $this->belongsTo(Supplier::class, 'supplier_id', 'id');
     }
+
+    public function returnItems()
+    {
+        return $this->hasMany(ReturnItem::class, 'newspaper_id', 'id');
+    }
 }

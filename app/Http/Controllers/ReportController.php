@@ -4,8 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Report;
+use App\Models\ReturnItem;
 use App\Models\Sale;
 use App\Models\SaleItem;
+use App\Models\BindingService;
+use App\Models\BindingServiceRawMaterial;
+use App\Models\RefillBinding;
+use App\Models\LaminatingService;
+use App\Models\LaminatingServiceRawMaterial;
+use App\Models\RefillLaminating;
+use App\Models\PhotocopyService;
+use App\Models\PhotocopyServiceRawMaterial;
+use App\Models\RefillPhotocopy;
+use App\Models\PrintoutService;
+use App\Models\PrintoutServiceRawMaterial;
+use App\Models\RefillPrintout;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -131,7 +144,168 @@ class ReportController extends Controller
     $totalCustomer = $salesQuery->distinct('customer_id')->count('customer_id');
 
     // =========================
-    // 10. Return to Vue via Inertia
+    // 10. Return Items Data
+    // =========================
+    $returnItemsQuery = ReturnItem::with(['product', 'customer', 'sale', 'newspaper']);
+    
+    if ($startDate && $endDate) {
+        $returnItemsQuery->whereBetween('return_date', [$startDate, $endDate]);
+    }
+    
+    $returnItems = $returnItemsQuery->orderBy('return_date', 'desc')->get();
+    
+    // Calculate return items statistics
+    $totalReturnedQuantity = $returnItems->sum('quantity');
+    $totalReturnItems = $returnItems->count();
+    
+    // Group return items by reason
+    $returnReasons = $returnItems->groupBy('reason')
+        ->map(function ($group) {
+            return [
+                'count' => $group->count(),
+                'quantity' => $group->sum('quantity')
+            ];
+        })->toArray();
+
+    // =========================
+    // 11. Binding Service Data
+    // =========================
+    $bindingServices = BindingService::with(['rawMaterials.product'])->get();
+    
+    // Calculate usage statistics for each binding service
+    $bindingServices->transform(function ($service) use ($startDate, $endDate) {
+        // Count how many times this service was used in sales
+        $usageQuery = SaleItem::where('binding_id', $service->id);
+        
+        if ($startDate && $endDate) {
+            $usageQuery->whereHas('sale', function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('sale_date', [$startDate, $endDate]);
+            });
+        }
+        
+        $service->times_used = $usageQuery->sum('quantity');
+        
+        // Get raw materials with usage information
+        $service->raw_materials = $service->rawMaterials->map(function ($rawMaterial) use ($service) {
+            $rawMaterial->quantity_used = $rawMaterial->quantity_per_service * $service->times_used;
+            return $rawMaterial;
+        });
+        
+        // Get refill stock information
+        $service->refill_stock = RefillBinding::with('product')
+            ->where('product_id', $service->id)
+            ->orWhereHas('product', function ($query) use ($service) {
+                $query->whereIn('id', $service->rawMaterials->pluck('product_id'));
+            })
+            ->get();
+            
+        return $service;
+    });
+
+    // =========================
+    // 12. Laminating Service Data
+    // =========================
+    $laminatingServices = LaminatingService::with(['rawMaterials.product'])->get();
+    
+    $laminatingServices->transform(function ($service) use ($startDate, $endDate) {
+        // Count how many times this service was used in sales
+        $usageQuery = SaleItem::where('laminating_id', $service->id);
+        
+        if ($startDate && $endDate) {
+            $usageQuery->whereHas('sale', function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('sale_date', [$startDate, $endDate]);
+            });
+        }
+        
+        $service->times_used = $usageQuery->sum('quantity');
+        
+        // Get raw materials with usage information
+        $service->raw_materials = $service->rawMaterials->map(function ($rawMaterial) use ($service) {
+            $rawMaterial->quantity_used = $rawMaterial->quantity_per_service * $service->times_used;
+            return $rawMaterial;
+        });
+        
+        // Get refill stock information
+        $service->refill_stock = RefillLaminating::with('product')
+            ->where('product_id', $service->id)
+            ->orWhereHas('product', function ($query) use ($service) {
+                $query->whereIn('id', $service->rawMaterials->pluck('product_id'));
+            })
+            ->get();
+            
+        return $service;
+    });
+
+    // =========================
+    // 13. Photocopy Service Data
+    // =========================
+    $photocopyServices = PhotocopyService::with(['rawMaterials.product'])->get();
+    
+    $photocopyServices->transform(function ($service) use ($startDate, $endDate) {
+        // Count how many times this service was used in sales
+        $usageQuery = SaleItem::where('photocopy_id', $service->id);
+        
+        if ($startDate && $endDate) {
+            $usageQuery->whereHas('sale', function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('sale_date', [$startDate, $endDate]);
+            });
+        }
+        
+        $service->times_used = $usageQuery->sum('quantity');
+        
+        // Get raw materials with usage information
+        $service->raw_materials = $service->rawMaterials->map(function ($rawMaterial) use ($service) {
+            $rawMaterial->quantity_used = $rawMaterial->quantity_per_service * $service->times_used;
+            return $rawMaterial;
+        });
+        
+        // Get refill stock information
+        $service->refill_stock = RefillPhotocopy::with('product')
+            ->where('product_id', $service->id)
+            ->orWhereHas('product', function ($query) use ($service) {
+                $query->whereIn('id', $service->rawMaterials->pluck('product_id'));
+            })
+            ->get();
+            
+        return $service;
+    });
+
+    // =========================
+    // 14. Printout Service Data
+    // =========================
+    $printoutServices = PrintoutService::with(['rawMaterials.product'])->get();
+    
+    $printoutServices->transform(function ($service) use ($startDate, $endDate) {
+        // Count how many times this service was used in sales
+        $usageQuery = SaleItem::where('printout_id', $service->id);
+        
+        if ($startDate && $endDate) {
+            $usageQuery->whereHas('sale', function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('sale_date', [$startDate, $endDate]);
+            });
+        }
+        
+        $service->times_used = $usageQuery->sum('quantity');
+        
+        // Get raw materials with usage information
+        $service->raw_materials = $service->rawMaterials->map(function ($rawMaterial) use ($service) {
+            $rawMaterial->quantity_used = $rawMaterial->quantity_per_service * $service->times_used;
+            return $rawMaterial;
+        });
+        
+        // Get refill stock information
+        $service->refill_stock = RefillPrintout::with('product')
+            ->where('product_id', $service->id)
+            ->orWhereHas('product', function ($query) use ($service) {
+                $query->whereIn('id', $service->rawMaterials->pluck('product_id'));
+            })
+            ->get();
+            
+        return $service;
+    });
+
+    // =========================
+    // 15. Return to Vue via Inertia
     // =========================
     return Inertia::render('Reports/Index', [
         'products' => $products,
@@ -147,6 +321,14 @@ class ReportController extends Controller
         'endDate' => $endDate,
         'categorySales' => $categorySales,
         'employeeSalesSummary' => $employeeSalesSummary,
+        'returnItems' => $returnItems,
+        'totalReturnedQuantity' => $totalReturnedQuantity,
+        'totalReturnItems' => $totalReturnItems,
+        'returnReasons' => $returnReasons,
+        'bindingServices' => $bindingServices,
+        'laminatingServices' => $laminatingServices,
+        'photocopyServices' => $photocopyServices,
+        'printoutServices' => $printoutServices,
     ]);
 }
 

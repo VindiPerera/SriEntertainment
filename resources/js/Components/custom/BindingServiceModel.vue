@@ -84,22 +84,8 @@
                 </select>
                 <span v-if="createForm.errors.pages" class="error">{{ createForm.errors.pages }}</span>
               </div>
-              <div class="form-group">
-                <label for="price">Price</label>
-                <input v-model.number="createForm.price" type="number" id="price" placeholder="Enter price" step="0.01" />
-                <span v-if="createForm.errors.price" class="error">{{ createForm.errors.price }}</span>
-              </div>
-              <div class="form-group">
-                <label for="service_charge">Service Charge</label>
-                <input v-model.number="createForm.service_charge" type="number" id="service_charge" placeholder="Enter service charge" step="0.01" />
-                <span v-if="createForm.errors.service_charge" class="error">{{ createForm.errors.service_charge }}</span>
-              </div>
-              <div class="form-group" style="display: flex; gap: 12px; align-items: center;">
-              <label style="margin: 0; font-weight: bold;">Total Price :</label>
-              <div class="info-value" style="font-weight: bold; color: #2563eb;">{{ totalPriceDisplay }}</div>
-            </div>
-              
-              <!-- Category Selection -->
+
+  <!-- Category Selection -->
               <div class="form-group">
                 <label for="category">Category</label>
                 <select v-model="selectedCategoryId" id="category" @change="fetchProductsByCategory(selectedCategoryId)">
@@ -136,6 +122,24 @@
                 <span v-if="createForm.errors.products" class="error">{{ createForm.errors.products }}</span>
               </div>
 
+
+          
+              <div class="form-group">
+                <label for="price">Price</label>
+                <input v-model.number="createForm.price" type="number" id="price" placeholder="Enter price" step="0.01" />
+                <span v-if="createForm.errors.price" class="error">{{ createForm.errors.price }}</span>
+              </div>
+              <div class="form-group">
+                <label for="service_charge">Service Charge</label>
+                <input v-model.number="createForm.service_charge" type="number" id="service_charge" placeholder="Enter service charge" step="0.01" />
+                <span v-if="createForm.errors.service_charge" class="error">{{ createForm.errors.service_charge }}</span>
+              </div>
+              <div class="form-group" style="display: flex; gap: 12px; align-items: center;">
+              <label style="margin: 0; font-weight: bold;">Total Price :</label>
+              <div class="info-value" style="font-weight: bold; color: #2563eb;">{{ totalPriceDisplay }}</div>
+            </div>
+              
+            
               <div class="form-actions">
                 <button @click="submitForm" class="submit-button" :disabled="createForm.processing">
                   {{ createForm.processing ? 'Creating...' : 'Create Service' }}
@@ -436,12 +440,37 @@ const fetchProductsByCategory = async (categoryId) => {
   }
 };
 // Add product to selected list
-const addProduct = () => {
+const addProduct = async () => {
   if (selectedProductId.value) {
     const product = products.value.find(p => p.id === selectedProductId.value);
     if (product && !selectedProducts.value.some(p => p.id === product.id)) {
       selectedProducts.value.push(product);
       selectedProductId.value = null; // Reset selection
+      
+      // Update total price
+      const productIds = selectedProducts.value.map(p => p.id);
+      try {
+        // Construct URL with query parameters
+        const queryParams = productIds.map(id => `product_ids[]=${id}`).join('&');
+        const response = await fetch(`/api/total-price?${queryParams}`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          createForm.price = data.total_price || 0;
+          console.log('Total price updated:', createForm.price);
+        } else {
+          console.error('Error fetching total price:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error fetching total price:', error);
+      }
     }
   }
 };
@@ -449,6 +478,24 @@ const addProduct = () => {
 // Remove product from selected list
 const removeProduct = (productId) => {
   selectedProducts.value = selectedProducts.value.filter(p => p.id !== productId);
+  
+  // Recalculate total price
+  const productIds = selectedProducts.value.map(p => p.id);
+  if (productIds.length > 0) {
+    // Construct URL with proper query parameters
+    const queryParams = productIds.map(id => `product_ids[]=${id}`).join('&');
+    fetch(`/api/total-price?${queryParams}`)
+      .then(response => response.json())
+      .then(data => {
+        createForm.price = data.total_price || 0;
+        console.log('Total price recalculated:', createForm.price);
+      })
+      .catch(error => {
+        console.error('Error recalculating total price:', error);
+      });
+  } else {
+    createForm.price = 0; // Reset price if no products are selected
+  }
 };
 
 onMounted(() => {

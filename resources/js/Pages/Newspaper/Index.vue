@@ -223,7 +223,6 @@
   <NewspaperCreateModel v-model:open="isCreateModalOpen" />
   <NewspaperReturnModel
     v-model:open="isReturnModalOpen"
-    :newspapers="newspapers ? newspapers.data : []"
     @close="isReturnModalOpen = false"
   />
 

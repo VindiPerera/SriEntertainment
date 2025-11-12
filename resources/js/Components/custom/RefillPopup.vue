@@ -1,4 +1,12 @@
 <template>
+  <!-- Success Notification -->
+  <div v-if="showSuccessMessage" class="success-notification">
+    <div class="success-content">
+      <div class="success-icon">✓</div>
+      <span class="success-text">{{ successMessage }}</span>
+    </div>
+  </div>
+
   <div class="modal-overlay" v-if="modelValue">
     <div class="modal-content">
       <div class="modal-header">
@@ -299,9 +307,24 @@ const allcategories = ref([]);
 const colors = ref([]);
 const sizes = ref([]);
 
+// Success notification state
+const showSuccessMessage = ref(false);
+const successMessage = ref('');
+
 const selectedProduct = computed(() => {
   return products.value.find((p) => p.id === selectedProductId.value) || null;
 });
+
+// Function to show success notification
+const showSuccessNotification = (message) => {
+  successMessage.value = message;
+  showSuccessMessage.value = true;
+  
+  // Auto hide after 3 seconds
+  setTimeout(() => {
+    showSuccessMessage.value = false;
+  }, 3000);
+};
 
 const currentPage = computed(() => {
   return pagination.value.current_page || 1;
@@ -428,7 +451,10 @@ const submitStock = async () => {
       emit("refill-submitted");
       selectedProductId.value = null;
       stockQuantity.value = null;
-      alert("Stock added successfully!");
+      
+      // Show custom success notification
+      showSuccessNotification("Stock refilled successfully!");
+      
       // Close the modal after successful submission
       emit('close');
     } else {
@@ -470,6 +496,56 @@ watch(() => props.isRefillModalOpen, (newVal) => {
 </script>
 
 <style scoped>
+/* Success Notification Styles */
+.success-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+  padding: 16px 24px;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+  z-index: 2000;
+  animation: slideInRight 0.3s ease-out;
+  max-width: 400px;
+  min-width: 300px;
+}
+
+.success-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.success-icon {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.success-text {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
 .modal-overlay {
   position: fixed;
   top: 0;
