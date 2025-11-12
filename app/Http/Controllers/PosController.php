@@ -26,6 +26,11 @@ use App\Models\BindingService;
 use App\Models\RefillBinding;
 use App\Models\BindingRefill;
 use App\Models\BindingServiceRawMaterial;
+use App\Models\SimStock;
+use App\Models\Operator;
+use App\Models\WalletAccount;
+use App\Models\OperatorPricingRule;
+use App\Models\ReloadPackage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -48,6 +53,26 @@ class PosController extends Controller
         $sizes = Size::orderBy('created_at', 'desc')->get();
         $allemployee = Employee::orderBy('created_at', 'desc')->get();
 
+        // Fetch SIM and Reload data for integrated tabs
+        $simStocks = SimStock::where('stock', '>', 0)
+            ->orderBy('sim_name')
+            ->get();
+
+        $operators = Operator::with('rates')
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        $wallets = WalletAccount::with('operator')
+            ->get()
+            ->keyBy('operator_id');
+
+        $pricingRules = OperatorPricingRule::where('is_active', true)
+            ->where('transaction_type', 'sim_activation')
+            ->orderBy('operator_name')
+            ->orderBy('face_value')
+            ->get();
+
         return Inertia::render('Pos/Index', [
             'product' => null,
             'error' => null,
@@ -56,6 +81,11 @@ class PosController extends Controller
             'allemployee' => $allemployee,
             'colors' => $colors,
             'sizes' => $sizes,
+            // SIM & Reload data
+            'simStocks' => $simStocks,
+            'operators' => $operators,
+            'wallets' => $wallets,
+            'pricingRules' => $pricingRules,
         ]);
     }
 

@@ -266,10 +266,41 @@ const handlePrintReceipt = () => {
         </div>
 
         <div class="totals">
+            ${props.transaction.card_surcharge && props.transaction.card_surcharge > 0 ? `
+            <div style="font-size:12px; color:#666;">
+                <span>Sub Total</span>
+                <span>${f2(props.transaction.total_revenue)} LKR</span>
+            </div>
+            <div style="font-size:12px; color:#666;">
+                <span>Card Surcharge (2.5%)</span>
+                <span>${f2(props.transaction.card_surcharge)} LKR</span>
+            </div>
+            <div style="border-top: 1px solid #ccc; margin-top: 4px; padding-top: 4px;">
+                <span>Total</span>
+                <span>${f2(parseFloat(props.transaction.total_revenue) + parseFloat(props.transaction.card_surcharge))} LKR</span>
+            </div>
+            ` : `
             <div>
                 <span>Total</span>
                 <span>${f2(props.transaction.total_revenue)} LKR</span>
             </div>
+            `}
+            ${props.transaction.payment_method ? `
+            <div style="font-size:12px; margin-top:8px;">
+                <span>Payment Method</span>
+                <span style="text-transform:capitalize;">${props.transaction.payment_method}</span>
+            </div>
+            ` : ''}
+            ${props.transaction.cash_received && props.transaction.cash_received > 0 ? `
+            <div style="font-size:13px; margin-top:4px;">
+                <span>Cash Received</span>
+                <span>${f2(props.transaction.cash_received)} LKR</span>
+            </div>
+            <div style="font-size:13px; margin-top:4px; ${props.transaction.change_amount >= 0 ? 'color:#16a34a;' : 'color:#dc2626;'}">
+                <span>Balance</span>
+                <span>${props.transaction.change_amount >= 0 ? '' : '-'}${f2(Math.abs(props.transaction.change_amount || 0))} LKR</span>
+            </div>
+            ` : ''}
         </div>
 
         ${props.transaction.notes ? `

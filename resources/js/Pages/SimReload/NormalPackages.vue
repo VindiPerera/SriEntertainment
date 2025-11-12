@@ -333,6 +333,65 @@
       </form>
     </div>
   </Modal>
+
+  <!-- Confirmation Modal -->
+  <div v-if="showConfirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[120] p-4">
+    <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-2xl p-8 w-full max-w-md text-white">
+      <h3 class="text-xl font-bold mb-4">{{ confirmModalData.title }}</h3>
+      <p class="text-gray-300 mb-8">{{ confirmModalData.message }}</p>
+      
+      <div class="flex justify-end gap-3">
+        <button 
+          @click="showConfirmModal = false" 
+          class="px-8 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-full font-medium transition-colors duration-200"
+        >
+          {{ confirmModalData.cancelText }}
+        </button>
+        <button 
+          @click="() => { confirmModalData.onConfirm(); showConfirmModal = false; }" 
+          class="px-8 py-3 bg-gradient-to-r from-pink-400 to-pink-500 hover:from-pink-500 hover:to-pink-600 text-white rounded-full font-medium transition-all duration-200 shadow-lg"
+        >
+          {{ confirmModalData.confirmText }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alert Modal -->
+  <div v-if="showAlertModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[120] p-4">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+      <div class="text-center mb-6">
+        <div v-if="alertModalData.type === 'success'" class="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+          <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+        <div v-else-if="alertModalData.type === 'error'" class="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+          <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </div>
+        <div v-else class="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+          <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ alertModalData.title }}</h3>
+        <p class="text-gray-600">{{ alertModalData.message }}</p>
+      </div>
+      <div class="flex justify-center">
+        <button 
+          @click="showAlertModal = false; if (alertModalData.type === 'success') window.location.reload();"
+          class="px-8 py-3 rounded-lg font-semibold transition-colors duration-200"
+          :class="alertModalData.type === 'success' ? 'bg-green-600 hover:bg-green-700 text-white' : 
+                  alertModalData.type === 'error' ? 'bg-red-600 hover:bg-red-700 text-white' : 
+                  'bg-blue-600 hover:bg-blue-700 text-white'"
+        >
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -357,6 +416,25 @@ const quoteData = ref(null);
 const showAddPackageModal = ref(false);
 const showEditPackageModal = ref(false);
 const selectedPackageForEdit = ref(null);
+
+// Confirmation modal state
+const showConfirmModal = ref(false);
+const confirmModalData = ref({
+  title: '',
+  message: '',
+  onConfirm: null,
+  confirmText: 'OK',
+  cancelText: 'Cancel',
+  type: 'warning'
+});
+
+// Alert modal state
+const showAlertModal = ref(false);
+const alertModalData = ref({
+  title: '',
+  message: '',
+  type: 'success' // success, error, info
+});
 
 const packageForm = ref({
   operator_id: '',
@@ -422,7 +500,12 @@ const getQuote = async () => {
   } catch (error) {
     console.error('Failed to get quote:', error);
     if (error.response?.status === 404) {
-      alert('Please create a wallet for this operator first.');
+      alertModalData.value = {
+        title: 'Wallet Not Found',
+        message: 'Please create a wallet for this operator first.',
+        type: 'error'
+      };
+      showAlertModal.value = true;
       closePurchaseModal();
     }
   }
@@ -430,12 +513,22 @@ const getQuote = async () => {
 
 const submitPurchase = async () => {
   if (!quoteData.value?.sufficient_balance) {
-    alert('Insufficient balance!');
+    alertModalData.value = {
+      title: 'Insufficient Balance',
+      message: 'Insufficient balance!',
+      type: 'error'
+    };
+    showAlertModal.value = true;
     return;
   }
   
   if (!purchaseForm.value.msisdn || purchaseForm.value.msisdn.length !== 10) {
-    alert('Please enter a valid 10-digit mobile number');
+    alertModalData.value = {
+      title: 'Invalid Mobile Number',
+      message: 'Please enter a valid 10-digit mobile number',
+      type: 'error'
+    };
+    showAlertModal.value = true;
     return;
   }
   
@@ -445,11 +538,20 @@ const submitPurchase = async () => {
     const response = await axios.post('/api/wallet/sell', purchaseForm.value);
     
     if (response.data.success) {
-      alert(response.data.message);
-      window.location.reload();
+      alertModalData.value = {
+        title: 'Success',
+        message: response.data.message,
+        type: 'success'
+      };
+      showAlertModal.value = true;
     }
   } catch (error) {
-    alert('Purchase failed: ' + (error.response?.data?.message || error.message));
+    alertModalData.value = {
+      title: 'Purchase Failed',
+      message: error.response?.data?.message || error.message,
+      type: 'error'
+    };
+    showAlertModal.value = true;
   } finally {
     purchaseForm.value.processing = false;
   }
@@ -542,31 +644,45 @@ const submitPackage = async () => {
     const response = await axios[method](url, packageForm.value);
     
     if (response.data.success) {
-      alert(response.data.message);
-      window.location.reload();
+      alertModalData.value = {
+        title: 'Success',
+        message: response.data.message,
+        type: 'success'
+      };
+      showAlertModal.value = true;
     }
   } catch (error) {
-    alert('Operation failed: ' + (error.response?.data?.message || error.message));
+    alertModalData.value = {
+      title: 'Operation Failed',
+      message: error.response?.data?.message || error.message,
+      type: 'error'
+    };
+    showAlertModal.value = true;
   } finally {
     packageForm.value.processing = false;
   }
 };
 
 const confirmDeletePackage = async (pkg) => {
-  if (!confirm(`Are you sure you want to delete "${pkg.name}"? This action cannot be undone.`)) {
-    return;
-  }
-  
-  try {
-    const response = await axios.delete(`/api/reload-packages/${pkg.id}`);
-    
-    if (response.data.success) {
-      alert(response.data.message);
-      window.location.reload();
+  confirmModalData.value = {
+    title: 'Confirm Delete',
+    message: `Are you sure you want to delete "${pkg.name}"? This action cannot be undone.`,
+    confirmText: 'OK',
+    cancelText: 'Cancel',
+    type: 'danger',
+    onConfirm: async () => {
+      try {
+        const response = await axios.delete(`/api/reload-packages/${pkg.id}`);
+        
+        if (response.data.success) {
+          window.location.reload();
+        }
+      } catch (error) {
+        console.error('Delete failed:', error);
+      }
     }
-  } catch (error) {
-    alert('Delete failed: ' + (error.response?.data?.message || error.message));
-  }
+  };
+  showConfirmModal.value = true;
 };
 </script>
 

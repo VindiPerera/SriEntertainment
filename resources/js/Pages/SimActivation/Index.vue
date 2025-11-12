@@ -16,14 +16,36 @@
             📱 SIM Activation & Reload
           </h1>
         </div>
-        <div class="flex gap-3">
-          <button @click="showPackagesModal = true" class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 font-medium">
-            Manage Pricing Rules
-          </button>
-        </div>
       </div>
 
-      <!-- Transaction Form -->
+      <!-- Tab Navigation -->
+      <div class="flex space-x-2 border-b-2 border-gray-300 mb-8">
+        <button
+          @click="activeTab = 'transaction'"
+          :class="[
+            'px-8 py-4 text-xl font-bold tracking-wide transition-all duration-200',
+            activeTab === 'transaction'
+              ? 'bg-blue-600 text-white border-b-4 border-blue-800'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          ]"
+        >
+          🔄 New Transaction
+        </button>
+        <button
+          @click="activeTab = 'packages'"
+          :class="[
+            'px-8 py-4 text-xl font-bold tracking-wide transition-all duration-200',
+            activeTab === 'packages'
+              ? 'bg-orange-600 text-white border-b-4 border-orange-800'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          ]"
+        >
+          📦 SIM Activation Packages
+        </button>
+      </div>
+
+      <!-- Transaction Tab Content -->
+      <div v-show="activeTab === 'transaction'">
       <div class="bg-white rounded-2xl shadow-xl p-8">
         <h2 class="text-2xl font-bold text-gray-900 mb-6">New Transaction</h2>
 
@@ -206,76 +228,138 @@
           </div>
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- Pricing Rules Modal -->
-  <div v-if="showPackagesModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] overflow-y-auto p-4">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-6xl my-8 max-h-[90vh] overflow-y-auto">
-      <div class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
-        <h2 class="text-2xl font-bold text-gray-800">Operator Pricing Rules</h2>
-        <button @click="showPackagesModal = false" class="text-gray-500 hover:text-gray-700">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
       </div>
-      
-      <div class="p-6">
+      <!-- End Transaction Tab -->
+
+      <!-- Packages Tab Content -->
+      <div v-show="activeTab === 'packages'" class="space-y-6">
         <!-- Add Rule Button -->
-        <div class="mb-4 flex justify-end">
-          <button @click="openAddRuleModal" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">
-            + Add New Rule
+        <div class="flex justify-end">
+          <button @click="openAddRuleModal" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-lg transition-all duration-200 hover:shadow-xl">
+            + Add New Pricing Rule
           </button>
         </div>
 
-        <!-- Rules Table -->
-        <div class="bg-white rounded-lg border overflow-hidden">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Operator</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Face Value</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Discount (Fixed)</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Discount (%)</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Extra Benefit</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="rule in pricingRules" :key="rule.id" :class="{ 'opacity-50': !rule.is_active }">
-                <td class="px-4 py-3 whitespace-nowrap font-medium text-gray-900">{{ rule.operator_name }}</td>
-                <td class="px-4 py-3 whitespace-nowrap">
-                  <span v-if="rule.face_value" class="text-gray-900 font-semibold">Rs. {{ rule.face_value }}</span>
-                  <span v-else class="text-gray-500 italic">Default (All)</span>
-                </td>
-                <td class="px-4 py-3 whitespace-nowrap text-gray-900">Rs. {{ rule.seller_discount_flat }}</td>
-                <td class="px-4 py-3 whitespace-nowrap text-gray-900">{{ rule.seller_discount_percent }}%</td>
-                <td class="px-4 py-3 whitespace-nowrap text-gray-900">Rs. {{ rule.extra_benefit }}</td>
-                <td class="px-4 py-3 whitespace-nowrap">
-                  <span :class="rule.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" 
-                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
-                    {{ rule.is_active ? 'Active' : 'Inactive' }}
-                  </span>
-                </td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm space-x-2">
-                  <button @click="openEditRuleModal(rule)" class="text-blue-600 hover:text-blue-900">Edit</button>
-                  <button @click="toggleRuleActive(rule)" class="text-yellow-600 hover:text-yellow-900">
-                    {{ rule.is_active ? 'Deactivate' : 'Activate' }}
-                  </button>
-                  <button @click="deleteRule(rule)" class="text-red-600 hover:text-red-900">Delete</button>
-                </td>
-              </tr>
-              <tr v-if="pricingRules.length === 0">
-                <td colspan="7" class="px-6 py-8 text-center text-gray-500">
-                  No pricing rules found. Click "Add New Rule" to create one.
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <!-- Operator Tabs -->
+        <div class="flex space-x-2 border-b border-gray-200">
+          <button 
+            v-for="op in ['Dialog', 'Mobitel', 'Airtel', 'Hutch']" 
+            :key="op"
+            @click="selectedOperator = op"
+            :class="selectedOperator === op 
+              ? 'border-b-2 border-red-600 text-red-600 font-semibold' 
+              : 'text-gray-600 hover:text-gray-800'"
+            class="px-6 py-3 font-medium transition-colors"
+          >
+            {{ op }}
+          </button>
+        </div>
+
+        <!-- Empty State -->
+        <div v-if="getOperatorRules(selectedOperator).length === 0" class="text-center py-16">
+          <svg class="w-20 h-20 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+          </svg>
+          <p class="text-lg font-medium text-gray-900">No pricing rules for {{ selectedOperator }}</p>
+          <p class="text-sm text-gray-500 mt-2">Click "Add New Pricing Rule" to create one.</p>
+        </div>
+
+        <!-- Pricing Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div 
+            v-for="rule in getOperatorRules(selectedOperator)" 
+            :key="rule.id"
+            :class="!rule.is_active ? 'opacity-60' : ''"
+            class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow duration-200"
+          >
+            <!-- Card Header with Gradient -->
+            <div :class="getOperatorGradient(selectedOperator)" class="px-4 py-2 text-white">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <div class="bg-white bg-opacity-20 p-1.5 rounded">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                    </svg>
+                  </div>
+                  <h3 class="text-sm font-bold">{{ selectedOperator }}</h3>
+                </div>
+                <span :class="rule.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" 
+                      class="px-2 py-0.5 text-xs font-semibold rounded-full">
+                  {{ rule.is_active ? 'Active' : 'Inactive' }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="p-3 space-y-2">
+              <!-- Face Value -->
+              <div class="text-center pb-2 border-b border-gray-200">
+                <p class="text-xs text-gray-500">Face Value</p>
+                <p v-if="rule.face_value" class="text-xl font-bold text-gray-900">Rs. {{ rule.face_value }}</p>
+                <p v-else class="text-base font-semibold text-gray-500 italic">Default</p>
+              </div>
+
+              <!-- Pricing Details Grid -->
+              <div class="grid grid-cols-2 gap-2">
+                <div class="bg-red-50 rounded p-2">
+                  <p class="text-xs text-gray-600">Fixed</p>
+                  <p class="text-sm font-bold text-red-600">Rs. {{ rule.seller_discount_flat }}</p>
+                </div>
+                <div class="bg-orange-50 rounded p-2">
+                  <p class="text-xs text-gray-600">Discount</p>
+                  <p class="text-sm font-bold text-orange-600">{{ rule.seller_discount_percent }}%</p>
+                </div>
+              </div>
+
+              <!-- Extra Benefit -->
+              <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded p-2">
+                <p class="text-xs text-gray-600">Extra Benefit</p>
+                <p class="text-sm font-bold text-green-600">Rs. {{ rule.extra_benefit }}</p>
+              </div>
+
+              <!-- Description if exists -->
+              <div v-if="rule.rule_description" class="text-xs text-gray-600 italic bg-gray-50 p-2 rounded">
+                {{ rule.rule_description }}
+              </div>
+            </div>
+
+            <!-- Card Footer Actions -->
+            <div class="px-3 py-2 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
+              <button 
+                @click="openEditRuleModal(rule)" 
+                class="flex items-center space-x-1 text-blue-600 hover:text-blue-800 text-xs font-medium"
+              >
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+                <span>Edit</span>
+              </button>
+              
+              <button 
+                @click="toggleRuleActive(rule)" 
+                :class="rule.is_active ? 'text-yellow-600 hover:text-yellow-800' : 'text-green-600 hover:text-green-800'"
+                class="flex items-center space-x-1 text-xs font-medium"
+              >
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                </svg>
+                <span>{{ rule.is_active ? 'Off' : 'On' }}</span>
+              </button>
+              
+              <button 
+                @click="deleteRule(rule)" 
+                class="flex items-center space-x-1 text-red-600 hover:text-red-800 text-xs font-medium"
+              >
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+                <span>Del</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
+      <!-- End Packages Tab -->
     </div>
   </div>
 
@@ -359,6 +443,30 @@
     :cashier="$page.props.auth.user"
   />
 
+  <!-- Confirmation Modal -->
+  <div v-if="showConfirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[120] p-4">
+    <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-2xl p-8 w-full max-w-md text-white">
+      <h3 class="text-xl font-bold mb-4">{{ confirmModalData.title }}</h3>
+      <p class="text-gray-300 mb-8">{{ confirmModalData.message }}</p>
+      
+      <div class="flex justify-end gap-3">
+        <button 
+          @click="showConfirmModal = false" 
+          class="px-8 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-full font-medium transition-colors duration-200"
+        >
+          {{ confirmModalData.cancelText }}
+        </button>
+        <button 
+          @click="() => { confirmModalData.onConfirm(); showConfirmModal = false; }" 
+          :class="confirmModalData.type === 'danger' ? 'bg-gradient-to-r from-pink-400 to-pink-500 hover:from-pink-500 hover:to-pink-600' : 'bg-gradient-to-r from-pink-400 to-pink-500 hover:from-pink-500 hover:to-pink-600'"
+          class="px-8 py-3 text-white rounded-full font-medium transition-all duration-200 shadow-lg"
+        >
+          {{ confirmModalData.confirmText }}
+        </button>
+      </div>
+    </div>
+  </div>
+
   <Footer />
 </template>
 
@@ -391,11 +499,25 @@ const preview = ref(null);
 const processing = ref(false);
 const recentTransactions = ref([]);
 
+// Tab state
+const activeTab = ref('transaction');
+const selectedOperator = ref('Dialog');
+
 // Modal states
-const showPackagesModal = ref(false);
 const showRuleFormModal = ref(false);
 const showSuccessModal = ref(false);
 const completedTransaction = ref(null);
+
+// Confirmation modal states
+const showConfirmModal = ref(false);
+const confirmModalData = ref({
+  title: '',
+  message: '',
+  onConfirm: null,
+  confirmText: 'OK',
+  cancelText: 'Cancel',
+  type: 'warning' // warning, danger, info
+});
 
 // Data states
 const pricingRules = ref([]);
@@ -457,6 +579,21 @@ const formatCurrency = (amount) => {
 
 const formatDate = (date) => {
   return new Date(date).toLocaleString();
+};
+
+// Helper functions for operator cards
+const getOperatorRules = (operatorName) => {
+  return pricingRules.value.filter(rule => rule.operator_name === operatorName);
+};
+
+const getOperatorGradient = (operatorName) => {
+  const gradients = {
+    'Dialog': 'bg-gradient-to-r from-red-600 to-pink-600',
+    'Mobitel': 'bg-gradient-to-r from-blue-600 to-indigo-600',
+    'Airtel': 'bg-gradient-to-r from-red-500 to-orange-500',
+    'Hutch': 'bg-gradient-to-r from-yellow-500 to-amber-600'
+  };
+  return gradients[operatorName] || 'bg-gradient-to-r from-gray-600 to-gray-700';
 };
 
 const onSimChange = () => {
@@ -620,35 +757,45 @@ const saveRule = async () => {
 };
 
 const toggleRuleActive = async (rule) => {
-  if (!confirm(`Are you sure you want to ${rule.is_active ? 'deactivate' : 'activate'} this pricing rule?`)) {
-    return;
-  }
-  
-  try {
-    const response = await axios.post(`/api/operator-pricing-rules/${rule.id}/toggle-active`);
-    if (response.data.success) {
-      alert(response.data.message);
-      await loadPricingRules();
+  confirmModalData.value = {
+    title: 'Confirm Action',
+    message: `Are you sure you want to ${rule.is_active ? 'deactivate' : 'activate'} this pricing rule?`,
+    confirmText: 'OK',
+    cancelText: 'Cancel',
+    type: 'warning',
+    onConfirm: async () => {
+      try {
+        const response = await axios.post(`/api/operator-pricing-rules/${rule.id}/toggle-active`);
+        if (response.data.success) {
+          await loadPricingRules();
+        }
+      } catch (error) {
+        console.error('Error toggling rule:', error);
+      }
     }
-  } catch (error) {
-    alert('Error: ' + (error.response?.data?.message || 'Failed to update pricing rule'));
-  }
+  };
+  showConfirmModal.value = true;
 };
 
 const deleteRule = async (rule) => {
-  if (!confirm('Are you sure you want to delete this pricing rule? This cannot be undone.')) {
-    return;
-  }
-  
-  try {
-    const response = await axios.delete(`/api/operator-pricing-rules/${rule.id}`);
-    if (response.data.success) {
-      alert(response.data.message);
-      await loadPricingRules();
+  confirmModalData.value = {
+    title: 'Confirm Delete',
+    message: 'Are you sure you want to delete this pricing rule? This cannot be undone.',
+    confirmText: 'OK',
+    cancelText: 'Cancel',
+    type: 'danger',
+    onConfirm: async () => {
+      try {
+        const response = await axios.delete(`/api/operator-pricing-rules/${rule.id}`);
+        if (response.data.success) {
+          await loadPricingRules();
+        }
+      } catch (error) {
+        console.error('Error deleting rule:', error);
+      }
     }
-  } catch (error) {
-    alert('Error: ' + (error.response?.data?.message || 'Failed to delete pricing rule'));
-  }
+  };
+  showConfirmModal.value = true;
 };
 
 loadRecentTransactions();

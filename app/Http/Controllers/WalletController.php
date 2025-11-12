@@ -213,6 +213,10 @@ class WalletController extends Controller
                     'transaction_reference' => 'RLD-' . strtoupper(uniqid()),
                     'notes' => $request->notes,
                     'sale_date' => now(),
+                    'payment_method' => $request->payment_method ?? 'cash',
+                    'card_surcharge' => $request->card_surcharge ?? 0,
+                    'cash_received' => $request->cash_received ?? 0,
+                    'change_amount' => $request->change_amount ?? 0,
                 ]);
 
                 // Create wallet transaction

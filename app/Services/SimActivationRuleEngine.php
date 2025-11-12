@@ -159,6 +159,7 @@ class SimActivationRuleEngine
             'total_revenue' => $totalRevenue,
             'total_cost' => $totalCost,
             'total_profit' => $totalProfit,
+            'customer_payment' => $totalRevenue, // What customer pays = package price + SIM price
             'matched_rule_description' => $rule ? $rule->rule_description : 'No matching rule - full deduction',
             'ledger_lines' => $ledgerLines,
         ];

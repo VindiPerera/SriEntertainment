@@ -59,7 +59,7 @@ class SimActivationController extends Controller
             'operator_name' => 'required|string',
             'sim_stock_id' => 'nullable|exists:sim_stocks,id',
             'pricing_rule_id' => 'required|exists:operator_pricing_rules,id',
-            'mobile_number' => 'nullable|string|max:15',
+            'mobile_number' => 'required|string|max:15|unique:sim_activation_transactions,mobile_number',
             'package_revenue' => 'nullable|numeric|min:0',
             'sim_cost' => 'nullable|numeric|min:0',
             'sim_revenue' => 'nullable|numeric|min:0',
@@ -144,6 +144,10 @@ class SimActivationController extends Controller
                     'matched_rule_description' => $calc['matched_rule_description'],
                     'notes' => $request->notes,
                     'transaction_date' => now(),
+                    'payment_method' => $request->payment_method ?? 'cash',
+                    'card_surcharge' => $request->card_surcharge ?? 0,
+                    'cash_received' => $request->cash_received ?? 0,
+                    'change_amount' => $request->change_amount ?? 0,
                 ]);
 
                 // Create ledger lines

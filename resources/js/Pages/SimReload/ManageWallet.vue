@@ -611,6 +611,68 @@
     :reloadSale="completedReloadSale"
     :cashier="$page.props.auth.user"
   />
+
+  <!-- Alert Modal -->
+  <div v-if="showAlertModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[120] p-4">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+      <div class="text-center mb-6">
+        <div v-if="alertModalData.type === 'success'" class="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+          <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+        <div v-else-if="alertModalData.type === 'error'" class="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+          <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </div>
+        <div v-else class="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+          <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ alertModalData.title }}</h3>
+        <p class="text-gray-600">{{ alertModalData.message }}</p>
+      </div>
+      
+      <div class="flex justify-center">
+        <button 
+          @click="showAlertModal = false" 
+          :class="[
+            'px-8 py-3 rounded-full font-semibold transition-all duration-200 shadow-lg',
+            alertModalData.type === 'success' ? 'bg-green-600 hover:bg-green-700 text-white' : 
+            alertModalData.type === 'error' ? 'bg-red-600 hover:bg-red-700 text-white' : 
+            'bg-blue-600 hover:bg-blue-700 text-white'
+          ]"
+        >
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div v-if="showConfirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[120] p-4">
+    <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-2xl p-8 w-full max-w-md text-white">
+      <h3 class="text-xl font-bold mb-4">{{ confirmModalData.title }}</h3>
+      <p class="text-gray-300 mb-8">{{ confirmModalData.message }}</p>
+      
+      <div class="flex justify-end gap-3">
+        <button 
+          @click="showConfirmModal = false" 
+          class="px-8 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-full font-medium transition-colors duration-200"
+        >
+          {{ confirmModalData.cancelText }}
+        </button>
+        <button 
+          @click="() => { confirmModalData.onConfirm(); showConfirmModal = false; }" 
+          class="px-8 py-3 bg-gradient-to-r from-pink-400 to-pink-500 hover:from-pink-500 hover:to-pink-600 text-white rounded-full font-medium transition-all duration-200 shadow-lg"
+        >
+          {{ confirmModalData.confirmText }}
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -667,6 +729,25 @@ const completedReloadSale = ref(null);
 const showAddOperatorModal = ref(false);
 const showEditOperatorModal = ref(false);
 const selectedOperator = ref(null);
+
+// Confirmation modal state
+const showConfirmModal = ref(false);
+const confirmModalData = ref({
+  title: '',
+  message: '',
+  onConfirm: null,
+  confirmText: 'OK',
+  cancelText: 'Cancel',
+  type: 'warning'
+});
+
+// Alert modal state
+const showAlertModal = ref(false);
+const alertModalData = ref({
+  title: '',
+  message: '',
+  type: 'success' // 'success', 'error', 'info'
+});
 
 const operatorForm = ref({
   name: '',
@@ -775,7 +856,12 @@ const exportTransactionsPDF = async () => {
     link.remove();
     window.URL.revokeObjectURL(url);
   } catch (error) {
-    alert('Failed to export PDF: ' + (error.response?.data?.message || error.message));
+    alertModalData.value = {
+      title: 'PDF Export Failed',
+      message: error.response?.data?.message || error.message,
+      type: 'error'
+    };
+    showAlertModal.value = true;
   }
 };
 
@@ -818,11 +904,24 @@ const submitDeposit = async () => {
     const response = await axios.post('/api/wallet/deposit', depositForm.value);
     
     if (response.data.success) {
-      alert(response.data.message);
-      window.location.reload();
+      alertModalData.value = {
+        title: 'Deposit Successful!',
+        message: response.data.message,
+        type: 'success'
+      };
+      showAlertModal.value = true;
+      
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
     }
   } catch (error) {
-    alert('Deposit failed: ' + (error.response?.data?.message || error.message));
+    alertModalData.value = {
+      title: 'Deposit Failed',
+      message: error.response?.data?.message || error.message,
+      type: 'error'
+    };
+    showAlertModal.value = true;
   } finally {
     depositForm.value.processing = false;
   }
@@ -850,7 +949,12 @@ const getQuote = async () => {
 
 const submitSell = async () => {
   if (!quoteData.value?.sufficient_balance) {
-    alert('Insufficient balance!');
+    alertModalData.value = {
+      title: 'Insufficient Balance',
+      message: 'Wallet balance is insufficient for this transaction. Please deposit funds first.',
+      type: 'error'
+    };
+    showAlertModal.value = true;
     return;
   }
   
@@ -882,7 +986,12 @@ const submitSell = async () => {
       await fetchWallets();
     }
   } catch (error) {
-    alert('Sale failed: ' + (error.response?.data?.message || error.message));
+    alertModalData.value = {
+      title: 'Sale Failed',
+      message: error.response?.data?.message || error.message,
+      type: 'error'
+    };
+    showAlertModal.value = true;
   } finally {
     sellForm.value.processing = false;
   }
@@ -1064,7 +1173,12 @@ const submitOperator = async () => {
       .filter(p => !isNaN(p) && p > 0);
     
     if (percentageValues.length === 0) {
-      alert('Please add at least one percentage rate');
+      alertModalData.value = {
+        title: 'Validation Error',
+        message: 'Please add at least one percentage rate',
+        type: 'error'
+      };
+      showAlertModal.value = true;
       operatorForm.value.processing = false;
       return;
     }
@@ -1087,31 +1201,51 @@ const submitOperator = async () => {
     const response = await axios[method](url, dataToSubmit);
     
     if (response.data.success) {
-      alert(response.data.message);
-      window.location.reload();
+      closeOperatorModal();
+      alertModalData.value = {
+        title: showEditOperatorModal.value ? 'Provider Updated!' : 'Provider Added!',
+        message: response.data.message,
+        type: 'success'
+      };
+      showAlertModal.value = true;
+      
+      // Reload after modal is closed
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
     }
   } catch (error) {
-    alert('Operation failed: ' + (error.response?.data?.message || error.message));
+    alertModalData.value = {
+      title: 'Operation Failed',
+      message: error.response?.data?.message || error.message,
+      type: 'error'
+    };
+    showAlertModal.value = true;
   } finally {
     operatorForm.value.processing = false;
   }
 };
 
 const confirmDeleteOperator = async (operator) => {
-  if (!confirm(`Are you sure you want to delete ${operator.name}? This action cannot be undone.`)) {
-    return;
-  }
-  
-  try {
-    const response = await axios.delete(`/operators/${operator.id}`);
-    
-    if (response.data.success) {
-      alert(response.data.message);
-      window.location.reload();
+  confirmModalData.value = {
+    title: 'Confirm Delete',
+    message: `Are you sure you want to delete ${operator.name}? This action cannot be undone.`,
+    confirmText: 'OK',
+    cancelText: 'Cancel',
+    type: 'danger',
+    onConfirm: async () => {
+      try {
+        const response = await axios.delete(`/operators/${operator.id}`);
+        
+        if (response.data.success) {
+          window.location.reload();
+        }
+      } catch (error) {
+        console.error('Delete failed:', error);
+      }
     }
-  } catch (error) {
-    alert('Delete failed: ' + (error.response?.data?.message || error.message));
-  }
+  };
+  showConfirmModal.value = true;
 };
 
 </script>

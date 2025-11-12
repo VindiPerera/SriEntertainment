@@ -36,6 +36,10 @@ class SimActivationTransaction extends Model
         'matched_rule_description',
         'notes',
         'transaction_date',
+        'payment_method',
+        'card_surcharge',
+        'cash_received',
+        'change_amount',
     ];
 
     protected $casts = [
@@ -55,6 +59,9 @@ class SimActivationTransaction extends Model
         'total_revenue' => 'decimal:2',
         'total_cost' => 'decimal:2',
         'transaction_date' => 'datetime',
+        'card_surcharge' => 'decimal:2',
+        'cash_received' => 'decimal:2',
+        'change_amount' => 'decimal:2',
     ];
 
     /**
