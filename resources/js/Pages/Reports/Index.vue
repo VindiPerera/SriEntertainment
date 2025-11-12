@@ -507,28 +507,8 @@
               <th class="p-3 text-left font-semibold">Sale ID</th>
             </tr>
           </thead>
-
           <tbody class="text-[12px] font-medium">
-            <tr
-              v-for="(returnItem, index) in returnItems"
-              :key="returnItem.id"
-              class="border-b transition duration-200 hover:bg-gray-100"
-            >
-              <td class="p-3 text-center">{{ index + 1 }}</td>
-              <td class="p-3">{{ new Date(returnItem.return_date).toLocaleDateString() }}</td>
-              <td class="p-3 font-bold">{{ returnItem.customer?.name || "N/A" }}</td>
-              <td class="p-3">
-                {{ returnItem.product?.name || returnItem.newspaper?.name || "N/A" }}
-              </td>
-              <td class="p-3 text-center">{{ returnItem.quantity }}</td>
-              <td class="p-3">{{ returnItem.reason }}</td>
-              <td class="p-3 text-center">{{ returnItem.sale_id || "N/A" }}</td>
-            </tr>
-            <tr v-if="returnItems.length === 0">
-              <td colspan="7" class="p-8 text-center text-gray-500">
-                No return items found for the selected date range
-              </td>
-            </tr>
+            <!-- DataTables will populate this -->
           </tbody>
         </table>
       </div>
@@ -568,38 +548,7 @@
           </thead>
 
           <tbody class="text-[12px] font-medium">
-            <tr
-              v-for="(service, index) in bindingServices"
-              :key="service.id"
-              class="border-b transition duration-200 hover:bg-gray-100"
-            >
-              <td class="p-3 text-center">{{ index + 1 }}</td>
-              <td class="p-3 font-bold">{{ service.name || "N/A" }}</td>
-              <td class="p-3 text-center">{{ service.price || "0.00" }}</td>
-              <td class="p-3 text-center">{{ service.times_used || 0 }}</td>
-              <td class="p-3 text-center">{{ ((service.price || 0) * (service.times_used || 0)).toFixed(2) }}</td>
-              <td class="p-3">
-                <div v-if="service.raw_materials && service.raw_materials.length > 0">
-                  <div v-for="material in service.raw_materials" :key="material.id" class="mb-1">
-                    {{ material.product?.name || 'N/A' }} (Qty: {{ material.quantity_used || 0 }})
-                  </div>
-                </div>
-                <span v-else class="text-gray-500">No raw materials</span>
-              </td>
-              <td class="p-3 text-center">
-                <div v-if="service.refill_stock && service.refill_stock.length > 0">
-                  <div v-for="stock in service.refill_stock" :key="stock.id" class="mb-1">
-                    {{ stock.product?.name || 'N/A' }}: {{ stock.stock || 0 }}
-                  </div>
-                </div>
-                <span v-else class="text-gray-500">No stock data</span>
-              </td>
-            </tr>
-            <tr v-if="bindingServices.length === 0">
-              <td colspan="7" class="p-8 text-center text-gray-500">
-                No binding services found for the selected date range
-              </td>
-            </tr>
+            <!-- DataTables will populate this -->
           </tbody>
         </table>
       </div>
@@ -659,38 +608,7 @@
           </thead>
 
           <tbody class="text-[12px] font-medium">
-            <tr
-              v-for="(service, index) in laminatingServices"
-              :key="service.id"
-              class="border-b transition duration-200 hover:bg-gray-100"
-            >
-              <td class="p-3 text-center">{{ index + 1 }}</td>
-              <td class="p-3 font-bold">{{ service.name || "N/A" }}</td>
-              <td class="p-3 text-center">{{ service.price || "0.00" }}</td>
-              <td class="p-3 text-center">{{ service.times_used || 0 }}</td>
-              <td class="p-3 text-center">{{ ((service.price || 0) * (service.times_used || 0)).toFixed(2) }}</td>
-              <td class="p-3">
-                <div v-if="service.raw_materials && service.raw_materials.length > 0">
-                  <div v-for="material in service.raw_materials" :key="material.id" class="mb-1">
-                    {{ material.product?.name || 'N/A' }} (Qty: {{ material.quantity_used || 0 }})
-                  </div>
-                </div>
-                <span v-else class="text-gray-500">No raw materials</span>
-              </td>
-              <td class="p-3 text-center">
-                <div v-if="service.refill_stock && service.refill_stock.length > 0">
-                  <div v-for="stock in service.refill_stock" :key="stock.id" class="mb-1">
-                    {{ stock.product?.name || 'N/A' }}: {{ stock.stock || 0 }}
-                  </div>
-                </div>
-                <span v-else class="text-gray-500">No stock data</span>
-              </td>
-            </tr>
-            <tr v-if="laminatingServices.length === 0">
-              <td colspan="7" class="p-8 text-center text-gray-500">
-                No laminating services found for the selected date range
-              </td>
-            </tr>
+            <!-- DataTables will populate this -->
           </tbody>
         </table>
       </div>
@@ -750,38 +668,7 @@
           </thead>
 
           <tbody class="text-[12px] font-medium">
-            <tr
-              v-for="(service, index) in photocopyServices"
-              :key="service.id"
-              class="border-b transition duration-200 hover:bg-gray-100"
-            >
-              <td class="p-3 text-center">{{ index + 1 }}</td>
-              <td class="p-3 font-bold">{{ service.name || "N/A" }}</td>
-              <td class="p-3 text-center">{{ service.price || "0.00" }}</td>
-              <td class="p-3 text-center">{{ service.times_used || 0 }}</td>
-              <td class="p-3 text-center">{{ ((service.price || 0) * (service.times_used || 0)).toFixed(2) }}</td>
-              <td class="p-3">
-                <div v-if="service.raw_materials && service.raw_materials.length > 0">
-                  <div v-for="material in service.raw_materials" :key="material.id" class="mb-1">
-                    {{ material.product?.name || 'N/A' }} (Qty: {{ material.quantity_used || 0 }})
-                  </div>
-                </div>
-                <span v-else class="text-gray-500">No raw materials</span>
-              </td>
-              <td class="p-3 text-center">
-                <div v-if="service.refill_stock && service.refill_stock.length > 0">
-                  <div v-for="stock in service.refill_stock" :key="stock.id" class="mb-1">
-                    {{ stock.product?.name || 'N/A' }}: {{ stock.stock || 0 }}
-                  </div>
-                </div>
-                <span v-else class="text-gray-500">No stock data</span>
-              </td>
-            </tr>
-            <tr v-if="photocopyServices.length === 0">
-              <td colspan="7" class="p-8 text-center text-gray-500">
-                No photocopy services found for the selected date range
-              </td>
-            </tr>
+            <!-- DataTables will populate this -->
           </tbody>
         </table>
       </div>
@@ -841,38 +728,7 @@
           </thead>
 
           <tbody class="text-[12px] font-medium">
-            <tr
-              v-for="(service, index) in printoutServices"
-              :key="service.id"
-              class="border-b transition duration-200 hover:bg-gray-100"
-            >
-              <td class="p-3 text-center">{{ index + 1 }}</td>
-              <td class="p-3 font-bold">{{ service.name || "N/A" }}</td>
-              <td class="p-3 text-center">{{ service.price || "0.00" }}</td>
-              <td class="p-3 text-center">{{ service.times_used || 0 }}</td>
-              <td class="p-3 text-center">{{ ((service.price || 0) * (service.times_used || 0)).toFixed(2) }}</td>
-              <td class="p-3">
-                <div v-if="service.raw_materials && service.raw_materials.length > 0">
-                  <div v-for="material in service.raw_materials" :key="material.id" class="mb-1">
-                    {{ material.product?.name || 'N/A' }} (Qty: {{ material.quantity_used || 0 }})
-                  </div>
-                </div>
-                <span v-else class="text-gray-500">No raw materials</span>
-              </td>
-              <td class="p-3 text-center">
-                <div v-if="service.refill_stock && service.refill_stock.length > 0">
-                  <div v-for="stock in service.refill_stock" :key="stock.id" class="mb-1">
-                    {{ stock.product?.name || 'N/A' }}: {{ stock.stock || 0 }}
-                  </div>
-                </div>
-                <span v-else class="text-gray-500">No stock data</span>
-              </td>
-            </tr>
-            <tr v-if="printoutServices.length === 0">
-              <td colspan="7" class="p-8 text-center text-gray-500">
-                No printout services found for the selected date range
-              </td>
-            </tr>
+            <!-- DataTables will populate this -->
           </tbody>
         </table>
       </div>
@@ -2119,13 +1975,48 @@ $(document).ready(function () {
     dom: "Bfrtip",
     buttons: [],
     paging: false, // Disable pagination
+    columns: [
+      { data: null, title: "#", orderable: false, searchable: false },
+      { data: "return_date", title: "Return Date" },
+      { data: "customer", title: "Customer" },
+      { data: "product", title: "Product/Newspaper" },
+      { data: "quantity", title: "Quantity", className: "text-center" },
+      { data: "reason", title: "Reason" },
+      { data: "sale_id", title: "Sale ID", className: "text-center" }
+    ],
     columnDefs: [
       {
-        targets: 0, // Adjust the target column if needed
-        searchable: false,
-        orderable: false, // Disable sorting for this specific column
+        targets: 0,
+        render: function (data, type, row, meta) {
+          return meta.row + 1;
+        }
       },
+      {
+        targets: 1,
+        render: function (data, type, row) {
+          return data ? new Date(data).toLocaleDateString() : 'N/A';
+        }
+      },
+      {
+        targets: 2,
+        render: function (data, type, row) {
+          return row.customer?.name || 'N/A';
+        }
+      },
+      {
+        targets: 3,
+        render: function (data, type, row) {
+          return row.product?.name || row.newspaper?.name || 'N/A';
+        }
+      },
+      {
+        targets: 6,
+        render: function (data, type, row) {
+          return data || 'N/A';
+        }
+      }
     ],
+    data: returnItems.value || [],
     initComplete: function () {
       let searchInput = $("div.dataTables_filter input");
       searchInput.attr("placeholder", "Search ...");
@@ -2137,6 +2028,7 @@ $(document).ready(function () {
     },
     language: {
       search: "",
+      emptyTable: "No return items found for the selected date range"
     },
   });
 
@@ -2145,13 +2037,72 @@ $(document).ready(function () {
     dom: "Bfrtip",
     buttons: [],
     paging: false, // Disable pagination
+    columns: [
+      { data: null, title: "#", orderable: false, searchable: false },
+      { data: "name", title: "Service Name" },
+      { data: "price", title: "Price (LKR)", className: "text-center" },
+      { data: "times_used", title: "Times Used", className: "text-center" },
+      { data: null, title: "Total Revenue (LKR)", className: "text-center" },
+      { data: "raw_materials", title: "Raw Materials Used" },
+      { data: "refill_stock", title: "Remaining Stock", className: "text-center" }
+    ],
     columnDefs: [
       {
-        targets: 0, // Adjust the target column if needed
-        searchable: false,
-        orderable: false, // Disable sorting for this specific column
+        targets: 0,
+        render: function (data, type, row, meta) {
+          return meta.row + 1;
+        }
       },
+      {
+        targets: 1,
+        render: function (data, type, row) {
+          return data || 'N/A';
+        }
+      },
+      {
+        targets: 2,
+        render: function (data, type, row) {
+          return data || '0.00';
+        }
+      },
+      {
+        targets: 3,
+        render: function (data, type, row) {
+          return data || 0;
+        }
+      },
+      {
+        targets: 4,
+        render: function (data, type, row) {
+          const price = row.price || 0;
+          const timesUsed = row.times_used || 0;
+          return (price * timesUsed).toFixed(2);
+        }
+      },
+      {
+        targets: 5,
+        render: function (data, type, row) {
+          if (data && data.length > 0) {
+            return data.map(material => 
+              `${material.product?.name || 'N/A'} (Qty: ${material.quantity_used || 0})`
+            ).join('<br>');
+          }
+          return '<span class="text-gray-500">No raw materials</span>';
+        }
+      },
+      {
+        targets: 6,
+        render: function (data, type, row) {
+          if (data && data.length > 0) {
+            return data.map(stock => 
+              `${stock.product?.name || 'N/A'}: ${stock.stock || 0}`
+            ).join('<br>');
+          }
+          return '<span class="text-gray-500">No stock data</span>';
+        }
+      }
     ],
+    data: bindingServices.value || [],
     initComplete: function () {
       let searchInput = $("div.dataTables_filter input");
       searchInput.attr("placeholder", "Search ...");
@@ -2163,6 +2114,7 @@ $(document).ready(function () {
     },
     language: {
       search: "",
+      emptyTable: "No binding services found for the selected date range"
     },
   });
 
@@ -2171,13 +2123,72 @@ $(document).ready(function () {
     dom: "Bfrtip",
     buttons: [],
     paging: false, // Disable pagination
+    columns: [
+      { data: null, title: "#", orderable: false, searchable: false },
+      { data: "name", title: "Service Name" },
+      { data: "price", title: "Price (LKR)", className: "text-center" },
+      { data: "times_used", title: "Times Used", className: "text-center" },
+      { data: null, title: "Total Revenue (LKR)", className: "text-center" },
+      { data: "raw_materials", title: "Raw Materials Used" },
+      { data: "refill_stock", title: "Remaining Stock", className: "text-center" }
+    ],
     columnDefs: [
       {
-        targets: 0, // Adjust the target column if needed
-        searchable: false,
-        orderable: false, // Disable sorting for this specific column
+        targets: 0,
+        render: function (data, type, row, meta) {
+          return meta.row + 1;
+        }
       },
+      {
+        targets: 1,
+        render: function (data, type, row) {
+          return data || 'N/A';
+        }
+      },
+      {
+        targets: 2,
+        render: function (data, type, row) {
+          return data || '0.00';
+        }
+      },
+      {
+        targets: 3,
+        render: function (data, type, row) {
+          return data || 0;
+        }
+      },
+      {
+        targets: 4,
+        render: function (data, type, row) {
+          const price = row.price || 0;
+          const timesUsed = row.times_used || 0;
+          return (price * timesUsed).toFixed(2);
+        }
+      },
+      {
+        targets: 5,
+        render: function (data, type, row) {
+          if (data && data.length > 0) {
+            return data.map(material => 
+              `${material.product?.name || 'N/A'} (Qty: ${material.quantity_used || 0})`
+            ).join('<br>');
+          }
+          return '<span class="text-gray-500">No raw materials</span>';
+        }
+      },
+      {
+        targets: 6,
+        render: function (data, type, row) {
+          if (data && data.length > 0) {
+            return data.map(stock => 
+              `${stock.product?.name || 'N/A'}: ${stock.stock || 0}`
+            ).join('<br>');
+          }
+          return '<span class="text-gray-500">No stock data</span>';
+        }
+      }
     ],
+    data: laminatingServices.value || [],
     initComplete: function () {
       let searchInput = $("div.dataTables_filter input");
       searchInput.attr("placeholder", "Search ...");
@@ -2189,6 +2200,7 @@ $(document).ready(function () {
     },
     language: {
       search: "",
+      emptyTable: "No laminating services found for the selected date range"
     },
   });
 
@@ -2197,13 +2209,72 @@ $(document).ready(function () {
     dom: "Bfrtip",
     buttons: [],
     paging: false, // Disable pagination
+    columns: [
+      { data: null, title: "#", orderable: false, searchable: false },
+      { data: "name", title: "Service Name" },
+      { data: "price", title: "Price (LKR)", className: "text-center" },
+      { data: "times_used", title: "Times Used", className: "text-center" },
+      { data: null, title: "Total Revenue (LKR)", className: "text-center" },
+      { data: "raw_materials", title: "Raw Materials Used" },
+      { data: "refill_stock", title: "Remaining Stock", className: "text-center" }
+    ],
     columnDefs: [
       {
-        targets: 0, // Adjust the target column if needed
-        searchable: false,
-        orderable: false, // Disable sorting for this specific column
+        targets: 0,
+        render: function (data, type, row, meta) {
+          return meta.row + 1;
+        }
       },
+      {
+        targets: 1,
+        render: function (data, type, row) {
+          return data || 'N/A';
+        }
+      },
+      {
+        targets: 2,
+        render: function (data, type, row) {
+          return data || '0.00';
+        }
+      },
+      {
+        targets: 3,
+        render: function (data, type, row) {
+          return data || 0;
+        }
+      },
+      {
+        targets: 4,
+        render: function (data, type, row) {
+          const price = row.price || 0;
+          const timesUsed = row.times_used || 0;
+          return (price * timesUsed).toFixed(2);
+        }
+      },
+      {
+        targets: 5,
+        render: function (data, type, row) {
+          if (data && data.length > 0) {
+            return data.map(material => 
+              `${material.product?.name || 'N/A'} (Qty: ${material.quantity_used || 0})`
+            ).join('<br>');
+          }
+          return '<span class="text-gray-500">No raw materials</span>';
+        }
+      },
+      {
+        targets: 6,
+        render: function (data, type, row) {
+          if (data && data.length > 0) {
+            return data.map(stock => 
+              `${stock.product?.name || 'N/A'}: ${stock.stock || 0}`
+            ).join('<br>');
+          }
+          return '<span class="text-gray-500">No stock data</span>';
+        }
+      }
     ],
+    data: photocopyServices.value || [],
     initComplete: function () {
       let searchInput = $("div.dataTables_filter input");
       searchInput.attr("placeholder", "Search ...");
@@ -2215,6 +2286,7 @@ $(document).ready(function () {
     },
     language: {
       search: "",
+      emptyTable: "No photocopy services found for the selected date range"
     },
   });
 
@@ -2223,13 +2295,72 @@ $(document).ready(function () {
     dom: "Bfrtip",
     buttons: [],
     paging: false, // Disable pagination
+    columns: [
+      { data: null, title: "#", orderable: false, searchable: false },
+      { data: "name", title: "Service Name" },
+      { data: "price", title: "Price (LKR)", className: "text-center" },
+      { data: "times_used", title: "Times Used", className: "text-center" },
+      { data: null, title: "Total Revenue (LKR)", className: "text-center" },
+      { data: "raw_materials", title: "Raw Materials Used" },
+      { data: "refill_stock", title: "Remaining Stock", className: "text-center" }
+    ],
     columnDefs: [
       {
-        targets: 0, // Adjust the target column if needed
-        searchable: false,
-        orderable: false, // Disable sorting for this specific column
+        targets: 0,
+        render: function (data, type, row, meta) {
+          return meta.row + 1;
+        }
       },
+      {
+        targets: 1,
+        render: function (data, type, row) {
+          return data || 'N/A';
+        }
+      },
+      {
+        targets: 2,
+        render: function (data, type, row) {
+          return data || '0.00';
+        }
+      },
+      {
+        targets: 3,
+        render: function (data, type, row) {
+          return data || 0;
+        }
+      },
+      {
+        targets: 4,
+        render: function (data, type, row) {
+          const price = row.price || 0;
+          const timesUsed = row.times_used || 0;
+          return (price * timesUsed).toFixed(2);
+        }
+      },
+      {
+        targets: 5,
+        render: function (data, type, row) {
+          if (data && data.length > 0) {
+            return data.map(material => 
+              `${material.product?.name || 'N/A'} (Qty: ${material.quantity_used || 0})`
+            ).join('<br>');
+          }
+          return '<span class="text-gray-500">No raw materials</span>';
+        }
+      },
+      {
+        targets: 6,
+        render: function (data, type, row) {
+          if (data && data.length > 0) {
+            return data.map(stock => 
+              `${stock.product?.name || 'N/A'}: ${stock.stock || 0}`
+            ).join('<br>');
+          }
+          return '<span class="text-gray-500">No stock data</span>';
+        }
+      }
     ],
+    data: printoutServices.value || [],
     initComplete: function () {
       let searchInput = $("div.dataTables_filter input");
       searchInput.attr("placeholder", "Search ...");
@@ -2241,6 +2372,7 @@ $(document).ready(function () {
     },
     language: {
       search: "",
+      emptyTable: "No printout services found for the selected date range"
     },
   });
 });
