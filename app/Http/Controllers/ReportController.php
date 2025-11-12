@@ -19,6 +19,9 @@ use App\Models\RefillPhotocopy;
 use App\Models\PrintoutService;
 use App\Models\PrintoutServiceRawMaterial;
 use App\Models\RefillPrintout;
+use App\Models\SimActivationTransaction;
+use App\Models\ReloadSale;
+use App\Models\WalletTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -305,7 +308,50 @@ class ReportController extends Controller
     });
 
     // =========================
-    // 15. Return to Vue via Inertia
+    // 15. Get SIM Activation Transactions
+    // =========================
+    $simActivationQuery = SimActivationTransaction::with('user');
+    
+    if ($startDate && $endDate) {
+        $simActivationQuery->whereBetween('transaction_date', [$startDate, $endDate]);
+    }
+    
+    $simActivationTransactions = $simActivationQuery->orderBy('transaction_date', 'desc')->get();
+    
+    $totalSimActivationRevenue = $simActivationTransactions->sum('total_revenue');
+    $totalSimActivationCost = $simActivationTransactions->sum('total_cost');
+    $totalSimActivationProfit = $simActivationTransactions->sum('total_profit');
+
+    // =========================
+    // 16. Get Reload Sales
+    // =========================
+    $reloadSalesQuery = ReloadSale::with('user', 'operator');
+    
+    if ($startDate && $endDate) {
+        $reloadSalesQuery->whereBetween('sale_date', [$startDate, $endDate]);
+    }
+    
+    $reloadSales = $reloadSalesQuery->orderBy('sale_date', 'desc')->get();
+    
+    $totalReloadRevenue = $reloadSales->where('status', 'completed')->sum('face_value');
+    $totalReloadCost = $reloadSales->where('status', 'completed')->sum('net_cost');
+    $totalReloadProfit = $totalReloadRevenue - $totalReloadCost;
+
+    // =========================
+    // 17. Get Deposit Bonuses (Seller Profit)
+    // =========================
+    $depositBonusQuery = WalletTransaction::with(['walletAccount.operator', 'walletAccount.user'])
+        ->where('transaction_type', 'deposit');
+    
+    if ($startDate && $endDate) {
+        $depositBonusQuery->whereBetween('transaction_date', [$startDate, $endDate]);
+    }
+    
+    $depositBonusTransactions = $depositBonusQuery->orderBy('transaction_date', 'desc')->get();
+    $totalDepositBonusProfit = $depositBonusTransactions->sum('bonus_amount');
+
+    // =========================
+    // 18. Return to Vue via Inertia
     // =========================
     return Inertia::render('Reports/Index', [
         'products' => $products,
@@ -326,6 +372,16 @@ class ReportController extends Controller
         'totalReturnItems' => $totalReturnItems,
         'returnReasons' => $returnReasons,
         'bindingServices' => $bindingServices,
+        'simActivationTransactions' => $simActivationTransactions,
+        'totalSimActivationRevenue' => $totalSimActivationRevenue,
+        'totalSimActivationCost' => $totalSimActivationCost,
+        'totalSimActivationProfit' => $totalSimActivationProfit,
+        'reloadSales' => $reloadSales,
+        'totalReloadRevenue' => $totalReloadRevenue,
+        'totalReloadCost' => $totalReloadCost,
+        'totalReloadProfit' => $totalReloadProfit,
+        'depositBonusTransactions' => $depositBonusTransactions,
+        'totalDepositBonusProfit' => $totalDepositBonusProfit,
         'laminatingServices' => $laminatingServices,
         'photocopyServices' => $photocopyServices,
         'printoutServices' => $printoutServices,

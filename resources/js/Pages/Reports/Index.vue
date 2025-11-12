@@ -263,6 +263,87 @@
                 </div>
             </div>
         </div>
+
+        <!-- SIM Activation and Reload Summary -->
+        <div class="grid w-full md:grid-cols-6 grid-cols-2 gap-4 mt-8">
+            <!-- SIM Activation Revenue -->
+            <div class="py-6 flex flex-col justify-center items-center border-2 border-[#059669] w-full space-y-4 rounded-2xl bg-[#059669] shadow-lg">
+                <div class="flex flex-col items-center justify-center">
+                    <h2 class="text-xl font-extrabold tracking-wide text-white uppercase">
+                        SIM Activation
+                    </h2>
+                    <h2 class="text-sm font-semibold tracking-wide text-white">Revenue</h2>
+                </div>
+                <div class="flex flex-col items-center justify-center">
+                    <p class="text-2xl font-bold text-white">{{ totalSimActivationRevenue.toFixed(2) }} LKR</p>
+                </div>
+            </div>
+
+            <!-- SIM Activation Cost -->
+            <div class="py-6 flex flex-col justify-center items-center border-2 border-[#7c2d12] w-full space-y-4 rounded-2xl bg-[#7c2d12] shadow-lg">
+                <div class="flex flex-col items-center justify-center">
+                    <h2 class="text-xl font-extrabold tracking-wide text-white uppercase">
+                        SIM Activation
+                    </h2>
+                    <h2 class="text-sm font-semibold tracking-wide text-white">Cost</h2>
+                </div>
+                <div class="flex flex-col items-center justify-center">
+                    <p class="text-2xl font-bold text-white">{{ totalSimActivationCost.toFixed(2) }} LKR</p>
+                </div>
+            </div>
+
+            <!-- SIM Activation Profit -->
+            <div class="py-6 flex flex-col justify-center items-center border-2 border-[#7c3aed] w-full space-y-4 rounded-2xl bg-[#7c3aed] shadow-lg">
+                <div class="flex flex-col items-center justify-center">
+                    <h2 class="text-xl font-extrabold tracking-wide text-white uppercase">
+                        SIM Activation
+                    </h2>
+                    <h2 class="text-sm font-semibold tracking-wide text-white">Profit</h2>
+                </div>
+                <div class="flex flex-col items-center justify-center">
+                    <p class="text-2xl font-bold text-white">{{ totalSimActivationProfit.toFixed(2) }} LKR</p>
+                </div>
+            </div>
+
+            <!-- Reload Revenue -->
+            <div class="py-6 flex flex-col justify-center items-center border-2 border-[#0891b2] w-full space-y-4 rounded-2xl bg-[#0891b2] shadow-lg">
+                <div class="flex flex-col items-center justify-center">
+                    <h2 class="text-xl font-extrabold tracking-wide text-white uppercase">
+                        Reload Sales
+                    </h2>
+                    <h2 class="text-sm font-semibold tracking-wide text-white">Revenue</h2>
+                </div>
+                <div class="flex flex-col items-center justify-center">
+                    <p class="text-2xl font-bold text-white">{{ totalReloadRevenue.toFixed(2) }} LKR</p>
+                </div>
+            </div>
+
+            <!-- Reload Cost -->
+            <div class="py-6 flex flex-col justify-center items-center border-2 border-[#92400e] w-full space-y-4 rounded-2xl bg-[#92400e] shadow-lg">
+                <div class="flex flex-col items-center justify-center">
+                    <h2 class="text-xl font-extrabold tracking-wide text-white uppercase">
+                        Reload Sales
+                    </h2>
+                    <h2 class="text-sm font-semibold tracking-wide text-white">Cost</h2>
+                </div>
+                <div class="flex flex-col items-center justify-center">
+                    <p class="text-2xl font-bold text-white">{{ totalReloadCost.toFixed(2) }} LKR</p>
+                </div>
+            </div>
+
+            <!-- Reload Profit -->
+            <div class="py-6 flex flex-col justify-center items-center border-2 border-[#a855f7] w-full space-y-4 rounded-2xl bg-[#a855f7] shadow-lg">
+                <div class="flex flex-col items-center justify-center">
+                    <h2 class="text-xl font-extrabold tracking-wide text-white uppercase">
+                        Reload Sales
+                    </h2>
+                    <h2 class="text-sm font-semibold tracking-wide text-white">Profit</h2>
+                </div>
+                <div class="flex flex-col items-center justify-center">
+                    <p class="text-2xl font-bold text-white">{{ totalReloadProfit.toFixed(2) }} LKR</p>
+                </div>
+            </div>
+        </div>
     <!-- Charts Section -->
     <div class="flex md:flex-row flex-col items-center justify-center w-full h-full md:space-x-4 md:space-y-0 space-y-4">
       <!-- Chart 1 -->
@@ -509,6 +590,216 @@
           </thead>
           <tbody class="text-[12px] font-medium">
             <!-- DataTables will populate this -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SIM Activation Transactions Summary -->
+    <div class="w-full bg-white border-4 border-black rounded-xl p-6">
+      <h2 class="text-2xl font-semibold text-slate-700 text-center pb-4">
+        SIM Activation Transactions Summary
+      </h2>
+
+      <!-- Summary Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+          <p class="text-sm text-gray-600">Total Transactions</p>
+          <p class="text-2xl font-bold text-blue-600">{{ simActivationTransactions.length }}</p>
+        </div>
+        <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded">
+          <p class="text-sm text-gray-600">Total Revenue</p>
+          <p class="text-2xl font-bold text-green-600">Rs. {{ formatCurrency(totalSimActivationRevenue) }}</p>
+        </div>
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+          <p class="text-sm text-gray-600">Total Cost</p>
+          <p class="text-2xl font-bold text-red-600">Rs. {{ formatCurrency(totalSimActivationCost) }}</p>
+        </div>
+        <div class="bg-purple-50 border-l-4 border-purple-500 p-4 rounded">
+          <p class="text-sm text-gray-600">Total Profit</p>
+          <p class="text-2xl font-bold text-purple-600">Rs. {{ formatCurrency(totalSimActivationProfit) }}</p>
+        </div>
+      </div>
+
+      <!-- Transactions Table -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-gray-800 bg-white border border-gray-300 rounded-lg shadow-md">
+          <thead>
+            <tr class="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-700 text-white text-[14px]">
+              <th class="p-3 text-left font-semibold">#</th>
+              <th class="p-3 text-left font-semibold">Date</th>
+              <th class="p-3 text-left font-semibold">Transaction #</th>
+              <th class="p-3 text-left font-semibold">Operator</th>
+              <th class="p-3 text-left font-semibold">Mobile Number</th>
+              <th class="p-3 text-center font-semibold">Package Revenue</th>
+              <th class="p-3 text-center font-semibold">SIM Revenue</th>
+              <th class="p-3 text-center font-semibold">Total Revenue</th>
+              <th class="p-3 text-center font-semibold">Package Cost</th>
+              <th class="p-3 text-center font-semibold">SIM Cost</th>
+              <th class="p-3 text-center font-semibold">Total Cost</th>
+              <th class="p-3 text-center font-semibold">Package Profit</th>
+              <th class="p-3 text-center font-semibold">SIM Profit</th>
+              <th class="p-3 text-center font-semibold">Total Profit</th>
+              <th class="p-3 text-center font-semibold">Seller</th>
+            </tr>
+          </thead>
+          <tbody class="text-[12px] font-medium">
+            <tr v-for="(transaction, index) in simActivationTransactions" :key="transaction.id" class="border-b hover:bg-gray-100">
+              <td class="p-3 text-center">{{ index + 1 }}</td>
+              <td class="p-3">{{ new Date(transaction.transaction_date).toLocaleDateString() }}</td>
+              <td class="p-3">{{ transaction.transaction_number }}</td>
+              <td class="p-3 font-bold">{{ transaction.operator_name }}</td>
+              <td class="p-3">{{ transaction.mobile_number }}</td>
+              <td class="p-3 text-center">Rs. {{ formatCurrency(transaction.package_revenue) }}</td>
+              <td class="p-3 text-center">Rs. {{ formatCurrency(transaction.sim_revenue) }}</td>
+              <td class="p-3 text-center font-bold">Rs. {{ formatCurrency(transaction.total_revenue) }}</td>
+              <td class="p-3 text-center text-red-600">Rs. {{ formatCurrency(transaction.package_cost) }}</td>
+              <td class="p-3 text-center text-red-600">Rs. {{ formatCurrency(transaction.sim_cost) }}</td>
+              <td class="p-3 text-center text-red-600 font-bold">Rs. {{ formatCurrency(transaction.total_cost) }}</td>
+              <td class="p-3 text-center" :class="transaction.package_profit >= 0 ? 'text-green-600' : 'text-red-600'">
+                Rs. {{ formatCurrency(transaction.package_profit) }}
+              </td>
+              <td class="p-3 text-center" :class="transaction.sim_profit >= 0 ? 'text-green-600' : 'text-red-600'">
+                Rs. {{ formatCurrency(transaction.sim_profit) }}
+              </td>
+              <td class="p-3 text-center font-bold" :class="transaction.total_profit >= 0 ? 'text-green-600' : 'text-red-600'">
+                Rs. {{ formatCurrency(transaction.total_profit) }}
+              </td>
+              <td class="p-3">{{ transaction.user?.name || 'N/A' }}</td>
+            </tr>
+            <tr v-if="simActivationTransactions.length === 0">
+              <td colspan="15" class="p-8 text-center text-gray-500">
+                No SIM activation transactions found for the selected date range
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Reload Sales Summary -->
+    <div class="w-full bg-white border-4 border-black rounded-xl p-6">
+      <h2 class="text-2xl font-semibold text-slate-700 text-center pb-4">
+        Reload Sales Summary
+      </h2>
+
+      <!-- Summary Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+          <p class="text-sm text-gray-600">Total Sales</p>
+          <p class="text-2xl font-bold text-blue-600">{{ reloadSales.filter(s => s.status === 'completed').length }}</p>
+        </div>
+        <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded">
+          <p class="text-sm text-gray-600">Total Revenue</p>
+          <p class="text-2xl font-bold text-green-600">Rs. {{ formatCurrency(totalReloadRevenue) }}</p>
+        </div>
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+          <p class="text-sm text-gray-600">Total Cost</p>
+          <p class="text-2xl font-bold text-red-600">Rs. {{ formatCurrency(totalReloadCost) }}</p>
+        </div>
+        <div class="bg-purple-50 border-l-4 border-purple-500 p-4 rounded">
+          <p class="text-sm text-gray-600">Total Profit</p>
+          <p class="text-2xl font-bold text-purple-600">Rs. {{ formatCurrency(totalReloadProfit) }}</p>
+        </div>
+      </div>
+
+      <!-- Sales Table -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-gray-800 bg-white border border-gray-300 rounded-lg shadow-md">
+          <thead>
+            <tr class="bg-gradient-to-r from-green-700 via-green-600 to-green-700 text-white text-[14px]">
+              <th class="p-3 text-left font-semibold">#</th>
+              <th class="p-3 text-left font-semibold">Date</th>
+              <th class="p-3 text-left font-semibold">Operator</th>
+              <th class="p-3 text-left font-semibold">MSISDN</th>
+              <th class="p-3 text-center font-semibold">Face Value</th>
+              <th class="p-3 text-center font-semibold">Commission %</th>
+              <th class="p-3 text-center font-semibold">Commission Amount</th>
+              <th class="p-3 text-center font-semibold">Net Cost</th>
+              <th class="p-3 text-center font-semibold">Profit</th>
+              <th class="p-3 text-center font-semibold">Status</th>
+              <th class="p-3 text-left font-semibold">Seller</th>
+            </tr>
+          </thead>
+          <tbody class="text-[12px] font-medium">
+            <tr v-for="(sale, index) in reloadSales" :key="sale.id" class="border-b hover:bg-gray-100">
+              <td class="p-3 text-center">{{ index + 1 }}</td>
+              <td class="p-3">{{ new Date(sale.sale_date).toLocaleDateString() }}</td>
+              <td class="p-3 font-bold">{{ sale.operator?.name || 'N/A' }}</td>
+              <td class="p-3">{{ sale.msisdn }}</td>
+              <td class="p-3 text-center font-bold">Rs. {{ formatCurrency(sale.face_value) }}</td>
+              <td class="p-3 text-center">{{ sale.commission_percent }}%</td>
+              <td class="p-3 text-center">Rs. {{ formatCurrency(sale.commission_amount) }}</td>
+              <td class="p-3 text-center text-red-600">Rs. {{ formatCurrency(sale.net_cost) }}</td>
+              <td class="p-3 text-center font-bold" :class="(sale.face_value - sale.net_cost) >= 0 ? 'text-green-600' : 'text-red-600'">
+                Rs. {{ formatCurrency(sale.face_value - sale.net_cost) }}
+              </td>
+              <td class="p-3 text-center">
+                <span :class="'px-2 py-1 rounded-full text-xs font-semibold ' + (sale.status === 'completed' ? 'bg-green-100 text-green-800' : sale.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800')">
+                  {{ sale.status }}
+                </span>
+              </td>
+              <td class="p-3">{{ sale.user?.name || 'N/A' }}</td>
+            </tr>
+            <tr v-if="reloadSales.length === 0">
+              <td colspan="11" class="p-8 text-center text-gray-500">
+                No reload sales found for the selected date range
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Deposit Bonus Profit Summary -->
+    <div class="w-full bg-white border-4 border-black rounded-xl p-6">
+      <h2 class="text-2xl font-semibold text-slate-700 text-center pb-4">
+        Deposit Bonus Profit Summary
+      </h2>
+
+      <!-- Summary Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="bg-cyan-50 border-l-4 border-cyan-500 p-4 rounded">
+          <p class="text-sm text-gray-600">Total Deposits</p>
+          <p class="text-2xl font-bold text-cyan-600">{{ depositBonusTransactions.length }}</p>
+        </div>
+        <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded">
+          <p class="text-sm text-gray-600">Total Bonus Profit</p>
+          <p class="text-2xl font-bold text-emerald-600">Rs. {{ formatCurrency(totalDepositBonusProfit) }}</p>
+        </div>
+        <div class="bg-indigo-50 border-l-4 border-indigo-500 p-4 rounded">
+          <p class="text-sm text-gray-600">Average Per Deposit</p>
+          <p class="text-2xl font-bold text-indigo-600">Rs. {{ depositBonusTransactions.length > 0 ? formatCurrency(totalDepositBonusProfit / depositBonusTransactions.length) : '0' }}</p>
+        </div>
+      </div>
+
+      <!-- Deposits Table -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-gray-800 bg-white border border-gray-300 rounded-lg shadow-md">
+          <thead>
+            <tr class="bg-gradient-to-r from-cyan-700 via-cyan-600 to-cyan-700 text-white text-[14px]">
+              <th class="p-3 text-left font-semibold">#</th>
+              <th class="p-3 text-left font-semibold">Date</th>
+              <th class="p-3 text-left font-semibold">Operator</th>
+              <th class="p-3 text-left font-semibold">User</th>
+              <th class="p-3 text-center font-semibold">Bonus Amount</th>
+              <th class="p-3 text-center font-semibold">Notes</th>
+            </tr>
+          </thead>
+          <tbody class="text-[12px] font-medium">
+            <tr v-for="(transaction, index) in depositBonusTransactions" :key="transaction.id" class="border-b hover:bg-gray-100">
+              <td class="p-3 text-center">{{ index + 1 }}</td>
+              <td class="p-3">{{ new Date(transaction.transaction_date).toLocaleDateString() }}</td>
+              <td class="p-3 font-bold">{{ transaction.wallet_account?.operator?.name || 'N/A' }}</td>
+              <td class="p-3">{{ transaction.wallet_account?.user?.name || 'N/A' }}</td>
+              <td class="p-3 text-center font-bold text-emerald-600">Rs. {{ formatCurrency(transaction.bonus_amount) }}</td>
+              <td class="p-3 text-gray-600">{{ transaction.notes || '-' }}</td>
+            </tr>
+            <tr v-if="depositBonusTransactions.length === 0">
+              <td colspan="6" class="p-8 text-center text-gray-500">
+                No deposit bonuses found for the selected date range
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -821,6 +1112,16 @@ const props = defineProps({
   laminatingServices: { type: Array, default: () => [] },
   photocopyServices: { type: Array, default: () => [] },
   printoutServices: { type: Array, default: () => [] },
+  simActivationTransactions: { type: Array, default: () => [] },
+  totalSimActivationRevenue: { type: Number, default: 0 },
+  totalSimActivationCost: { type: Number, default: 0 },
+  totalSimActivationProfit: { type: Number, default: 0 },
+  reloadSales: { type: Array, default: () => [] },
+  totalReloadRevenue: { type: Number, default: 0 },
+  totalReloadCost: { type: Number, default: 0 },
+  totalReloadProfit: { type: Number, default: 0 },
+  depositBonusTransactions: { type: Array, default: () => [] },
+  totalDepositBonusProfit: { type: Number, default: 0 },
 });
 
 const totalPrice = computed(() => {
@@ -854,6 +1155,15 @@ const fetchProductByCode = async () => {
         console.error('Error fetching batch data:', error);
         alert('Error fetching batch data. Please try again.');
     }
+};
+
+// Format currency helper function
+const formatCurrency = (value) => {
+  if (!value) return '0.00';
+  return parseFloat(value).toLocaleString('en-LK', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 };
 
 // Date filters

@@ -467,6 +467,42 @@
     </div>
   </div>
 
+  <!-- Alert Modal -->
+  <div v-if="showAlertModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[120] p-4">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+      <div class="text-center mb-6">
+        <div v-if="alertModalData.type === 'success'" class="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+          <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+        <div v-else-if="alertModalData.type === 'error'" class="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+          <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </div>
+        <div v-else class="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+          <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ alertModalData.title }}</h3>
+        <p class="text-gray-600">{{ alertModalData.message }}</p>
+      </div>
+      <div class="flex justify-center">
+        <button 
+          @click="showAlertModal = false; if (alertModalData.type === 'success') window.location.reload();"
+          class="px-8 py-3 rounded-lg font-semibold transition-colors duration-200"
+          :class="alertModalData.type === 'success' ? 'bg-green-600 hover:bg-green-700 text-white' : 
+                  alertModalData.type === 'error' ? 'bg-red-600 hover:bg-red-700 text-white' : 
+                  'bg-blue-600 hover:bg-blue-700 text-white'"
+        >
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
+
   <Footer />
 </template>
 
@@ -517,6 +553,14 @@ const confirmModalData = ref({
   confirmText: 'OK',
   cancelText: 'Cancel',
   type: 'warning' // warning, danger, info
+});
+
+// Alert modal states
+const showAlertModal = ref(false);
+const alertModalData = ref({
+  title: '',
+  message: '',
+  type: 'success' // success, error, info
 });
 
 // Data states
@@ -630,7 +674,12 @@ const getPreview = async () => {
     }
   } catch (error) {
     console.error('Preview failed:', error);
-    alert('Failed to get preview: ' + (error.response?.data?.message || error.message));
+    alertModalData.value = {
+      title: 'Preview Failed',
+      message: error.response?.data?.message || error.message,
+      type: 'error'
+    };
+    showAlertModal.value = true;
   }
 };
 
@@ -664,7 +713,12 @@ const processTransaction = async () => {
       await loadRecentTransactions();
     }
   } catch (error) {
-    alert('Transaction failed: ' + (error.response?.data?.message || error.message));
+    alertModalData.value = {
+      title: 'Transaction Failed',
+      message: error.response?.data?.message || error.message,
+      type: 'error'
+    };
+    showAlertModal.value = true;
   } finally {
     processing.value = false;
   }
@@ -745,15 +799,26 @@ const saveRule = async () => {
     const response = await axios[method](url, ruleData);
     
     if (response.data.success) {
-      alert(response.data.message);
+      alertModalData.value = {
+        title: 'Success',
+        message: response.data.message,
+        type: 'success'
+      };
+      showAlertModal.value = true;
       closeRuleFormModal();
       await loadPricingRules();
     }
   } catch (error) {
-    alert('Error: ' + (error.response?.data?.message || 'Failed to save pricing rule'));
+    alertModalData.value = {
+      title: 'Error',
+      message: error.response?.data?.message || 'Failed to save pricing rule',
+      type: 'error'
+    };
+    showAlertModal.value = true;
   } finally {
     savingRule.value = false;
   }
+
 };
 
 const toggleRuleActive = async (rule) => {
