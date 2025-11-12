@@ -69,9 +69,8 @@ class MobileTopUpController extends Controller
      */
     public function simActivationPackages()
     {
-        return Inertia::render('MobileTopUp/SimActivationPackages', [
-            'pageTitle' => 'SIM Activation Packages'
-        ]);
+        // Redirect to the new SimActivation module
+        return redirect()->route('sim-activation.index');
     }
 
     /**

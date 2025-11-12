@@ -20,7 +20,7 @@
 
       <!-- Service Cards Section -->
       <div class="w-full flex justify-center">
-        <div
+       <div
           class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4
                  gap-y-12 gap-x-12 xl:gap-x-16 2xl:gap-x-20
                  max-w-[96rem] w-full"
@@ -61,7 +61,7 @@
                 </svg>
               </div>
               <h3 class="text-3xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors duration-300 text-center">
-                SIM Activation Packages
+                SIM Activation & Reload
               </h3>
               <div class="h-1 w-20 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
             </div>
@@ -108,108 +108,12 @@
               <div class="h-1 w-20 bg-gradient-to-r from-cyan-500 to-teal-600 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
             </div>
           </button>
+
+          
         </div>
       </div>
 
-      <!-- Divider -->
-      <div class="flex items-center justify-center my-8">
-        <div class="flex-grow border-t-2 border-gray-300"></div>
-        <span class="px-4 text-2xl font-bold text-gray-600 uppercase">Select Carrier</span>
-        <div class="flex-grow border-t-2 border-gray-300"></div>
-      </div>
-
-      <!-- Carrier Selection Grid -->
-      <div class="mt-12 w-full flex justify-center">
-        <div
-          class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4
-                 gap-y-12 gap-x-12 xl:gap-x-16 2xl:gap-x-20
-                 max-w-[96rem] w-full"
-        >
-          <!-- Mobitel -->
-          <button
-            @click="selectCarrier('Mobitel')"
-            aria-label="Select Mobitel"
-            class="card-base group hover:from-emerald-50 hover:to-blue-50"
-          >
-            <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl"></div>
-            <div class="relative flex flex-col items-center justify-center space-y-6">
-              <div class="icon-ring from-emerald-500 to-blue-600 group-hover:scale-110">
-                <svg class="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                </svg>
-              </div>
-              <h3 class="text-3xl font-bold text-gray-800 group-hover:text-emerald-600 transition-colors duration-300">
-                Mobitel
-              </h3>
-              <div class="h-1 w-20 bg-gradient-to-r from-emerald-500 to-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
-            </div>
-          </button>
-
-          <!-- Dialog -->
-          <button
-            @click="selectCarrier('Dialog')"
-            aria-label="Select Dialog"
-            class="card-base group hover:from-red-50 hover:to-yellow-50"
-          >
-            <div class="absolute inset-0 bg-gradient-to-br from-red-600/5 to-yellow-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl"></div>
-            <div class="relative flex flex-col items-center justify-center space-y-6">
-              <div class="icon-ring from-red-600 to-yellow-500 group-hover:scale-110">
-                <svg class="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                </svg>
-              </div>
-              <h3 class="text-3xl font-bold text-gray-800 group-hover:text-red-600 transition-colors duration-300">
-                Dialog
-              </h3>
-              <div class="h-1 w-20 bg-gradient-to-r from-red-600 to-yellow-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
-            </div>
-          </button>
-
-          <!-- Airtel -->
-          <button
-            @click="selectCarrier('Airtel')"
-            aria-label="Select Airtel"
-            class="card-base group hover:from-red-50 hover:to-red-100"
-          >
-            <div class="absolute inset-0 bg-gradient-to-br from-red-600/5 to-red-700/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl"></div>
-            <div class="relative flex flex-col items-center justify-center space-y-6">
-              <div class="icon-ring from-red-600 to-red-700 group-hover:scale-110">
-                <svg class="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                </svg>
-              </div>
-              <h3 class="text-3xl font-bold text-gray-800 group-hover:text-red-600 transition-colors duration-300">
-                Airtel
-              </h3>
-              <div class="h-1 w-20 bg-gradient-to-r from-red-600 to-red-700 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
-            </div>
-          </button>
-
-          <!-- Hutch -->
-          <button
-            @click="selectCarrier('Hutch')"
-            aria-label="Select Hutch"
-            class="card-base group hover:from-orange-50 hover:to-amber-50"
-          >
-            <div class="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-gray-900/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl"></div>
-            <div class="relative flex flex-col items-center justify-center space-y-6">
-              <div class="icon-ring from-orange-500 to-gray-900 group-hover:scale-110">
-                <svg class="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                </svg>
-              </div>
-              <h3 class="text-3xl font-bold text-gray-800 group-hover:text-orange-600 transition-colors duration-300">
-                Hutch
-              </h3>
-              <div class="h-1 w-20 bg-gradient-to-r from-orange-500 to-gray-900 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
-            </div>
-          </button>
-        </div>
-      </div>
+     
     </div>
   </div>
 

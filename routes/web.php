@@ -191,6 +191,46 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/operator/{operatorId}', [ReloadPackageController::class, 'byOperator']);
     });
     
+    // SIM Activation & Wallet Accounting Routes
+    Route::prefix('sim-activation')->group(function () {
+        Route::get('/', [\App\Http\Controllers\SimActivationController::class, 'index'])->name('sim-activation.index');
+        Route::get('/analytics', [\App\Http\Controllers\SimActivationController::class, 'analytics'])->name('sim-activation.analytics');
+    });
+
+    // SIM Activation Packages Management
+    Route::prefix('sim-activation-packages')->group(function () {
+        Route::get('/', [\App\Http\Controllers\SimActivationPackageController::class, 'index'])->name('sim-activation-packages.index');
+    });
+
+    // Operator Pricing Rules Management
+    Route::prefix('operator-pricing-rules')->group(function () {
+        Route::get('/', [\App\Http\Controllers\OperatorPricingRuleController::class, 'index'])->name('operator-pricing-rules.index');
+    });
+    
+    // SIM Activation API Routes
+    Route::prefix('api/sim-activation')->group(function () {
+        Route::post('/', [\App\Http\Controllers\SimActivationController::class, 'store']);
+        Route::post('/preview', [\App\Http\Controllers\SimActivationController::class, 'preview']);
+        Route::get('/history', [\App\Http\Controllers\SimActivationController::class, 'history']);
+        Route::get('/analytics-data', [\App\Http\Controllers\SimActivationController::class, 'analyticsData']);
+    });
+
+    // SIM Activation Packages API Routes
+    Route::prefix('api/sim-activation-packages')->group(function () {
+        Route::post('/', [\App\Http\Controllers\SimActivationPackageController::class, 'store']);
+        Route::put('/{package}', [\App\Http\Controllers\SimActivationPackageController::class, 'update']);
+        Route::delete('/{package}', [\App\Http\Controllers\SimActivationPackageController::class, 'destroy']);
+        Route::post('/{package}/toggle-active', [\App\Http\Controllers\SimActivationPackageController::class, 'toggleActive']);
+    });
+
+    // Operator Pricing Rules API Routes
+    Route::prefix('api/operator-pricing-rules')->group(function () {
+        Route::post('/', [\App\Http\Controllers\OperatorPricingRuleController::class, 'store']);
+        Route::put('/{rule}', [\App\Http\Controllers\OperatorPricingRuleController::class, 'update']);
+        Route::delete('/{rule}', [\App\Http\Controllers\OperatorPricingRuleController::class, 'destroy']);
+        Route::post('/{rule}/toggle-active', [\App\Http\Controllers\OperatorPricingRuleController::class, 'toggleActive']);
+    });
+    
     
     Route::get('/products/{id}/promotion-items', [ProductController::class, 'getPromotionItems']);
 

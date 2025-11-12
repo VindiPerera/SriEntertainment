@@ -6,7 +6,7 @@
         <!-- Include the Header -->
         <Header />
 
-        <div class="w-full md:w-5/6 w-full py-12 space-y-16">
+        <div class="w-full md:w-5/6 py-12 space-y-16">
             <div class="flex items-center justify-between space-x-4">
                 <div class="flex w-full space-x-4">
                     <Link href="/">
@@ -25,7 +25,46 @@
                     </p>
                 </div>
             </div>
-            <div class="flex md:flex-row flex-col w-full gap-4">
+
+            <!-- Tab Navigation -->
+            <div class="flex space-x-2 border-b-2 border-gray-300">
+                <button
+                    @click="activeTab = 'products'"
+                    :class="[
+                        'px-8 py-4 text-xl font-bold tracking-wide transition-all duration-200',
+                        activeTab === 'products'
+                            ? 'bg-black text-white border-b-4 border-yellow-500'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    ]"
+                >
+                    🛒 Products
+                </button>
+                <button
+                    @click="activeTab = 'sim'"
+                    :class="[
+                        'px-8 py-4 text-xl font-bold tracking-wide transition-all duration-200',
+                        activeTab === 'sim'
+                            ? 'bg-black text-white border-b-4 border-yellow-500'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    ]"
+                >
+                    📱 SIM Activation
+                </button>
+                <button
+                    @click="activeTab = 'reload'"
+                    :class="[
+                        'px-8 py-4 text-xl font-bold tracking-wide transition-all duration-200',
+                        activeTab === 'reload'
+                            ? 'bg-black text-white border-b-4 border-yellow-500'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    ]"
+                >
+                    💰 Sell Reload
+                </button>
+            </div>
+            
+            <!-- Products Tab Content -->
+            <div v-show="activeTab === 'products'" class="flex md:flex-row flex-col w-full gap-4">
                 <div class="flex flex-col md:w-1/2 w-full">
                     <div class="flex flex-col w-full">
                         <div class="p-16 space-y-8 bg-black shadow-lg rounded-3xl">
@@ -362,8 +401,396 @@
                     </div>
                 </div>
             </div>
+            <!-- End Products Tab -->
+
+            <!-- SIM Activation Tab Content -->
+            <div v-show="activeTab === 'sim'" class="bg-white rounded-2xl shadow-xl p-8">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">📱 SIM Activation Transaction</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Transaction Form -->
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Select Operator *</label>
+                            <select 
+                                v-model="simForm.operator_name"
+                                @change="onSimOperatorChange"
+                                required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="">Choose operator...</option>
+                                <option v-for="operator in uniqueSimOperators" :key="operator.id" :value="operator.name">
+                                    {{ operator.name }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div v-if="simForm.operator_name">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Select SIM (Optional - for activation)
+                            </label>
+                            <select 
+                                v-model="simForm.sim_stock_id"
+                                @change="onSimChange"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="">No SIM (Reload only)</option>
+                                <option v-for="sim in filteredSimStocks" :key="sim.id" :value="sim.id">
+                                    {{ sim.sim_name }} (Stock: {{ sim.stock }})
+                                </option>
+                            </select>
+                        </div>
+
+                        <div v-if="simForm.operator_name">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Select Package *</label>
+                            <select 
+                                v-model="simForm.pricing_rule_id"
+                                @change="getSimPreview"
+                                required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="">Choose package...</option>
+                                <option v-for="rule in availableSimPackages" :key="rule.id" :value="rule.id">
+                                    Rs. {{ formatCurrency(rule.face_value) }}
+                                    <template v-if="rule.seller_discount_percent > 0"> - {{ rule.seller_discount_percent }}% discount</template>
+                                    <template v-if="rule.extra_benefit > 0"> + Rs. {{ rule.extra_benefit }} benefit</template>
+                                </option>
+                            </select>
+                        </div>
+
+                        <div v-if="simForm.pricing_rule_id">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Mobile Number *</label>
+                            <input 
+                                v-model="simForm.mobile_number"
+                                @input="mobileNumberError = ''"
+                                type="text"
+                                pattern="[0-9]{10}"
+                                maxlength="10"
+                                required
+                                placeholder="07XXXXXXXX"
+                                :class="[
+                                    'w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500',
+                                    mobileNumberError ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                                ]"
+                            />
+                            <p v-if="mobileNumberError" class="text-xs text-red-600 mt-1">{{ mobileNumberError }}</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                            <textarea 
+                                v-model="simForm.notes"
+                                rows="3"
+                                placeholder="Optional notes..."
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            ></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Billing Details -->
+                    <div class="bg-white rounded-lg p-6 shadow-lg h-fit">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-6">Billing Details</h3>
+                        
+                        <div v-if="simPreview">
+                            <!-- SIM Operator Name -->
+                            <div class="mb-4 pb-4 border-b border-gray-200">
+                                <p class="text-sm text-gray-500 mb-1">Operator</p>
+                                <p class="text-lg font-bold text-gray-900">{{ simForm.operator_name }}</p>
+                            </div>
+                            
+                            <!-- Package Details -->
+                            <div v-if="selectedSimPackage" class="mb-4 pb-4 border-b border-gray-200">
+                                <p class="text-sm text-gray-500 mb-1">Package</p>
+                                <p class="text-lg font-bold text-gray-900">
+                                    Rs. {{ formatCurrency(selectedSimPackage.face_value) }}
+                                </p>
+                            </div>
+                            
+                            <!-- SIM Price (if SIM is included) -->
+                            <div v-if="simPreview.sim_revenue && simPreview.sim_revenue > 0" class="mb-4 pb-4 border-b border-gray-200">
+                                <p class="text-sm text-gray-500 mb-1">SIM Card</p>
+                                <p class="text-lg font-bold text-gray-900">
+                                    Rs. {{ formatCurrency(simPreview.sim_revenue) }}
+                                </p>
+                            </div>
+                            
+                            <!-- Total Amount -->
+                            <div class="flex justify-between items-center py-4 border-b-2 border-gray-200">
+                                <span class="text-xl font-semibold text-gray-700">Total</span>
+                                <span class="text-3xl font-bold text-gray-900">Rs. {{ formatCurrency(calculateSimTotalWithSurcharge()) }}</span>
+                            </div>
+                            
+                            <!-- Payment Method Selection -->
+                            <div class="mt-6 mb-4">
+                                <div class="flex items-center justify-start space-x-4 mb-3">
+                                    <p class="text-xl font-medium text-black">Payment Method :</p>
+                                </div>
+                                <div class="flex justify-start space-x-4">
+                                    <div 
+                                        @click="simForm.payment_method = 'cash'" 
+                                        :class="[
+                                            'cursor-pointer border-2 border-black rounded-xl flex flex-col justify-center items-center p-4 transition-all',
+                                            simForm.payment_method === 'cash'
+                                                ? 'bg-yellow-500'
+                                                : 'bg-white'
+                                        ]"
+                                    >
+                                        <img src="/images/money-stack.png" alt="Cash" class="w-20 h-20" />
+                                    </div>
+                                    <div 
+                                        @click="simForm.payment_method = 'card'" 
+                                        :class="[
+                                            'cursor-pointer border-2 border-black rounded-xl flex flex-col justify-center items-center p-4 transition-all',
+                                            simForm.payment_method === 'card'
+                                                ? 'bg-yellow-500'
+                                                : 'bg-white'
+                                        ]"
+                                    >
+                                        <img src="/images/bank-card.png" alt="Card" class="w-20 h-20" />
+                                    </div>
+                                </div>
+                                <p v-if="simForm.payment_method === 'card'" class="text-xs text-orange-600 mt-2 font-semibold">
+                                    +2.5% surcharge applies
+                                </p>
+                            </div>
+                            
+                            <!-- Cash Received Input -->
+                            <div class="mb-4">
+                                <label class="block text-base font-medium text-gray-700 mb-2">Cash Received</label>
+                                <input 
+                                    v-model="simForm.cash_received"
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="Enter amount received from customer"
+                                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg font-semibold"
+                                />
+                            </div>
+                            
+                            <!-- Balance/Change Display -->
+                            <div v-if="simForm.cash_received" class="py-3 border-t-2 border-gray-200">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-base font-medium text-gray-700">Balance</span>
+                                    <span class="text-2xl font-bold" :class="calculateSimChange() >= 0 ? 'text-green-600' : 'text-red-600'">
+                                        {{ calculateSimChange() >= 0 ? '' : '-' }}Rs. {{ formatCurrency(Math.abs(calculateSimChange())) }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div v-else class="text-center text-gray-500 py-8">
+                            <p>Select package to see billing details</p>
+                        </div>
+                        
+                        <button 
+                            @click="processSimActivation"
+                            :disabled="!simForm.operator_name || !simForm.pricing_rule_id || !simForm.mobile_number || simProcessing"
+                            :class="[
+                                'w-full mt-6 py-4 text-xl font-bold text-white rounded-xl transition-all',
+                                (!simForm.operator_name || !simForm.pricing_rule_id || !simForm.mobile_number || simProcessing)
+                                    ? 'bg-gray-400 cursor-not-allowed'
+                                    : 'bg-green-600 hover:bg-green-700'
+                            ]"
+                        >
+                            <i class="ri-check-line mr-2"></i> 
+                            {{ simProcessing ? 'Processing...' : (simForm.sim_stock_id ? 'Activate SIM' : 'Process Reload') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- End SIM Tab -->
+
+            <!-- Reload Tab Content -->
+            <div v-show="activeTab === 'reload'" class="bg-white rounded-2xl shadow-xl p-8">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">💰 Sell Reload</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Reload Form -->
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Select Operator *</label>
+                            <select 
+                                v-model="reloadForm.operator_id"
+                                @change="loadReloadOperatorData"
+                                required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="">Choose operator...</option>
+                                <option v-for="operator in operators" :key="operator.id" :value="operator.id">
+                                    {{ operator.name }} - Balance: Rs. {{ formatCurrency(getWalletBalance(operator.id)) }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div v-if="reloadForm.operator_id">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Select Package *</label>
+                            <select 
+                                v-model="reloadForm.reload_package_id"
+                                @change="getReloadQuote"
+                                required
+                                :disabled="reloadPackagesLoading"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                            >
+                                <option value="">{{ reloadPackagesLoading ? 'Loading packages...' : 'Choose package...' }}</option>
+                                <option v-for="pkg in reloadPackages" :key="pkg.id" :value="pkg.id">
+                                    {{ pkg.name }} - Rs. {{ formatCurrency(pkg.face_value) }}
+                                </option>
+                            </select>
+                            <p v-if="reloadPackages.length === 0 && !reloadPackagesLoading && reloadForm.operator_id" class="text-xs text-red-500 mt-1">
+                                No packages available for this operator
+                            </p>
+                        </div>
+
+                        <div v-if="reloadForm.operator_id">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Mobile Number (MSISDN) *</label>
+                            <input 
+                                v-model="reloadForm.msisdn"
+                                type="text"
+                                pattern="[0-9]{10}"
+                                maxlength="10"
+                                required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                placeholder="07XXXXXXXX"
+                            />
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                            <textarea 
+                                v-model="reloadForm.notes"
+                                rows="3"
+                                placeholder="Optional notes..."
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            ></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Billing Details -->
+                    <div class="bg-white rounded-lg p-6 shadow-lg h-fit">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-6">Billing Details</h3>
+                        
+                        <div v-if="reloadQuote">
+                            <!-- Operator Name -->
+                            <div v-if="selectedReloadOperator" class="mb-4 pb-4 border-b border-gray-200">
+                                <p class="text-sm text-gray-500 mb-1">Operator</p>
+                                <p class="text-lg font-bold text-gray-900">{{ selectedReloadOperator.name }}</p>
+                            </div>
+                            
+                            <!-- Package Details -->
+                            <div v-if="selectedReloadPackage" class="mb-4 pb-4 border-b border-gray-200">
+                                <p class="text-sm text-gray-500 mb-1">Package</p>
+                                <p class="text-lg font-bold text-gray-900">
+                                    {{ selectedReloadPackage.name }} - Rs. {{ formatCurrency(selectedReloadPackage.face_value) }}
+                                </p>
+                            </div>
+                            
+                            <!-- Total Amount -->
+                            <div class="flex justify-between items-center py-4 border-b-2 border-gray-200">
+                                <span class="text-xl font-semibold text-gray-700">Total</span>
+                                <span class="text-3xl font-bold text-gray-900">Rs. {{ formatCurrency(calculateReloadTotalWithSurcharge()) }}</span>
+                            </div>
+                            
+                            <!-- Payment Method Selection -->
+                            <div class="mt-6 mb-4">
+                                <div class="flex items-center justify-start space-x-4 mb-3">
+                                    <p class="text-xl font-medium text-black">Payment Method :</p>
+                                </div>
+                                <div class="flex justify-start space-x-4">
+                                    <div 
+                                        @click="reloadForm.payment_method = 'cash'" 
+                                        :class="[
+                                            'cursor-pointer border-2 border-black rounded-xl flex flex-col justify-center items-center p-4 transition-all',
+                                            reloadForm.payment_method === 'cash'
+                                                ? 'bg-yellow-500'
+                                                : 'bg-white'
+                                        ]"
+                                    >
+                                        <img src="/images/money-stack.png" alt="Cash" class="w-20 h-20" />
+                                    </div>
+                                    <div 
+                                        @click="reloadForm.payment_method = 'card'" 
+                                        :class="[
+                                            'cursor-pointer border-2 border-black rounded-xl flex flex-col justify-center items-center p-4 transition-all',
+                                            reloadForm.payment_method === 'card'
+                                                ? 'bg-yellow-500'
+                                                : 'bg-white'
+                                        ]"
+                                    >
+                                        <img src="/images/bank-card.png" alt="Card" class="w-20 h-20" />
+                                    </div>
+                                </div>
+                                <p v-if="reloadForm.payment_method === 'card'" class="text-xs text-orange-600 mt-2 font-semibold">
+                                    +2.5% surcharge applies
+                                </p>
+                            </div>
+                            
+                            <!-- Cash Received Input -->
+                            <div class="mb-4">
+                                <label class="block text-base font-medium text-gray-700 mb-2">Cash Received</label>
+                                <input 
+                                    v-model="reloadForm.cash_received"
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="Enter amount received from customer"
+                                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg font-semibold"
+                                />
+                            </div>
+                            
+                            <!-- Balance/Change Display -->
+                            <div v-if="reloadForm.cash_received" class="py-3 border-t-2 border-gray-200">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-base font-medium text-gray-700">Balance</span>
+                                    <span class="text-2xl font-bold" :class="calculateReloadChange() >= 0 ? 'text-green-600' : 'text-red-600'">
+                                        {{ calculateReloadChange() >= 0 ? '' : '-' }}Rs. {{ formatCurrency(Math.abs(calculateReloadChange())) }}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- Insufficient Balance Warning -->
+                            <div v-if="!reloadQuote.sufficient_balance" class="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                <p class="text-sm text-red-800 font-semibold">⚠️ Insufficient wallet balance! Please deposit first.</p>
+                            </div>
+                        </div>
+                        
+                        <div v-else class="text-center text-gray-500 py-8">
+                            <p>Select package to see billing details</p>
+                        </div>
+                        
+                        <button 
+                            @click="processSellReload"
+                            :disabled="!reloadForm.operator_id || !reloadForm.reload_package_id || !reloadForm.msisdn || reloadProcessing || !reloadQuote?.sufficient_balance"
+                            :class="[
+                                'w-full mt-6 py-4 text-xl font-bold text-white rounded-xl transition-all',
+                                (!reloadForm.operator_id || !reloadForm.reload_package_id || !reloadForm.msisdn || reloadProcessing || !reloadQuote?.sufficient_balance)
+                                    ? 'bg-gray-400 cursor-not-allowed'
+                                    : 'bg-green-600 hover:bg-green-700'
+                            ]"
+                        >
+                            <i class="ri-check-line mr-2"></i> 
+                            {{ reloadProcessing ? 'Processing...' : 'Process Reload Sale' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- End Reload Tab -->
+
         </div>
     </div>
+    
+    <!-- Success Modals -->
+    <SimActivationSuccessModal
+        v-if="completedSimTransaction"
+        :open="showSimSuccessModal"
+        @update:open="showSimSuccessModal = $event"
+        :transaction="completedSimTransaction"
+        :cashier="loggedInUser"
+    />
+    <ReloadSuccessModal
+        v-if="completedReloadTransaction"
+        :open="showReloadSuccessModal"
+        @update:open="showReloadSuccessModal = $event"
+        :reloadSale="completedReloadTransaction"
+        :cashier="loggedInUser"
+    />
     <PosSuccessModel :open="isSuccessModalOpen" @update:open="handleModalOpenUpdate" :products="products"
         :employee="employee" :cashier="loggedInUser" :customer="customer" :orderid="orderid" :cash="cash"
         :balance="balance" :subTotal="subtotal" :totalDiscount="totalDiscount" :total="total"
@@ -406,6 +833,8 @@ import Footer from "@/Components/custom/Footer.vue";
 import Banner from "@/Components/Banner.vue";
 import PosSuccessModel from "@/Components/custom/PosSuccessModel.vue";
 import AlertModel from "@/Components/custom/AlertModel.vue";
+import SimActivationSuccessModal from "@/Components/custom/SimActivationSuccessModal.vue";
+import ReloadSuccessModal from "@/Components/custom/ReloadSuccessModal.vue";
 import { useForm, router } from "@inertiajs/vue3";
 import { ref, onMounted, computed, watch, defineAsyncComponent } from 'vue';
 import { Head } from "@inertiajs/vue3";
@@ -425,6 +854,10 @@ const SelectPhotocopyModel = defineAsyncComponent(() =>
   import("@/Components/custom/SelectPhotocopyModel.vue")
 );
 
+// Tab Management
+const activeTab = ref('products');
+
+// Existing POS variables
 const product = ref(null);
 const error = ref(null);
 const products = ref([]);
@@ -438,6 +871,88 @@ const isSelectModalOpen = ref(false);
 const custom_discount_type = ref('percent');
 const orderid = computed(() => generateOrderId());
 
+// SIM Activation variables
+const showSimSuccessModal = ref(false);
+const completedSimTransaction = ref(null);
+const simProcessing = ref(false);
+const simPreview = ref(null);
+const mobileNumberError = ref('');
+const simForm = ref({
+    operator_name: '',
+    sim_stock_id: '',
+    pricing_rule_id: '',
+    mobile_number: '',
+    notes: '',
+    package_revenue: null,
+    sim_cost: null,
+    sim_revenue: null,
+    payment_method: 'cash',
+    cash_received: '',
+});
+
+// Reload variables
+const showReloadSuccessModal = ref(false);
+const completedReloadTransaction = ref(null);
+const reloadProcessing = ref(false);
+const reloadPackages = ref([]);
+const reloadPackagesLoading = ref(false);
+const reloadQuote = ref(null);
+const reloadForm = ref({
+    operator_id: null,
+    reload_package_id: '',
+    msisdn: '',
+    notes: '',
+    payment_method: 'cash',
+    cash_received: '',
+});
+
+// Computed properties for SIM & Reload
+const uniqueSimOperators = computed(() => {
+    const unique = [];
+    const seen = new Set();
+    props.simStocks.forEach(sim => {
+        if (!seen.has(sim.sim_name)) {
+            seen.add(sim.sim_name);
+            unique.push({ id: sim.id, name: sim.sim_name });
+        }
+    });
+    return unique;
+});
+
+const filteredSimStocks = computed(() => {
+    if (!simForm.value.operator_name) return [];
+    return props.simStocks.filter(sim => 
+        sim.sim_name === simForm.value.operator_name && sim.stock > 0
+    );
+});
+
+const availableSimPackages = computed(() => {
+    if (!simForm.value.operator_name) return [];
+    return props.pricingRules.filter(rule => 
+        rule.operator_name === simForm.value.operator_name && rule.is_active
+    );
+});
+
+const selectedSimPackage = computed(() => {
+    if (!simForm.value.pricing_rule_id) return null;
+    return props.pricingRules.find(rule => rule.id === simForm.value.pricing_rule_id);
+});
+
+const selectedReloadOperator = computed(() => {
+    if (!reloadForm.value.operator_id) return null;
+    return props.operators.find(op => op.id === reloadForm.value.operator_id);
+});
+
+const selectedReloadPackage = computed(() => {
+    if (!reloadForm.value.reload_package_id) return null;
+    return reloadPackages.value.find(pkg => pkg.id === reloadForm.value.reload_package_id);
+});
+
+const getWalletBalance = (operatorId) => {
+    const wallet = props.wallets[operatorId];
+    return wallet ? wallet.balance : 0;
+};
+
 
 // const balance = ref(0);
 
@@ -449,11 +964,16 @@ const handleModalOpenUpdate = (newValue) => {
 };
 
 const props = defineProps({
-    loggedInUser: Object, // Using backend product name to avoid messing with selected products
+    loggedInUser: Object,
     allcategories: Array,
     allemployee: Array,
     colors: Array,
     sizes: Array,
+    // SIM & Reload data from database
+    simStocks: Array,
+    operators: Array,
+    wallets: Object,
+    pricingRules: Array,
 });
 
 const discount = ref(0);
@@ -928,6 +1448,236 @@ const generateReceipt = () => {
     console.log("Receipt Details:", receiptDetails);
     return receiptDetails;
 };
+
+// Helper function for currency formatting
+const formatCurrency = (amount) => {
+    return parseFloat(amount || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+};
+
+// Helper functions for card surcharge calculations
+const calculateSimCardSurcharge = () => {
+    if (!simPreview.value) return 0;
+    const baseAmount = simPreview.value.customer_payment || simPreview.value.total_revenue || 0;
+    return baseAmount * 0.025; // 2.5%
+};
+
+const calculateSimTotalWithSurcharge = () => {
+    if (!simPreview.value) return 0;
+    const base = simPreview.value.customer_payment || simPreview.value.total_revenue || 0;
+    return simForm.value.payment_method === 'card' ? base + calculateSimCardSurcharge() : base;
+};
+
+const calculateReloadCardSurcharge = () => {
+    if (!reloadQuote.value || !reloadQuote.value.face_value) return 0;
+    return reloadQuote.value.face_value * 0.025; // 2.5%
+};
+
+const calculateReloadTotalWithSurcharge = () => {
+    if (!reloadQuote.value || !reloadQuote.value.face_value) return 0;
+    const base = reloadQuote.value.face_value;
+    return reloadForm.value.payment_method === 'card' ? base + calculateReloadCardSurcharge() : base;
+};
+
+// Helper functions for change calculation
+const calculateSimChange = () => {
+    const cashReceived = parseFloat(simForm.value.cash_received) || 0;
+    const total = calculateSimTotalWithSurcharge();
+    return cashReceived - total;
+};
+
+const calculateReloadChange = () => {
+    const cashReceived = parseFloat(reloadForm.value.cash_received) || 0;
+    const total = calculateReloadTotalWithSurcharge();
+    return cashReceived - total;
+};
+
+// ==================== SIM ACTIVATION FUNCTIONS ====================
+const onSimOperatorChange = () => {
+    simForm.value.sim_stock_id = '';
+    simForm.value.pricing_rule_id = '';
+    simPreview.value = null;
+};
+
+const onSimChange = () => {
+    // Auto-populate SIM cost and revenue from stock when SIM is selected
+    if (simForm.value.sim_stock_id) {
+        const selectedSim = props.simStocks.find(sim => sim.id == simForm.value.sim_stock_id);
+        if (selectedSim) {
+            simForm.value.sim_cost = parseFloat(selectedSim.cost_price || 0);
+            simForm.value.sim_revenue = parseFloat(selectedSim.selling_price || 0);
+        }
+    } else {
+        simForm.value.sim_cost = null;
+        simForm.value.sim_revenue = null;
+    }
+    getSimPreview();
+};
+
+const getSimPreview = async () => {
+    if (!simForm.value.pricing_rule_id) {
+        simPreview.value = null;
+        return;
+    }
+
+    try {
+        const response = await axios.post('/api/sim-activation/preview', simForm.value);
+        if (response.data.success) {
+            simPreview.value = response.data.preview;
+        }
+    } catch (error) {
+        console.error('Preview failed:', error);
+    }
+};
+
+const processSimActivation = async () => {
+    simProcessing.value = true;
+    mobileNumberError.value = ''; // Clear any previous errors
+    
+    try {
+        // Calculate card surcharge if applicable
+        const cardSurcharge = simForm.value.payment_method === 'card' ? calculateSimCardSurcharge() : 0;
+        const changeAmount = calculateSimChange();
+        
+        // Use the existing SIM activation route (POST to /api/sim-activation/)
+        const response = await axios.post('/api/sim-activation', {
+            ...simForm.value,
+            card_surcharge: cardSurcharge,
+            change_amount: changeAmount >= 0 ? changeAmount : 0,
+        });
+
+        if (response.data.success) {
+            completedSimTransaction.value = response.data.transaction;
+            showSimSuccessModal.value = true;
+            
+            // Reset form
+            simForm.value = {
+                operator_name: '',
+                sim_stock_id: '',
+                pricing_rule_id: '',
+                mobile_number: '',
+                notes: '',
+                package_revenue: null,
+                sim_cost: null,
+                sim_revenue: null,
+                payment_method: 'cash',
+                cash_received: '',
+            };
+            simPreview.value = null;
+            
+            isAlertModalOpen.value = true;
+            message.value = 'SIM activation processed successfully!';
+        }
+    } catch (err) {
+        console.error('SIM Activation Error:', err);
+        
+        // Check for duplicate mobile number error
+        if (err.response?.status === 422 && err.response?.data?.errors?.mobile_number) {
+            mobileNumberError.value = `This number has already been activated`;
+            message.value = `Mobile number ${simForm.value.mobile_number} has already been used for SIM activation.`;
+        } else {
+            message.value = err.response?.data?.message || 'Failed to process SIM activation';
+        }
+        
+        isAlertModalOpen.value = true;
+    } finally {
+        simProcessing.value = false;
+    }
+};
+
+// ==================== RELOAD FUNCTIONS ====================
+const loadReloadOperatorData = async () => {
+    // Reset form when operator changes
+    reloadForm.value.reload_package_id = '';
+    reloadQuote.value = null;
+    
+    if (!reloadForm.value.operator_id) {
+        reloadPackages.value = [];
+        return;
+    }
+    
+    // Load packages for selected operator
+    reloadPackagesLoading.value = true;
+    try {
+        const response = await axios.get(`/api/wallet/packages?operator_id=${reloadForm.value.operator_id}`);
+        reloadPackages.value = response.data.packages || [];
+    } catch (error) {
+        console.error('Failed to load packages:', error);
+        reloadPackages.value = [];
+    } finally {
+        reloadPackagesLoading.value = false;
+    }
+};
+
+const getReloadQuote = async () => {
+    if (!reloadForm.value.reload_package_id) {
+        reloadQuote.value = null;
+        return;
+    }
+    
+    try {
+        const response = await axios.post('/api/wallet/quote', {
+            operator_id: reloadForm.value.operator_id,
+            reload_package_id: reloadForm.value.reload_package_id,
+        });
+        
+        if (response.data.success) {
+            reloadQuote.value = response.data.quote;
+        }
+    } catch (error) {
+        console.error('Failed to get quote:', error);
+        isAlertModalOpen.value = true;
+        message.value = 'Failed to get quote: ' + (error.response?.data?.message || error.message);
+    }
+};
+
+const processSellReload = async () => {
+    if (!reloadQuote.value?.sufficient_balance) {
+        isAlertModalOpen.value = true;
+        message.value = 'Insufficient wallet balance!';
+        return;
+    }
+
+    reloadProcessing.value = true;
+    try {
+        // Calculate card surcharge if applicable
+        const cardSurcharge = reloadForm.value.payment_method === 'card' ? calculateReloadCardSurcharge() : 0;
+        const changeAmount = calculateReloadChange();
+        
+        // Use the existing wallet sell route
+        const response = await axios.post('/api/wallet/sell', {
+            ...reloadForm.value,
+            card_surcharge: cardSurcharge,
+            change_amount: changeAmount >= 0 ? changeAmount : 0,
+        });
+
+        if (response.data.success) {
+            completedReloadTransaction.value = response.data.reloadSale;
+            showReloadSuccessModal.value = true;
+            
+            // Reset form
+            reloadForm.value = {
+                operator_id: null,
+                reload_package_id: '',
+                msisdn: '',
+                notes: '',
+                payment_method: 'cash',
+                cash_received: '',
+            };
+            reloadQuote.value = null;
+            reloadPackages.value = [];
+            
+            isAlertModalOpen.value = true;
+            message.value = 'Reload sold successfully!';
+        }
+    } catch (err) {
+        console.error('Reload Sale Error:', err);
+        isAlertModalOpen.value = true;
+        message.value = err.response?.data?.message || 'Failed to process reload sale';
+    } finally {
+        reloadProcessing.value = false;
+    }
+};
+
 // const searchTerm = ref(form.barcode);
 
 // // Computed property for filtered product results

@@ -27,6 +27,10 @@ class ReloadSale extends Model
         'sale_id',
         'notes',
         'sale_date',
+        'payment_method',
+        'card_surcharge',
+        'cash_received',
+        'change_amount',
     ];
 
     protected $casts = [
@@ -37,6 +41,9 @@ class ReloadSale extends Model
         'wallet_balance_before' => 'decimal:2',
         'wallet_balance_after' => 'decimal:2',
         'sale_date' => 'datetime',
+        'card_surcharge' => 'decimal:2',
+        'cash_received' => 'decimal:2',
+        'change_amount' => 'decimal:2',
     ];
 
     /**
