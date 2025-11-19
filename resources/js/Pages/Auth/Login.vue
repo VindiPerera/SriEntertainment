@@ -108,7 +108,7 @@ const submit = () => {
       </p>
       <p class="text-2xl">|</p>
       <p class="text-2xl font-bold">
-        JAAN PoS <span class="font-normal">(Textile) Version 1.1</span>
+        JAAN PoS <span class="font-normal">(Communication) Version 1.1</span>
       </p>
     </div>
     <div
