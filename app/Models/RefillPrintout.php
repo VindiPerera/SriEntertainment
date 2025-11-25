@@ -11,10 +11,11 @@ class RefillPrintout extends Model
 
     protected $fillable = [
         'product_id',
-         'product_code',
+        'product_code',
         'product_name',
         'quantity',
-        'total_stock', // Changed from 'stock'
+        'total_stock',
+        'reason',
     ];
 
     protected $casts = [

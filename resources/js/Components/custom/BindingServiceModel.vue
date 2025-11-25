@@ -1,29 +1,46 @@
 <template>
-  <div class="content-wrapper">
-    <div class="content-container">
+  <div class="page-content">
+    <div class="content-wrapper">
       <div class="page-header">
-        <h2>Binding Services</h2>
+        <h2>Binding Management</h2>
       </div>
-      <div class="page-content">
-        <!-- Stock 0 Notification for all unique product codes -->
-        <NotificationAlert
-          v-if="lowStockProducts.length > 0"
-          :visible="true"
-          type="warning"
-          title="Stock Alert"
-          :message="lowStockMessage"
-          :auto-close="false"
-        />
-        <!-- Add Button and Search Bar in One Row -->
-        <div class="controls-row">
-          <div class="search-bar">
-            <input v-model="search" type="text" placeholder="Search binding services..." />
-          </div>
-          <button @click="openCreateForm" class="add-button">Add New Binding Service</button>
-          <button @click="openRefillPopup" class="add-button">Refill</button>
-        </div>
 
-        <table class="service-table">
+      <!-- Modern Toggle Navigation -->
+      <div class="toggle-navigation">
+        <button 
+          @click="activeTab = 'services'" 
+          :class="['toggle-btn', { 'active': activeTab === 'services' }]"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          <span>Binding Services</span>
+        </button>
+        <button 
+          @click="activeTab = 'history'" 
+          :class="['toggle-btn', { 'active': activeTab === 'history' }]"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <span>Refill History</span>
+        </button>
+      </div>
+
+      <div class="page-body">
+        <!-- Services Section -->
+        <div v-show="activeTab === 'services'" class="tab-content">
+          <!-- Add Button and Search Bar in One Row -->
+          <div class="controls-row">
+            <div class="search-bar">
+              <input v-model="search" type="text" placeholder="Search binding services..." />
+            </div>
+            <button @click="openCreateForm" class="add-button">Add New Binding Service</button>
+            <button @click="openRefillModal" class="add-button">Refill</button>
+          </div>
+
+          <div class="table-container-modern">
+            <table class="service-table">
           <thead>
             <tr>
               <th>#</th>
@@ -50,6 +67,49 @@
             </tr>
           </tbody>
         </table>
+          </div>
+        </div>
+
+        <!-- Refill History Section -->
+        <div v-show="activeTab === 'history'" class="tab-content">
+          <div class="table-container-modern">
+            <table class="service-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Product Code</th>
+                  <th>Product Name</th>
+                  <th>Reason</th>
+                  <th>Quantity</th>
+                  <th>Current Stock</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(refill, index) in refillBindings" :key="refill.id">
+                  <td>{{ index + 1 }}</td>
+                  <td>{{ refill.product_code }}</td>
+                  <td>{{ refill.product_name }}</td>
+                  <td>{{ refill.reason }}</td>
+                  <td>{{ refill.quantity }}</td>
+                  <td>{{ refill.total_stock }}</td>
+                  <td>{{ new Date(refill.created_at).toLocaleDateString('en-GB') }}</td>
+                </tr>
+                <tr v-if="refillBindings.length === 0">
+                  <td colspan="7" class="empty-state">
+                    <div class="empty-content">
+                      <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                      </svg>
+                      <p class="text-lg font-semibold text-gray-600">No refill history found</p>
+                      <span class="text-sm text-gray-400">Start adding refills to see the history here</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
 
         <!-- Create Modal -->
         <div v-if="isCreateModalOpen" class="modal-overlay">
@@ -214,8 +274,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useForm } from "@inertiajs/vue3";
+import axios from "axios";
 import BindingRefillPopup from './BindingRefillPopup.vue';
 import NotificationAlert from './NotificationAlert.vue';
 
@@ -224,6 +285,12 @@ const isEditModalOpen = ref(false);
 const isRefillPopupVisible = ref(false);
 const search = ref("");
 const editingService = ref(null);
+
+// Toggle state for active tab
+const activeTab = ref('services');
+
+// Refill history management
+const refillBindings = ref([]);
 
 // Category and Product Selection
 const categories = ref([]);
@@ -283,13 +350,15 @@ const closeEditModal = () => {
   editForm.reset();
 };
 
-const openRefillPopup = () => {
+const openRefillModal = () => {
   isRefillPopupVisible.value = true;
+  fetchRefillBindings();
 };
 
 const handleRefillSubmitted = () => {
   isRefillPopupVisible.value = false;
   fetchServices(); // Refresh the services list if needed
+  fetchRefillBindings(); // Refresh the refill history
   console.log('Binding refill submitted successfully');
 };
 
@@ -439,6 +508,18 @@ const fetchProductsByCategory = async (categoryId) => {
     alert('Failed to load products. Please try again.');
   }
 };
+
+// Fetch refill history for binding services
+const fetchRefillBindings = async () => {
+  try {
+    const response = await axios.get('/refill-bindings');
+    refillBindings.value = response.data;
+  } catch (error) {
+    console.error('Error fetching refill bindings:', error);
+    refillBindings.value = [];
+  }
+};
+
 // Add product to selected list
 const addProduct = async () => {
   if (selectedProductId.value) {
@@ -501,6 +582,13 @@ const removeProduct = (productId) => {
 onMounted(() => {
   fetchServices();
   fetchLowStockProducts();
+});
+
+// Watch activeTab to fetch refill bindings when switching to history
+watch(activeTab, (newTab) => {
+  if (newTab === 'history') {
+    fetchRefillBindings();
+  }
 });
 
 const filteredServices = computed(() => {
@@ -591,6 +679,126 @@ const deleteService = (id) => {
   min-height: 100%;
   background-color: #fff;
   margin-bottom: 500px;
+}
+
+/* Toggle Navigation Styles */
+.toggle-navigation {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 30px;
+  padding: 6px;
+  background: #f3f4f6;
+  border-radius: 12px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+.toggle-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 18px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.toggle-btn svg {
+  width: 18px;
+  height: 18px;
+  transition: all 0.3s ease;
+}
+
+.toggle-btn:hover {
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.toggle-btn.active {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  transform: translateY(-1px);
+}
+
+.toggle-btn.active svg {
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+}
+
+.tab-content {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Toggle Navigation Styles */
+.toggle-navigation {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 30px;
+  padding: 6px;
+  background: #f3f4f6;
+  border-radius: 12px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+.toggle-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 18px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.toggle-btn svg {
+  width: 18px;
+  height: 18px;
+  transition: all 0.3s ease;
+}
+
+.toggle-btn:hover {
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.toggle-btn.active {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  transform: translateY(-1px);
+}
+
+.toggle-btn.active svg {
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+}
+
+.tab-content {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .page-header h2 {
@@ -879,5 +1087,71 @@ const deleteService = (id) => {
 
 .remove-product-btn:hover {
   background-color: #cc0000;
+}
+
+/* Toggle Navigation Styles */
+.toggle-navigation {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 30px;
+  padding: 6px;
+  background: #f3f4f6;
+  border-radius: 12px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+.toggle-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 18px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.toggle-btn svg {
+  width: 18px;
+  height: 18px;
+  transition: all 0.3s ease;
+}
+
+.toggle-btn:hover {
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.toggle-btn.active {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  transform: translateY(-1px);
+}
+
+.toggle-btn.active svg {
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+}
+
+.tab-content {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

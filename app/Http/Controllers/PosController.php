@@ -342,7 +342,12 @@ class PosController extends Controller
                     if ($photocopyModel->rawMaterials->count() > 0) {
                         // Check stock availability for each raw material
                         foreach ($photocopyModel->rawMaterials as $rawMaterial) {
-                            $availableStock = RefillPhotocopy::where('product_id', $rawMaterial->product_id)->sum('stock');
+                            // Get the latest stock from refill_photocopies for this product
+                            $latestRefill = RefillPhotocopy::where('product_code', $rawMaterial->product->code)
+                                ->orderBy('created_at', 'desc')
+                                ->first();
+                            
+                            $availableStock = $latestRefill ? $latestRefill->stock : 0;
                             
                             if ($availableStock < $item['quantity']) {
                                 DB::rollBack();
@@ -352,27 +357,25 @@ class PosController extends Controller
                             }
                         }
 
-                        // Deduct stock from raw materials
+                        // Deduct stock from raw materials and create "Sold" records
                         foreach ($photocopyModel->rawMaterials as $rawMaterial) {
-                            $remainingQuantity = $item['quantity'];
-                            $refills = RefillPhotocopy::where('product_id', $rawMaterial->product_id)
-                                ->where('stock', '>', 0)
-                                ->orderBy('id')
-                                ->get();
-
-                            foreach ($refills as $refill) {
-                                if ($remainingQuantity <= 0) break;
-
-                                if ($refill->stock >= $remainingQuantity) {
-                                    $refill->stock -= $remainingQuantity;
-                                    $refill->save();
-                                    $remainingQuantity = 0;
-                                } else {
-                                    $remainingQuantity -= $refill->stock;
-                                    $refill->stock = 0;
-                                    $refill->save();
-                                }
-                            }
+                            // Get the latest stock from refill_photocopies for this product
+                            $latestRefill = RefillPhotocopy::where('product_code', $rawMaterial->product->code)
+                                ->orderBy('created_at', 'desc')
+                                ->first();
+                            
+                            $currentStock = $latestRefill ? $latestRefill->stock : 0;
+                            $newStock = $currentStock - $item['quantity'];
+                            
+                            // Create new refill record with reason "Sold"
+                            RefillPhotocopy::create([
+                                'product_id' => $rawMaterial->product_id,
+                                'product_code' => $rawMaterial->product->code,
+                                'product_name' => $rawMaterial->product->name,
+                                'quantity' => $item['quantity'],
+                                'stock' => $newStock,
+                                'reason' => 'Sold',
+                            ]);
 
                             // Create stock transaction for raw material deduction
                             StockTransaction::create([
@@ -385,32 +388,32 @@ class PosController extends Controller
                         }
                     } else {
                         // If no raw materials defined, check refill stock directly (backward compatibility)
-                        $refillStock = RefillPhotocopy::where('product_id', $item['id'])->sum('stock');
+                        $latestRefill = RefillPhotocopy::where('product_id', $item['id'])
+                            ->orderBy('created_at', 'desc')
+                            ->first();
+                        
+                        $currentStock = $latestRefill ? $latestRefill->stock : 0;
 
-                        if ($refillStock < $item['quantity']) {
+                        if ($currentStock < $item['quantity']) {
                             DB::rollBack();
                             return response()->json([
-                                'message' => "Insufficient stock for photocopy service: {$photocopyModel->name} ({$refillStock} available)"
+                                'message' => "Insufficient stock for photocopy service: {$photocopyModel->name} ({$currentStock} available)"
                             ], 423);
                         }
 
-                        // Deduct stock from refill
-                        $remainingQuantity = $item['quantity'];
-                        $refills = RefillPhotocopy::where('product_id', $item['id'])->orderBy('id')->get();
-
-                        foreach ($refills as $refill) {
-                            if ($remainingQuantity <= 0) break;
-
-                            if ($refill->stock >= $remainingQuantity) {
-                                $refill->stock -= $remainingQuantity;
-                                $refill->save();
-                                $remainingQuantity = 0;
-                            } else {
-                                $remainingQuantity -= $refill->stock;
-                                $refill->stock = 0;
-                                $refill->save();
-                            }
-                        }
+                        // Get product details
+                        $product = Product::find($item['id']);
+                        
+                        // Create new refill record with reason "Sold"
+                        $newStock = $currentStock - $item['quantity'];
+                        RefillPhotocopy::create([
+                            'product_id' => $item['id'],
+                            'product_code' => $product ? $product->code : '',
+                            'product_name' => $product ? $product->name : $photocopyModel->name,
+                            'quantity' => $item['quantity'],
+                            'stock' => $newStock,
+                            'reason' => 'Sold',
+                        ]);
                     }
 
                     // Create sale item for photocopy service
@@ -475,6 +478,16 @@ class PosController extends Controller
                                     $refill->save();
                                 }
                             }
+
+                            // Create RefillPrintout entry with reason "Sold"
+                            RefillPrintout::create([
+                                'product_id' => $rawMaterial->product_id,
+                                'product_code' => $rawMaterial->product->code ?? '',
+                                'product_name' => $rawMaterial->product->name ?? 'Unknown Product',
+                                'quantity' => $item['quantity'],
+                                'total_stock' => RefillPrintout::where('product_id', $rawMaterial->product_id)->sum('total_stock'),
+                                'reason' => 'Sold',
+                            ]);
 
                             // Create stock transaction for raw material deduction
                             StockTransaction::create([
@@ -566,6 +579,16 @@ class PosController extends Controller
                                 }
                             }
 
+                            // Create RefillLaminating entry with reason "Sold"
+                            RefillLaminating::create([
+                                'product_id' => $rawMaterial->product_id,
+                                'product_code' => $rawMaterial->product->code ?? '',
+                                'product_name' => $rawMaterial->product->name ?? 'Unknown Product',
+                                'quantity' => $item['quantity'],
+                                'total_stock' => RefillLaminating::where('product_id', $rawMaterial->product_id)->sum('total_stock'),
+                                'reason' => 'Sold',
+                            ]);
+
                             // Create stock transaction for raw material deduction
                             StockTransaction::create([
                                 'product_id' => $rawMaterial->product_id,
@@ -655,6 +678,16 @@ class PosController extends Controller
                                     $refill->save();
                                 }
                             }
+
+                            // Create RefillBinding entry with reason "Sold"
+                            RefillBinding::create([
+                                'product_id' => $rawMaterial->product_id,
+                                'product_code' => $rawMaterial->product->code ?? '',
+                                'product_name' => $rawMaterial->product->name ?? 'Unknown Product',
+                                'quantity' => $item['quantity'],
+                                'total_stock' => RefillBinding::where('product_id', $rawMaterial->product_id)->sum('total_stock'),
+                                'reason' => 'Sold',
+                            ]);
 
                             // Create stock transaction for raw material deduction
                             StockTransaction::create([

@@ -12,11 +12,23 @@ class RefillBindingController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        \Log::info('RefillBindingController index called', [
+            'expectsJson' => $request->expectsJson(),
+            'accept_header' => $request->header('Accept')
+        ]);
+        
         $refills = RefillBinding::with('product')
             ->orderBy('created_at', 'desc')
             ->get();
+            
+        \Log::info('RefillBinding records found', ['count' => $refills->count()]);
+            
+        if ($request->expectsJson()) {
+            \Log::info('Returning JSON response');
+            return response()->json($refills);
+        }
             
         return view('refillbinding.index', compact('refills'));
     }
@@ -31,6 +43,7 @@ class RefillBindingController extends Controller
                 'product_id' => 'required|exists:products,id',
                 'product_name' => 'required|string|max:255',
                 'quantity' => 'required|integer|min:1',
+                'reason' => 'nullable|string|max:255',
             ]);
 
             // Use database transaction for data integrity
@@ -55,6 +68,7 @@ class RefillBindingController extends Controller
                     'product_name' => $validated['product_name'],
                     'quantity' => $validated['quantity'],
                     'total_stock' => $product->quantity + $validated['quantity'],
+                    'reason' => $validated['reason'] ?? 'Added',
                 ]);
             }
 

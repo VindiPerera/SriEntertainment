@@ -2,19 +2,45 @@
   <div class="page-content">
     <div class="content-wrapper">
       <div class="page-header">
-        <h2>Laminating Services</h2>
+        <h2>Laminating Management</h2>
       </div>
-      <div class="page-body">
-        <!-- Add Button and Search Bar in One Row -->
-        <div class="controls-row">
-          <div class="search-bar">
-            <input v-model="search" type="text" placeholder="Search laminating services..." />
-          </div>
-          <button @click="openCreateForm" class="add-button">Add New Laminating Service</button>
-           <button @click="openRefillPopup" class="add-button">Add Refill</button>
-        </div>
 
-        <table class="service-table">
+      <!-- Modern Toggle Navigation -->
+      <div class="toggle-navigation">
+        <button 
+          @click="activeTab = 'services'" 
+          :class="['toggle-btn', { 'active': activeTab === 'services' }]"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          <span>Laminating Services</span>
+        </button>
+        <button 
+          @click="activeTab = 'history'" 
+          :class="['toggle-btn', { 'active': activeTab === 'history' }]"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <span>Refill History</span>
+        </button>
+      </div>
+
+      <div class="page-body">
+        <!-- Services Section -->
+        <div v-show="activeTab === 'services'" class="tab-content">
+          <!-- Add Button and Search Bar in One Row -->
+          <div class="controls-row">
+            <div class="search-bar">
+              <input v-model="search" type="text" placeholder="Search laminating services..." />
+            </div>
+            <button @click="openCreateForm" class="add-button">Add New Laminating Service</button>
+            <button @click="openRefillModal" class="add-button">Refill</button>
+          </div>
+
+          <div class="table-container-modern">
+            <table class="service-table">
           <thead>
             <tr>
               <th>#</th>
@@ -39,6 +65,49 @@
             </tr>
           </tbody>
         </table>
+          </div>
+        </div>
+
+        <!-- Refill History Section -->
+        <div v-show="activeTab === 'history'" class="tab-content">
+          <div class="table-container-modern">
+            <table class="service-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Product Code</th>
+                  <th>Product Name</th>
+                  <th>Reason</th>
+                  <th>Quantity</th>
+                  <th>Current Stock</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(refill, index) in refillLaminating" :key="refill.id">
+                  <td>{{ index + 1 }}</td>
+                  <td>{{ refill.product_code }}</td>
+                  <td>{{ refill.product_name }}</td>
+                  <td>{{ refill.reason }}</td>
+                  <td>{{ refill.quantity }}</td>
+                  <td>{{ refill.total_stock }}</td>
+                  <td>{{ new Date(refill.created_at).toLocaleDateString('en-GB') }}</td>
+                </tr>
+                <tr v-if="refillLaminating.length === 0">
+                  <td colspan="7" class="empty-state">
+                    <div class="empty-content">
+                      <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                      </svg>
+                      <p class="text-lg font-semibold text-gray-600">No refill history found</p>
+                      <span class="text-sm text-gray-400">Start adding refills to see the history here</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
 
         <!-- Create Modal -->
         <div v-if="isCreateModalOpen" class="modal-overlay">
@@ -186,11 +255,10 @@
           </div>
         </div>
 
-        <!-- Refill Popup -->
+        <!-- Refill Modal -->
         <LaminatingRefillPopup
-          :isOpen="isRefillPopupOpen"
-          @close="closeRefillPopup"
-          @refill-submitted="fetchServices"
+          :isOpen="isRefillModalOpen"
+          @close="closeRefillModal"
         />
 
         <!-- Notification Alert -->
@@ -219,14 +287,17 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useForm } from "@inertiajs/vue3";
+import axios from "axios";
 import LaminatingRefillPopup from './LaminatingRefillPopup.vue';
 import NotificationAlert from "./NotificationAlert.vue";
 
 const isCreateModalOpen = ref(false);
 const isEditModalOpen = ref(false);
-const isRefillPopupOpen = ref(false);
+const isRefillModalOpen = ref(false);
+const activeTab = ref('services'); // Toggle between 'services' and 'history'
 const search = ref("");
 const editingService = ref(null);
+const refillLaminating = ref([]);
 
 // Notification state
 const notification = ref({
@@ -303,26 +374,34 @@ const editTotalPriceDisplay = computed(() => {
 
 const openCreateForm = () => {
   isCreateModalOpen.value = true;
+  // Reset form data
+  selectedProducts.value = [];
+  selectedCategoryId.value = null;
+  selectedProductId.value = null;
+  products.value = [];
+  fetchCategories(); // Ensure categories are loaded
 };
 
 const closeCreateModal = () => {
   isCreateModalOpen.value = false;
-  createForm.reset();
-  // Reset category and product selections
-  selectedCategoryId.value = null;
-  selectedProductId.value = null;
-  selectedProducts.value = [];
-  products.value = [];
 };
 
 const closeEditModal = () => {
   isEditModalOpen.value = false;
-  editingService.value = null;
-  editForm.reset();
 };
 
-const closeRefillPopup = () => {
-  isRefillPopupOpen.value = false;
+const closeRefillModal = () => {
+  isRefillModalOpen.value = false;
+};
+
+const handleRefillSubmit = (data) => {
+  // Handle the refill submission
+  console.log('Refill submitted:', data);
+  closeRefillModal();
+  // Refresh the low stock products after refill
+  fetchLowStockProducts();
+  // Refresh refill laminating list
+  fetchRefillLaminating();
 };
 
 // Create form
@@ -484,10 +563,61 @@ const fetchProductsByCategory = async (categoryId) => {
   }
 };
 
+const fetchRefillLaminating = async () => {
+  try {
+    const response = await axios.get('/refilllaminating');
+    refillLaminating.value = response.data;
+  } catch (error) {
+    console.error('Error fetching refill laminating:', error);
+  }
+};
+
+// Fetch products for refill
+const fetchProducts = async (url = '/api/products') => {
+  try {
+    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    console.log('CSRF Token:', token); // Debugging CSRF token
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': token
+      },
+      body: JSON.stringify({
+        search: search.value,
+        sort: '',
+        color: '',
+        size: '',
+        stockStatus: '',
+        selectedCategory: ''
+      })
+    });
+
+    if (!response.ok) {
+      console.error('HTTP Error:', response.status); // Debugging response status
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('API Response:', data); // Debugging API response
+
+    if (data && data.products) {
+      products.value = data.products.data || [];
+    }
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    showNotification('error', 'Error', 'Failed to load products. Please try refreshing the page.');
+  }
+};
+
 onMounted(() => {
   fetchServices();
   fetchCategories();
+  fetchProducts();
   fetchLowStockProducts();
+  fetchRefillLaminating();
 });
 
 const filteredServices = computed(() => {
@@ -530,9 +660,9 @@ const submitForm = () => {
   });
 };
 
-const openRefillPopup = () => {
-  console.log("Opening refill popup...");
-  isRefillPopupOpen.value = true;
+const openRefillModal = () => {
+  console.log("Opening refill modal...");
+  isRefillModalOpen.value = true;
 };
 
 const editService = async (service) => {
@@ -604,8 +734,82 @@ const deleteService = (id) => {
 .content-wrapper {
   background-color: #fff;
   padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Modern Toggle Navigation */
+.toggle-navigation {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 30px;
+  padding: 6px;
+  background: #f3f4f6;
+  border-radius: 12px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+.toggle-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 18px;
+  background: transparent;
+  border: none;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.toggle-btn svg {
+  width: 18px;
+  height: 18px;
+  transition: all 0.3s ease;
+}
+
+.toggle-btn:hover {
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.toggle-btn.active {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  transform: translateY(-1px);
+}
+
+.toggle-btn.active svg {
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+}
+
+.tab-content {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.table-container-modern {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
 }
 
 .page-header {
@@ -613,15 +817,19 @@ const deleteService = (id) => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 30px;
-  padding-bottom: 15px;
+  padding-bottom: 20px;
   border-bottom: 2px solid #e0e0e0;
 }
 
 .page-header h2 {
-  font-size: 28px;
-  font-weight: bold;
-  color: #333;
+  font-size: 32px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0;
+  letter-spacing: -0.5px;
 }
 
 .modal-content {
@@ -900,5 +1108,54 @@ const deleteService = (id) => {
 
 .remove-product-btn:hover {
   background-color: #c82333;
+}
+
+.empty-state {
+  padding: 60px 20px !important;
+  background: linear-gradient(to bottom, #f9fafb 0%, #ffffff 100%);
+  text-align: center;
+}
+
+.empty-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.service-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+}
+
+.service-table th,
+.service-table td {
+  padding: 16px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.service-table th {
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  color: #374151;
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.service-table tbody tr {
+  transition: all 0.2s ease;
+}
+
+.service-table tbody tr:hover {
+  background: linear-gradient(to right, #f0f9ff 0%, #e0f2fe 100%);
+  transform: scale(1.001);
+}
+
+.service-table td {
+  color: #374151;
+  font-size: 14px;
 }
 </style>

@@ -41,9 +41,32 @@ class RefillPhotocopyController extends Controller
      */
     public function index()
     {
-        return view('refillphotocopy.index', [
-            'refills' => RefillPhotocopy::with('product')->get(),
-        ]);
+        $refills = RefillPhotocopy::with('product')
+            ->orderBy('created_at', 'desc')
+            ->get();
+            
+        return response()->json($refills);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy($id)
+    {
+        try {
+            $refill = RefillPhotocopy::findOrFail($id);
+            $refill->delete();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Refill record deleted successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete refill record'
+            ], 500);
+        }
     }
 
     /**
@@ -54,36 +77,57 @@ class RefillPhotocopyController extends Controller
         $validated = $request->validate([
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
+            'reason' => 'string|in:Added,Sold',
         ]);
 
         // Get the product details
         $product = Product::findOrFail($validated['product_id']);
 
-        // Check if product has enough stock
-        if ($product->stock_quantity < $validated['quantity']) {
-            return response()->json([
-                'message' => 'Insufficient stock available. Available stock: ' . $product->stock
-            ], 422);
+        // Get the latest stock from refill_photocopies for this product
+        $latestRefill = RefillPhotocopy::where('product_code', $product->code)
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        $currentStock = $latestRefill ? $latestRefill->stock : 0;
+        $reason = $validated['reason'] ?? 'Added';
+
+        // Calculate new stock based on reason
+        if ($reason === 'Added') {
+            // Check if product has enough stock to add
+            if ($product->stock_quantity < $validated['quantity']) {
+                return response()->json([
+                    'message' => 'Insufficient stock available. Available stock: ' . $product->stock_quantity
+                ], 422);
+            }
+            
+            $newStock = $currentStock + $validated['quantity'];
+            
+            // Deduct from main product inventory
+            $product->stock_quantity -= $validated['quantity'];
+            $product->save();
+        } else {
+            // Sold - decrease stock
+            if ($currentStock < $validated['quantity']) {
+                return response()->json([
+                    'message' => 'Insufficient refill stock. Current stock: ' . $currentStock
+                ], 422);
+            }
+            
+            $newStock = $currentStock - $validated['quantity'];
         }
 
-        // Calculate total stock for the product
-        $totalStock = RefillPhotocopy::where('product_code', $product->code)->sum('stock') + $validated['quantity'];
-
-        // Always create a new refill record
+        // Create new refill record
         $refill = RefillPhotocopy::create([
             'product_id' => $validated['product_id'],
             'product_code' => $product->code,
             'product_name' => $product->name,
             'quantity' => $validated['quantity'],
-            'stock' => $totalStock,
+            'stock' => $newStock,
+            'reason' => $reason,
         ]);
 
-        // Deduct the refill quantity from the product's available stock
-        $product->stock_quantity -= $validated['quantity'];
-        $product->save();
-
         return response()->json([
-            'message' => 'New refill added successfully',
+            'message' => $reason === 'Added' ? 'Stock added successfully' : 'Stock sold successfully',
             'refill' => $refill
         ], 201);
     }

@@ -338,6 +338,7 @@ const submitStock = async () => {
         product_id: selectedProductId.value,
         product_name: selectedProduct.value.name,
         quantity: parseInt(stockQuantity.value),
+        reason: 'Added',
       }),
     });
 

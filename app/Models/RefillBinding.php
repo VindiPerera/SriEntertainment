@@ -9,12 +9,15 @@ class RefillBinding extends Model
 {
     use HasFactory;
 
+    protected $table = 'refill_binding';
+
     protected $fillable = [
         'product_id',
         'product_code',
         'product_name',
         'quantity',
         'total_stock',
+        'reason',
     ];
 
     protected $casts = [

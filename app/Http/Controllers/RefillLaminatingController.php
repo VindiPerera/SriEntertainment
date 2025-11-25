@@ -10,10 +10,18 @@ use Illuminate\Support\Facades\Log;
 
 class RefillLaminatingController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $refills = RefillLaminating::with('product')
+            ->orderBy('created_at', 'desc')
+            ->get();
+            
+        if ($request->expectsJson()) {
+            return response()->json($refills);
+        }
+            
         return view('refilllaminating.index', [
-            'refills' => RefillLaminating::with('product')->get(),
+            'refills' => $refills,
         ]);
     }
 
@@ -40,6 +48,7 @@ class RefillLaminatingController extends Controller
             'product_name' => $product->name,
             'quantity' => $validated['quantity'],
             'total_stock' => $totalStock,
+            'reason' => 'Added',
         ]);
 
         $product->stock_quantity -= $validated['quantity'];
@@ -82,6 +91,7 @@ class RefillLaminatingController extends Controller
                 'product_name' => $product->name,
                 'quantity' => $validated['quantity'],
                 'total_stock' => $validated['quantity'],
+                'reason' => 'Added',
             ]);
         }
 

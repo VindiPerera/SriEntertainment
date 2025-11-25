@@ -276,6 +276,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/refillphotocopy', [RefillPhotocopyController::class, 'index'])->name('refillphotocopy.index');
     Route::post('/refillphotocopy', [RefillPhotocopyController::class, 'store'])->name('refillphotocopy.store');
     Route::post('/api/refill-photocopy', [RefillPhotocopyController::class, 'store']);
+    Route::get('/refill-photocopies', [RefillPhotocopyController::class, 'index'])->name('refill-photocopies.index');
+    Route::delete('/refill-photocopies/{id}', [RefillPhotocopyController::class, 'destroy'])->name('refill-photocopies.destroy');
+    Route::get('/refill-printouts', [RefillPrintoutController::class, 'index'])->name('refill-printouts.index');
+    Route::get('/refill-bindings', [RefillBindingController::class, 'index'])->name('refill-bindings.index');
     // API: Get all products with stock 0 (for notification)
     Route::get('/api/photocopy/low-stock', [RefillPhotocopyController::class, 'lowStockProducts']);
     Route::get('/api/printout/low-stock', [RefillPrintoutController::class, 'lowStockProducts']);

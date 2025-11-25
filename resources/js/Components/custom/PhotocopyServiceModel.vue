@@ -2,49 +2,118 @@
   <div class="page-content">
     <div class="content-wrapper">
       <div class="page-header">
-        <h2>Photocopy Services</h2>
+        <h2>Photocopy Management</h2>
       </div>
+
+      <!-- Modern Toggle Navigation -->
+      <div class="toggle-navigation">
+        <button 
+          @click="activeTab = 'services'" 
+          :class="['toggle-btn', { 'active': activeTab === 'services' }]"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          <span>Photocopy Services</span>
+        </button>
+        <button 
+          @click="activeTab = 'history'" 
+          :class="['toggle-btn', { 'active': activeTab === 'history' }]"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <span>Refill History</span>
+        </button>
+      </div>
+
       <div class="page-body">
-        <!-- Add Button and Search Bar in One Row -->
-        <div class="controls-row">
-          <div class="search-bar">
-            <input v-model="search" type="text" placeholder="Search photocopy services..." />
+        <!-- Services Section -->
+        <div v-show="activeTab === 'services'" class="tab-content">
+          <!-- Add Button and Search Bar in One Row -->
+          <div class="controls-row">
+            <div class="search-bar">
+              <input v-model="search" type="text" placeholder="Search photocopy services..." />
+            </div>
+            <button @click="openCreateForm" class="add-button">Add New Photocopy Service</button>
+            <button @click="openRefillModal" class="add-button">Refill</button>
           </div>
-          <button @click="openCreateForm" class="add-button">Add New Photocopy Service</button>
-          <button @click="openRefillModal" class="add-button">Refill</button>
+
+          <div class="table-container-modern">
+            <table class="service-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Name</th>
+                  <th>Size</th>
+                  <th>Side</th>
+                  <th>Pages</th>
+                  <th>Color</th>
+                  <th>Price</th>
+                  <th>Service Charge</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(service, index) in filteredServices" :key="service.id">
+                  <td>{{ index + 1 }}</td>
+                  <td>{{ service.name }}</td>
+                  <td>{{ service.size }}</td>
+                  <td>{{ service.side }}</td>
+                  <td>{{ service.pages }}</td>
+                  <td>{{ service.color }}</td>
+                  <td>{{ service.price }}</td>
+                  <td>{{ service.service_charge }}</td>
+                  <td>
+                    <button @click="editService(service)" class="edit-button">Edit</button>
+                    <button @click="deleteService(service.id)" class="delete-button">Delete</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        <table class="service-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Name</th>
-              <th>Size</th>
-              <th>Side</th>
-              <th>Pages</th>
-              <th>Color</th>
-              <th>Price</th>
-              <th>Service Charge</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(service, index) in filteredServices" :key="service.id">
-              <td>{{ index + 1 }}</td>
-              <td>{{ service.name }}</td>
-              <td>{{ service.size }}</td>
-              <td>{{ service.side }}</td>
-              <td>{{ service.pages }}</td>
-              <td>{{ service.color }}</td>
-              <td>{{ service.price }}</td>
-              <td>{{ service.service_charge }}</td>
-              <td>
-                <button @click="editService(service)" class="edit-button">Edit</button>
-                <button @click="deleteService(service.id)" class="delete-button">Delete</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <!-- Refill History Section -->
+        <div v-show="activeTab === 'history'" class="tab-content">
+          <div class="table-container-modern">
+            <table class="service-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Product Code</th>
+                  <th>Product Name</th>
+                  <th>Reason</th>
+                  <th>Quantity</th>
+                  <th>Current Stock</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(refill, index) in refillPhotocopies" :key="refill.id">
+                  <td>{{ index + 1 }}</td>
+                  <td>{{ refill.product_code }}</td>
+                  <td>{{ refill.product_name }}</td>
+                  <td>{{ refill.reason }}</td>
+                  <td>{{ refill.quantity }}</td>
+                  <td>{{ refill.stock }}</td>
+                  <td>{{ new Date(refill.created_at).toLocaleDateString('en-GB') }}</td>
+                </tr>
+                <tr v-if="refillPhotocopies.length === 0">
+                  <td colspan="7" class="empty-state">
+                    <div class="empty-content">
+                      <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                      </svg>
+                      <p class="text-lg font-semibold text-gray-600">No refill history found</p>
+                      <span class="text-sm text-gray-400">Start adding refills to see the history here</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
 
         <!-- Create Modal -->
         <div v-if="isCreateModalOpen" class="modal-overlay">
@@ -238,6 +307,7 @@
 
         <!-- Refill Modal -->
         <RefillPopup
+          v-model="isRefillModalOpen"
           :isRefillModalOpen="isRefillModalOpen"
           @close="closeRefillModal"
           @refill-submitted="handleRefillSubmit"
@@ -276,9 +346,11 @@ import NotificationAlert from "./NotificationAlert.vue";
 const isCreateModalOpen = ref(false);
 const isEditModalOpen = ref(false);
 const isRefillModalOpen = ref(false);
+const activeTab = ref('services'); // Toggle between 'services' and 'history'
 const search = ref("");
 const services = ref([]);
 const editingService = ref(null);
+const refillPhotocopies = ref([]);
 
 const openCreateForm = () => {
   isCreateModalOpen.value = true;
@@ -300,6 +372,34 @@ const closeEditModal = () => {
 
 const closeRefillModal = () => {
   isRefillModalOpen.value = false;
+};
+
+const handleRefillSubmit = (data) => {
+  // Handle the refill submission
+  console.log('Refill submitted:', data);
+  closeRefillModal();
+  // Refresh the low stock products after refill
+  fetchLowStockProducts();
+  // Refresh refill photocopies list
+  fetchRefillPhotocopies();
+};
+
+const editRefill = (refill) => {
+  // Handle edit refill - you can implement this based on your needs
+  console.log('Edit refill:', refill);
+};
+
+const deleteRefill = async (id) => {
+  if (confirm('Are you sure you want to delete this refill record?')) {
+    try {
+      await axios.delete(`/refill-photocopies/${id}`);
+      fetchRefillPhotocopies();
+      showNotification('success', 'Success', 'Refill record deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting refill:', error);
+      showNotification('error', 'Error', 'Failed to delete refill record.');
+    }
+  }
 };
 
 
@@ -379,6 +479,15 @@ const fetchLowStockProducts = async () => {
     }
   } catch (error) {
     lowStockProducts.value = [];
+  }
+};
+
+const fetchRefillPhotocopies = async () => {
+  try {
+    const response = await axios.get('/refill-photocopies');
+    refillPhotocopies.value = response.data;
+  } catch (error) {
+    console.error('Error fetching refill photocopies:', error);
   }
 };
 
@@ -533,6 +642,7 @@ onMounted(() => {
   fetchCategories();
   fetchProducts();
   fetchLowStockProducts();
+  fetchRefillPhotocopies();
 });
 
 // Removed watcher - using @change event instead
@@ -761,15 +871,89 @@ const selectProduct = (product) => {
 .content-wrapper {
   background-color: #fff;
   padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Modern Toggle Navigation */
+.toggle-navigation {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 30px;
+  padding: 6px;
+  background: #f3f4f6;
+  border-radius: 12px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+.toggle-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 18px; /* Reduced padding for smaller size */
+  background: transparent;
+  border: none;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  color: #6b7280;
+  font-size: 14px; /* Slightly smaller font size */
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.toggle-btn svg {
+  width: 18px; /* Reduced icon size */
+  height: 18px;
+  transition: all 0.3s ease;
+}
+
+.toggle-btn:hover {
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.toggle-btn.active {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  transform: translateY(-1px);
+}
+
+.toggle-btn.active svg {
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+}
+
+.tab-content {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.table-container-modern {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
 }
 
 .controls-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   gap: 20px;
 }
 
@@ -780,8 +964,16 @@ const selectProduct = (product) => {
 .controls-row .add-button {
   margin-bottom: 0;
   flex-shrink: 0;
-  padding: 10px 20px;
+  padding: 12px 24px;
   font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.controls-row .add-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
 }
 
 .page-header {
@@ -789,83 +981,204 @@ const selectProduct = (product) => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 30px;
-  padding-bottom: 15px;
+  padding-bottom: 20px;
   border-bottom: 2px solid #e0e0e0;
 }
 
 .page-header h2 {
-  font-size: 28px;
-  font-weight: bold;
-  color: #333;
+  font-size: 32px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0;
+  letter-spacing: -0.5px;
 }
 
 .add-button {
-  background-color: #4CAF50;
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
   color: white;
   padding: 12px 24px;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 16px;
-  font-weight: bold;
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+  transition: all 0.3s ease;
 }
 
 .add-button:hover {
-  background-color: #45a049;
+  background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
 }
 
 .search-bar input {
   width: 100%;
-  padding: 10px;
+  padding: 12px 16px;
   margin-bottom: 0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.search-bar input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .service-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 20px;
+  margin: 0;
 }
 
 .service-table th,
 .service-table td {
-  border: 1px solid #ddd;
-  padding: 12px;
+  padding: 16px;
   text-align: left;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .service-table th {
-  background-color: #f2f2f2;
-  font-weight: bold;
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  color: #374151;
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  letter-spacing: 0.5px;
+}
+
+.service-table tbody tr {
+  transition: all 0.2s ease;
+}
+
+.service-table tbody tr:hover {
+  background: linear-gradient(to right, #f0f9ff 0%, #e0f2fe 100%);
+  transform: scale(1.001);
+}
+
+.service-table td {
+  color: #374151;
+  font-size: 14px;
 }
 
 .edit-button {
-  background-color: #2196F3;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
-  padding: 6px 12px;
+  padding: 8px 16px;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
-  margin-right: 5px;
+  margin-right: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
 }
 
 .edit-button:hover {
-  background-color: #0b7dda;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .delete-button {
-  background-color: #f44336;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: white;
-  padding: 6px 12px;
+  padding: 8px 16px;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
 }
 
 .delete-button:hover {
-  background-color: #da190b;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+/* Badge Styles for History Table */
+.code-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+}
+
+.quantity-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 12px;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.25);
+}
+
+.stock-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 12px;
+  box-shadow: 0 2px 8px rgba(6, 182, 212, 0.25);
+}
+
+.reason-added {
+  display: inline-block;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  padding: 4px 14px;
+  border-radius: 16px;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+  text-transform: uppercase;
+}
+
+.reason-sold {
+  display: inline-block;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  padding: 4px 14px;
+  border-radius: 16px;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
+  text-transform: uppercase;
+}
+
+.empty-state {
+  padding: 60px 20px !important;
+  background: linear-gradient(to bottom, #f9fafb 0%, #ffffff 100%);
+  text-align: center;
+}
+
+.empty-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 }
 
 /* Create/Edit Modal Styles */
@@ -1151,6 +1464,8 @@ const selectProduct = (product) => {
   color: #333;
 }
 
+
+
 .user-manual-button {
   background-color: #28a745;
   color: white;
@@ -1285,6 +1600,11 @@ const selectProduct = (product) => {
   transition: background-color 0.3s ease;
 }
 
+#historyTable {
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .pagination-button:hover:not(:disabled) {
   background-color: #1976D2;
 }
@@ -1374,5 +1694,183 @@ const selectProduct = (product) => {
   border: 1px dashed #ccc;
   border-radius: 4px;
   font-style: italic;
+}
+
+/* Refill Section Styles - Modern Design */
+.refill-section-centered {
+  margin-top: 50px;
+  width: 100%;
+}
+
+.refill-full-width {
+  width: 100%;
+}
+
+.refill-header-modern {
+  margin-bottom: 30px;
+  padding: 0;
+}
+
+.icon-badge {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+  transition: all 0.3s ease;
+}
+
+.refill-title-modern {
+  color: #1f2937;
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0;
+  text-align: left;
+  letter-spacing: -0.5px;
+}
+
+.refill-container-modern {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.refill-container-modern .table-wrapper-modern {
+  width: 90%;
+  max-width: 1200px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+.refill-container-modern .table-wrapper-modern:hover {
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.refill-table-modern {
+  background-color: white;
+  margin: 0;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.refill-table-modern thead tr {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.refill-table-modern thead th {
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 18px 16px;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: none;
+}
+
+.refill-row-modern {
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.refill-row-modern:hover {
+  background: linear-gradient(to right, #f0f9ff 0%, #e0f2fe 100%);
+  transform: scale(1.001);
+}
+
+.refill-row-modern td {
+  padding: 16px;
+  color: #374151;
+  font-size: 14px;
+  border: none;
+}
+
+.code-badge-modern {
+  display: inline-block;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+}
+
+.quantity-badge-modern {
+  display: inline-block;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.25);
+}
+
+.stock-badge-modern {
+  display: inline-block;
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  box-shadow: 0 2px 8px rgba(6, 182, 212, 0.25);
+}
+
+.reason-added-modern {
+  display: inline-block;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  text-transform: uppercase;
+}
+
+.reason-sold-modern {
+  display: inline-block;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  text-transform: uppercase;
+}
+
+.empty-state-modern {
+  padding: 80px 20px !important;
+  background: linear-gradient(to bottom, #f9fafb 0%, #ffffff 100%);
+}
+
+.empty-content-modern {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.font-semibold {
+  font-weight: 600;
 }
 </style>

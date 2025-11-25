@@ -15,6 +15,7 @@ class RefillPhotocopy extends Model
         'product_name',
         'quantity',
         'stock',
+        'reason',
     ];
        
     public function product()

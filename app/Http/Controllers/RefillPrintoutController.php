@@ -12,11 +12,15 @@ class RefillPrintoutController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $refills = RefillPrintout::with('product')
             ->orderBy('created_at', 'desc')
             ->get();
+            
+        if ($request->expectsJson()) {
+            return response()->json($refills);
+        }
             
         return view('refillprintout.index', compact('refills'));
     }
@@ -59,6 +63,7 @@ class RefillPrintoutController extends Controller
                 'product_name' => $validated['product_name'],
                 'quantity' => $validated['quantity'],
                 'total_stock' => $newTotalStock,
+                'reason' => 'Added', // Default reason for refill
             ]);
 
             // Update the product's stock quantity (DEDUCT from stock)
@@ -130,6 +135,7 @@ class RefillPrintoutController extends Controller
                 'product_name' => $product->name,
                 'quantity' => $validated['quantity'],
                 'total_stock' => $newStock,
+                'reason' => 'Added', // Default reason for refill
             ]);
 
             // Update the product's stock quantity

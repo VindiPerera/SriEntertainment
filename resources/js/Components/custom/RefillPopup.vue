@@ -269,6 +269,7 @@
 
 <script setup>
 import { ref, defineProps, defineEmits, watch, computed } from 'vue';
+import axios from 'axios';
 
 const props = defineProps({
   modelValue: {
@@ -436,19 +437,10 @@ const submitStock = async () => {
   console.log("Submitting payload:", payload);
 
   try {
-    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-    const response = await fetch("/refillphotocopy", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        "X-CSRF-TOKEN": token,
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (response.ok) {
-      emit("refill-submitted");
+    const response = await axios.post("/refillphotocopy", payload);
+    
+    if (response.data) {
+      emit("refill-submitted", response.data);
       selectedProductId.value = null;
       stockQuantity.value = null;
       
@@ -457,15 +449,26 @@ const submitStock = async () => {
       
       // Close the modal after successful submission
       emit('close');
-    } else {
-      const errorData = await response.json();
-      console.error("Error:", errorData);
-      if (errorData.errors && errorData.errors.stock) {
-        alert(`Error: ${errorData.errors.stock.join(", ")}`);
-      }
     }
   } catch (error) {
     console.error("Error submitting stock:", error);
+    if (error.response) {
+      // Server responded with error
+      const errorData = error.response.data;
+      if (errorData.errors && errorData.errors.stock) {
+        alert(`Error: ${errorData.errors.stock.join(", ")}`);
+      } else if (errorData.message) {
+        alert(`Error: ${errorData.message}`);
+      } else {
+        alert('An error occurred while submitting the refill.');
+      }
+    } else if (error.request) {
+      // Request made but no response
+      alert('No response from server. Please check your connection.');
+    } else {
+      // Something else happened
+      alert('An unexpected error occurred.');
+    }
   }
 };
 

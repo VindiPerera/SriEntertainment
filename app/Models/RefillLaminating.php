@@ -17,6 +17,7 @@ class RefillLaminating extends Model
         'product_name',
         'quantity',
         'total_stock',
+        'reason',
     ];
 
     public function product()
