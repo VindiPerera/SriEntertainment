@@ -47,6 +47,7 @@
               <span class="ml-3 text-sm text-gray-900">
                 {{ paper.name }}
                 <span class="text-gray-500">(Stock: {{ paper.stock_quantity }})</span>
+                <span v-if="paper.day_of_week" class="text-gray-500">(Day: {{ paper.day_of_week.charAt(0).toUpperCase() + paper.day_of_week.slice(1) }})</span>
               </span>
             </label>
           </div>

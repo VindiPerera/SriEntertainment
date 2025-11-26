@@ -17,6 +17,7 @@ class Newspaper extends Model
         'batch_no',
         'supplier',
         'duration',
+        'day_of_week',
         'publication_date',
         'expire_date',
         'language',

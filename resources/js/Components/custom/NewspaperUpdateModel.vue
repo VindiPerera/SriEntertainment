@@ -111,12 +111,16 @@
                     <label class="block text-sm font-medium text-gray-300"
                       >Supplier:</label
                     >
-                    <input
+                    <select
                       v-model="form.supplier"
-                      type="text"
                       id="supplier"
-                      class="w-full px-4 py-2 mt-2 text-black rounded-md focus:outline-none focus:ring focus:ring-blue-600"
-                    />
+                      class="w-full px-4 py-2 mt-2 text-black bg-white rounded-md focus:outline-none focus:ring focus:ring-blue-600"
+                    >
+                      <option value="">Select Supplier</option>
+                      <option v-for="supplier in suppliers" :key="supplier.id" :value="supplier.name">
+                        {{ supplier.name }}
+                      </option>
+                    </select>
                     <span v-if="form.errors.supplier" class="mt-4 text-red-500">{{
                       form.errors.supplier
                     }}</span>
@@ -139,6 +143,28 @@
                       form.errors.duration
                     }}</span>
                   </div>
+                </div>
+
+                <div v-if="form.duration === 'weekly'" class="w-full">
+                  <label class="block text-sm font-medium text-gray-300"
+                    >Day of Week:</label
+                  >
+                  <select
+                    v-model="form.day_of_week"
+                    id="day_of_week"
+                    class="w-full px-4 py-2 mt-2 text-black bg-white rounded-md focus:outline-none focus:ring focus:ring-blue-600"
+                  >
+                    <option value="monday">Monday</option>
+                    <option value="tuesday">Tuesday</option>
+                    <option value="wednesday">Wednesday</option>
+                    <option value="thursday">Thursday</option>
+                    <option value="friday">Friday</option>
+                    <option value="saturday">Saturday</option>
+                    <option value="sunday">Sunday</option>
+                  </select>
+                  <span v-if="form.errors.day_of_week" class="mt-4 text-red-500">{{
+                    form.errors.day_of_week
+                  }}</span>
                 </div>
 
                 <div class="flex items-center gap-8 mt-6">
@@ -182,12 +208,16 @@
                     <label class="block text-sm font-medium text-gray-300"
                       >Language:</label
                     >
-                    <input
+                    <select
                       v-model="form.language"
-                      type="text"
                       id="language"
-                      class="w-full px-4 py-2 mt-2 text-black rounded-md focus:outline-none focus:ring focus:ring-blue-600"
-                    />
+                      class="w-full px-4 py-2 mt-2 text-black bg-white rounded-md focus:outline-none focus:ring focus:ring-blue-600"
+                    >
+                      <option value="">Select Language</option>
+                      <option value="tamil">Tamil</option>
+                      <option value="sinhala">Sinhala</option>
+                      <option value="english">English</option>
+                    </select>
                     <span v-if="form.errors.language" class="mt-4 text-red-500">{{
                       form.errors.language
                     }}</span>
@@ -299,6 +329,8 @@
                 </div>
               </div>
 
+              
+
               <!-- Modal Buttons -->
               <div class="mt-6 space-x-4">
                 <button
@@ -339,6 +371,10 @@ const emit = defineEmits(["update:open"]);
 const props = defineProps({
   open: Boolean,
   newspaper: Object,
+  suppliers: {
+    type: Array,
+    default: () => [],
+  },
 });
 
 const form = useForm({
@@ -348,6 +384,7 @@ const form = useForm({
   batch_no: "",
   supplier: "",
   duration: "monthly",
+  day_of_week: "",
   publication_date: "",
   expire_date: "",
   language: null,
@@ -369,6 +406,7 @@ watch(
       form.batch_no = newValue.batch_no || "";
       form.supplier = newValue.supplier || "";
       form.duration = newValue.duration || "monthly";
+      form.day_of_week = newValue.day_of_week || "";
       form.publication_date = newValue.publication_date
         ? new Date(newValue.publication_date).toISOString().split("T")[0]
         : "";

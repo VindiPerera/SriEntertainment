@@ -19,5 +19,6 @@ class VerifyCsrfToken extends Middleware
         '/api/refill-printout',
         '/api/refill-binding',
         '/api/refill-photocopy',
+        '/api/store-newspapers',
     ];
 }

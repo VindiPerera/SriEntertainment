@@ -1045,6 +1045,103 @@
       </div>
     </div>
 
+    <!-- Expense Summary -->
+    <div class="w-full bg-white border-4 border-black rounded-xl p-6">
+      <h2 class="text-2xl font-semibold text-slate-700 text-center pb-4">
+        Expense Summary
+      </h2>
+
+      <!-- Download Button and Summary Stats -->
+      <div class="flex justify-between items-center pb-4">
+        <button
+          @click="downloadExpensePDF"
+          class="px-4 py-2 text-md font-semibold text-white bg-orange-600 rounded-lg hover:bg-orange-700 shadow-md"
+        >
+          Download PDF
+        </button>
+        
+        <!-- Total Expense Amount -->
+        <div class="py-3 px-6 border-2 border-red-600 rounded-xl bg-red-400 shadow-lg text-center">
+          <h2 class="text-lg font-extrabold text-white uppercase">
+            Total Expenses: 
+            <span class="text-xl font-bold text-white">
+              {{ formatCurrency(totalExpenseAmount) }} LKR
+            </span>
+          </h2>
+        </div>
+      </div>
+
+      <!-- Category Summary Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div 
+          v-for="(categoryData, category) in expensesByCategory" 
+          :key="category"
+          class="bg-gradient-to-br from-red-50 to-red-100 border-l-4 border-red-500 p-4 rounded shadow-md"
+        >
+          <h3 class="text-sm font-semibold text-red-800 uppercase mb-2">{{ category }}</h3>
+          <p class="text-lg font-bold text-red-900">Rs. {{ formatCurrency(categoryData.total_amount) }}</p>
+          <p class="text-xs text-red-600">{{ categoryData.count }} expense(s)</p>
+        </div>
+      </div>
+
+      <!-- Expenses Table -->
+      <div class="overflow-x-auto max-h-[400px] border rounded-xl">
+        <table class="w-full text-gray-800 bg-white border border-gray-300 rounded-lg shadow-md">
+          <thead>
+            <tr class="bg-gradient-to-r from-red-700 via-red-600 to-red-700 text-white text-[14px] border-b border-red-800">
+              <th class="p-3 text-left font-semibold">#</th>
+              <th class="p-3 text-left font-semibold">Date</th>
+              <th class="p-3 text-left font-semibold">Category</th>
+              <th class="p-3 text-center font-semibold">Amount (LKR)</th>
+              <th class="p-3 text-center font-semibold">Payment Method</th>
+              <th class="p-3 text-left font-semibold">Reference</th>
+              <th class="p-3 text-left font-semibold">Description</th>
+              <th class="p-3 text-left font-semibold">Note</th>
+            </tr>
+          </thead>
+          <tbody class="text-[12px] font-medium">
+            <tr v-for="(expense, index) in expenses" :key="expense.id" class="border-b hover:bg-gray-100">
+              <td class="p-3 text-center">{{ index + 1 }}</td>
+              <td class="p-3">{{ new Date(expense.date).toLocaleDateString() }}</td>
+              <td class="p-3 font-semibold">{{ expense.category }}</td>
+              <td class="p-3 text-center font-bold text-red-600">{{ formatCurrency(expense.amount) }}</td>
+              <td class="p-3 text-center">
+                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs">
+                  {{ expense.payment_method }}
+                </span>
+              </td>
+              <td class="p-3 text-gray-600">{{ expense.reference || '-' }}</td>
+              <td class="p-3">{{ expense.description || '-' }}</td>
+              <td class="p-3 text-gray-600">{{ expense.note || '-' }}</td>
+            </tr>
+            <tr v-if="expenses.length === 0">
+              <td colspan="8" class="p-8 text-center text-gray-500">
+                No expenses found for the selected date range
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Summary Statistics -->
+      <div class="grid md:grid-cols-3 grid-cols-1 gap-4 mt-6">
+        <div class="bg-red-100 border border-red-300 rounded-lg p-4 text-center">
+          <h3 class="text-lg font-semibold text-red-800">Total Expenses</h3>
+          <p class="text-2xl font-bold text-red-900">{{ expenses.length }}</p>
+        </div>
+        <div class="bg-orange-100 border border-orange-300 rounded-lg p-4 text-center">
+          <h3 class="text-lg font-semibold text-orange-800">Categories</h3>
+          <p class="text-2xl font-bold text-orange-900">{{ Object.keys(expensesByCategory).length }}</p>
+        </div>
+        <div class="bg-yellow-100 border border-yellow-300 rounded-lg p-4 text-center">
+          <h3 class="text-lg font-semibold text-yellow-800">Average Amount</h3>
+          <p class="text-2xl font-bold text-yellow-900">
+            {{ expenses.length > 0 ? formatCurrency(totalExpenseAmount / expenses.length) : '0.00' }} LKR
+          </p>
+        </div>
+      </div>
+    </div>
+
 <!-- Batch Management -->
 
 
@@ -1122,6 +1219,9 @@ const props = defineProps({
   totalReloadProfit: { type: Number, default: 0 },
   depositBonusTransactions: { type: Array, default: () => [] },
   totalDepositBonusProfit: { type: Number, default: 0 },
+  expenses: { type: Array, default: () => [] },
+  totalExpenseAmount: { type: Number, default: 0 },
+  expensesByCategory: { type: Object, default: () => ({}) },
 });
 
 const totalPrice = computed(() => {
@@ -2244,14 +2344,51 @@ const downloadTopProductsStockPDF = () => {
   doc.save("TopProductsStockTable.pdf");
 };
 
+const downloadExpensePDF = () => {
+  const doc = new jsPDF();
 
+  // Title for the PDF
+  doc.text("Expense Summary", 14, 10);
 
+  // Table headings
+  const tableColumn = [
+    "#",
+    "Date", 
+    "Category",
+    "Amount (LKR)",
+    "Payment Method",
+    "Reference",
+    "Description",
+    "Note"
+  ];
 
+  // Prepare data for the table rows
+  const tableRows = [];
+  props.expenses.forEach((expense, index) => {
+    const expenseData = [
+      index + 1,
+      new Date(expense.date).toLocaleDateString('en-GB'),
+      expense.category,
+      parseFloat(expense.amount || 0).toFixed(2),
+      expense.payment_method,
+      expense.reference || '-',
+      expense.description || '-',
+      expense.note || '-'
+    ];
+    tableRows.push(expenseData);
+  });
 
+  // Generate the table
+  doc.autoTable({
+    head: [tableColumn],
+    body: tableRows,
+    startY: 20,
+    margin: { top: 10 },
+  });
 
-
-
-
+  // Save the PDF
+  doc.save("Expense_Summary.pdf");
+};
 
 $(document).ready(function () {
   let table = $("#stockQtyTbl").DataTable({
@@ -2348,13 +2485,13 @@ $(document).ready(function () {
     buttons: [],
     paging: false, // Disable pagination
     columns: [
-      { data: null, title: "#", orderable: false, searchable: false },
-      { data: "name", title: "Service Name" },
-      { data: "price", title: "Price (LKR)", className: "text-center" },
-      { data: "times_used", title: "Times Used", className: "text-center" },
-      { data: null, title: "Total Revenue (LKR)", className: "text-center" },
-      { data: "raw_materials", title: "Raw Materials Used" },
-      { data: "refill_stock", title: "Remaining Stock", className: "text-center" }
+      { data: null, title: "#", orderable: false, searchable: false, width: "5%" },
+      { data: "name", title: "Service Name", width: "20%" },
+      { data: "price", title: "Price (LKR)", className: "text-center", width: "10%" },
+      { data: "times_used", title: "Times Used", className: "text-center", width: "10%" },
+      { data: null, title: "Total Revenue (LKR)", className: "text-center", width: "15%" },
+      { data: "raw_materials", title: "Raw Materials Used", width: "20%" },
+      { data: "refill_stock", title: "Remaining Stock", className: "text-center", width: "20%" }
     ],
     columnDefs: [
       {
@@ -2394,10 +2531,10 @@ $(document).ready(function () {
         render: function (data, type, row) {
           if (data && data.length > 0) {
             return data.map(material => 
-              `${material.product?.name || 'N/A'} (Qty: ${material.quantity_used || 0})`
-            ).join('<br>');
+              `${material.product?.name || 'xxxx'} (Qty: ${material.quantity_used || 0})`
+            ).join(', ');
           }
-          return '<span class="text-gray-500">No raw materials</span>';
+          return 'xxxx (Qty: 0)';
         }
       },
       {
@@ -2405,10 +2542,10 @@ $(document).ready(function () {
         render: function (data, type, row) {
           if (data && data.length > 0) {
             return data.map(stock => 
-              `${stock.product?.name || 'N/A'}: ${stock.stock || 0}`
+              `${stock.product?.name || 'xxxx'}: ${stock.stock || 0}`
             ).join('<br>');
           }
-          return '<span class="text-gray-500">No stock data</span>';
+          return 'xxxx: 0';
         }
       }
     ],
@@ -2434,13 +2571,13 @@ $(document).ready(function () {
     buttons: [],
     paging: false, // Disable pagination
     columns: [
-      { data: null, title: "#", orderable: false, searchable: false },
-      { data: "name", title: "Service Name" },
-      { data: "price", title: "Price (LKR)", className: "text-center" },
-      { data: "times_used", title: "Times Used", className: "text-center" },
-      { data: null, title: "Total Revenue (LKR)", className: "text-center" },
-      { data: "raw_materials", title: "Raw Materials Used" },
-      { data: "refill_stock", title: "Remaining Stock", className: "text-center" }
+      { data: null, title: "#", orderable: false, searchable: false, width: "5%" },
+      { data: "name", title: "Service Name", width: "20%" },
+      { data: "price", title: "Price (LKR)", className: "text-center", width: "10%" },
+      { data: "times_used", title: "Times Used", className: "text-center", width: "10%" },
+      { data: null, title: "Total Revenue (LKR)", className: "text-center", width: "15%" },
+      { data: "raw_materials", title: "Raw Materials Used", width: "20%" },
+      { data: "refill_stock", title: "Remaining Stock", className: "text-center", width: "20%" }
     ],
     columnDefs: [
       {
@@ -2480,10 +2617,10 @@ $(document).ready(function () {
         render: function (data, type, row) {
           if (data && data.length > 0) {
             return data.map(material => 
-              `${material.product?.name || 'N/A'} (Qty: ${material.quantity_used || 0})`
-            ).join('<br>');
+              `${material.product?.name || 'Spiral'} (Qty: ${material.quantity_used || 0})`
+            ).join(', ');
           }
-          return '<span class="text-gray-500">No raw materials</span>';
+          return 'Spiral (Qty: 0)';
         }
       },
       {
@@ -2491,10 +2628,10 @@ $(document).ready(function () {
         render: function (data, type, row) {
           if (data && data.length > 0) {
             return data.map(stock => 
-              `${stock.product?.name || 'N/A'}: ${stock.stock || 0}`
+              `${stock.product?.name || 'Spiral'}: ${stock.stock || 0}`
             ).join('<br>');
           }
-          return '<span class="text-gray-500">No stock data</span>';
+          return 'Spiral: 0';
         }
       }
     ],

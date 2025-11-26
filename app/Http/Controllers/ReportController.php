@@ -22,6 +22,7 @@ use App\Models\RefillPrintout;
 use App\Models\SimActivationTransaction;
 use App\Models\ReloadSale;
 use App\Models\WalletTransaction;
+use App\Models\Expense;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -351,7 +352,28 @@ class ReportController extends Controller
     $totalDepositBonusProfit = $depositBonusTransactions->sum('bonus_amount');
 
     // =========================
-    // 18. Return to Vue via Inertia
+    // 18. Expenses Summary
+    // =========================
+    $expenseQuery = Expense::query();
+
+    if ($startDate && $endDate) {
+        $expenseQuery->whereBetween('date', [$startDate, $endDate]);
+    }
+
+    $expenses = $expenseQuery->orderBy('date', 'desc')->get();
+    $totalExpenseAmount = $expenses->sum('amount');
+    
+    // Group expenses by category for summary
+    $expensesByCategory = $expenses->groupBy('category')->map(function ($categoryExpenses) {
+        return [
+            'total_amount' => $categoryExpenses->sum('amount'),
+            'count' => $categoryExpenses->count(),
+            'expenses' => $categoryExpenses
+        ];
+    });
+
+    // =========================
+    // 19. Return to Vue via Inertia
     // =========================
     return Inertia::render('Reports/Index', [
         'products' => $products,
@@ -385,6 +407,9 @@ class ReportController extends Controller
         'laminatingServices' => $laminatingServices,
         'photocopyServices' => $photocopyServices,
         'printoutServices' => $printoutServices,
+        'expenses' => $expenses,
+        'totalExpenseAmount' => $totalExpenseAmount,
+        'expensesByCategory' => $expensesByCategory,
     ]);
 }
 

@@ -13,6 +13,8 @@ use App\Http\Controllers\ColorController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\SizeController;
 
+use App\Http\Controllers\ExpenseController;
+
 use App\Http\Controllers\QuotationController;
 
 use App\Http\Controllers\EmployeeController;
@@ -94,6 +96,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('products-size', [ProductController::class, 'sizeStore'])->name('productSize');
 
+     Route::get('/expenses', [ExpenseController::class, 'index'])->name('expenses.index');
+        Route::post('/expenses', [ExpenseController::class, 'store'])->name('expenses.store');
+        Route::post('/expenses/{expense}', [ExpenseController::class, 'update'])->name('expenses.update');
+        Route::delete('/expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
+        Route::get('/expenses/dashboard-summary', [ExpenseController::class, 'dashboardSummary'])->name('expenses.dashboard-summary');    // Route::resource('company-info', CompenseInfoController::class)->name('companyInfo.index');
+   
 
     // Route::resource('company-info', CompanyInfoController::class)->name('companyInfo.index');
     Route::get('/company-info', [CompanyInfoController::class, 'index'])->name('companyInfo.index');
@@ -265,6 +273,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     Route::get('/newspapers/batch', [NewspaperController::class, 'getNextBatchNumber']);
     Route::get('/newspapers/available-for-return', [NewspaperController::class, 'getAvailableForReturn'])->name('newspapers.availableForReturn');
+    Route::get('/newspapers/suppliers', [NewspaperController::class, 'getSuppliers'])->name('newspapers.suppliers');
+    Route::get('/newspapers/names', [NewspaperController::class, 'getNewspaperNames'])->name('newspapers.names');
+    Route::get('/api/store-newspapers', [NewspaperController::class, 'getStoreNewspapers'])->name('store-newspapers.index');
+    Route::post('/api/store-newspapers', [NewspaperController::class, 'storeNewspaper'])->name('store-newspapers.store');
     Route::resource('newspapers', NewspaperController::class);
     Route::resource('services', ServiceController::class);
     Route::resource('photocopy-services', PhotocopyServiceController::class);

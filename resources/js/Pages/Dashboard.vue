@@ -327,6 +327,24 @@
         </div>
       </Link>
 
+      <Link href="/expenses" v-if="HasRole(['Admin', 'Manager'])">
+        <div class="dashboard-card bg-[#2E86C6]">
+          <div class="card-content">
+            <div class="icon-container">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5m0 0a3.5 3.5 0 0 1 0 7H6"></path>
+              </svg>
+            </div>
+            <div class="text-container">
+              <p class="title">Expenses</p>
+              <p class="description">
+                Add, track, and manage business expenses. View expense history and summaries in reports.
+              </p>
+            </div>
+          </div>
+        </div>
+      </Link>
+
       <Link href="/transactionHistory" v-if="HasRole(['Admin'])">
         <div class="dashboard-card group bg-gradient-to-br from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400">
           <div class="card-content">

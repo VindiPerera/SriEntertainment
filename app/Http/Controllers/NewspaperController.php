@@ -60,7 +60,7 @@ class NewspaperController extends Controller
     public function getAvailableForReturn()
     {
         $newspapers = Newspaper::where('stock_quantity', '>', 0)
-            ->select('id', 'name', 'stock_quantity')
+            ->select('id', 'name', 'stock_quantity', 'day_of_week')
             ->orderBy('name')
             ->get();
             
@@ -72,7 +72,67 @@ class NewspaperController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Newspaper/Create');
+        $suppliers = \App\Models\Supplier::orderBy('name')->get(['id', 'name']);
+        
+        return Inertia::render('Newspaper/Create', [
+            'suppliers' => $suppliers,
+        ]);
+    }
+
+    /**
+     * Get suppliers for dropdown
+     */
+    public function getSuppliers()
+    {
+        $suppliers = \App\Models\Supplier::orderBy('name')->get(['id', 'name']);
+        return response()->json($suppliers);
+    }
+
+    /**
+     * Get newspaper names for dropdown
+     */
+    public function getNewspaperNames()
+    {
+        $newspapers = Newspaper::orderBy('name')->get(['id', 'name']);
+        return response()->json($newspapers);
+    }
+
+    /**
+     * Get store newspapers for the store modal
+     */
+    public function getStoreNewspapers()
+    {
+        $storeNewspapers = \App\Models\StoreNewspaper::orderBy('name')
+            ->get(['id', 'name']);
+            
+        return response()->json($storeNewspapers);
+    }
+
+    /**
+     * Store a newspaper in the store newspapers table
+     */
+    public function storeNewspaper(Request $request)
+    {
+        \Log::info('Store newspaper request received:', $request->all());
+        
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255|unique:store_newspapers,name',
+            ]);
+
+            \Log::info('Validation passed:', $validated);
+
+            $storeNewspaper = \App\Models\StoreNewspaper::create([
+                'name' => $validated['name'],
+            ]);
+
+            \Log::info('Store newspaper created:', $storeNewspaper->toArray());
+
+            return response()->json($storeNewspaper, 201);
+        } catch (\Exception $e) {
+            \Log::error('Error creating store newspaper:', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     /**
@@ -87,9 +147,10 @@ class NewspaperController extends Controller
             'batch_no' => 'nullable|string|max:255',
             'supplier' => 'nullable|string|max:255',
             'duration' => 'required|in:monthly,weekly',
+            'day_of_week' => 'required_if:duration,weekly|nullable|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
             'publication_date' => 'required|date',
             'expire_date' => 'required|date',
-            'language' => 'nullable|string|max:255',
+            'language' => 'nullable|in:tamil,sinhala,english',
             'stock_quantity' => 'required|integer',
             'cost_price' => 'required|numeric',
             'selling_price' => 'required|numeric',
@@ -98,7 +159,24 @@ class NewspaperController extends Controller
             'return' => 'required|integer|min:0'
         ]);
 
-        Newspaper::create($validated);
+        Newspaper::create([
+            'name' => $validated['name'],
+            'productcode' => $validated['productcode'],
+            'barcode' => $validated['barcode'],
+            'batch_no' => $validated['batch_no'],
+            'supplier' => $validated['supplier'],
+            'duration' => $validated['duration'],
+            'day_of_week' => $validated['day_of_week'],
+            'publication_date' => $validated['publication_date'],
+            'expire_date' => $validated['expire_date'],
+            'language' => $validated['language'],
+            'stock_quantity' => $validated['stock_quantity'],
+            'cost_price' => $validated['cost_price'],
+            'selling_price' => $validated['selling_price'],
+            'discount' => $validated['discount'],
+            'discount_price' => $validated['discount_price'],
+            'return' => $validated['return'],
+        ]);
 
         return redirect()->route('newspapers.index')->with('success', 'Newspaper created successfully.');
     }
@@ -118,8 +196,15 @@ class NewspaperController extends Controller
      */
     public function edit(Newspaper $newspaper)
     {
+        $suppliers = \App\Models\Supplier::orderBy('name')->get(['id', 'name']);
+        
         return Inertia::render('Newspaper/Edit', [
-            'newspaper' => $newspaper,
+            'newspaper' => $newspaper->only([
+                'id', 'name', 'productcode', 'barcode', 'batch_no', 'supplier', 'duration', 'day_of_week',
+                'publication_date', 'expire_date', 'language', 'stock_quantity', 'cost_price', 'selling_price',
+                'discount', 'discount_price', 'return'
+            ]),
+            'suppliers' => $suppliers,
         ]);
     }
 
@@ -135,9 +220,10 @@ class NewspaperController extends Controller
             'batch_no' => 'nullable|string|max:255',
             'supplier' => 'nullable|string|max:255',
             'duration' => 'required|in:monthly,weekly',
+            'day_of_week' => 'required_if:duration,weekly|nullable|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
             'publication_date' => 'required|date',
             'expire_date' => 'required|date',
-            'language' => 'nullable|string|max:255',
+            'language' => 'nullable|in:tamil,sinhala,english',
             'stock_quantity' => 'required|integer',
             'cost_price' => 'required|numeric',
             'selling_price' => 'required|numeric',
