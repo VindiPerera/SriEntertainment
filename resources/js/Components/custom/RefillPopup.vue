@@ -7,186 +7,293 @@
     </div>
   </div>
 
-  <div class="modal-overlay" v-if="modelValue">
+  <div class="modal-overlay" v-if="modelValue" @click.self="closeModal">
     <div class="modal-content">
+      <!-- Modern Header -->
       <div class="modal-header">
-        <h2>Refill Stock</h2>
-        <button @click="openProductSelection" class="user-manual-button">User Manual</button>
-        <button @click="closeModal" class="close-button">×</button>
-      </div>
-      <div class="modal-body">
-        <div class="selected-product-info">
-          <h3>Selected Product</h3>
-          <div class="info-grid">
-            <div class="info-row">
-              <span class="info-label">Name:</span>
-              <span class="info-value">{{ selectedProduct?.name || '' }}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Current Stock:</span>
-              <span class="info-value">{{ selectedProduct?.stock_quantity || '' }}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Price:</span>
-              <span class="info-value">{{ selectedProduct?.selling_price || '' }}.00 LKR</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Barcode:</span>
-              <span class="info-value">{{ selectedProduct?.barcode || '' }}</span>
-            </div>
+        <div class="header-left">
+          <div class="header-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 6H16L14 4H10L8 6H4C2.9 6 2 6.9 2 8V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V8C22 6.9 21.1 6 20 6Z" fill="currentColor"/>
+            </svg>
           </div>
-          <div class="form-group">
-            <label for="quantity">Add Stock Quantity</label>
-            <input 
-              v-model="quantity" 
-              type="number" 
-              id="quantity" 
-              class="form-input"
-              :class="{ 'error': showError }"
-            />
-            <span v-if="showError" class="error-message">The stock field is required.</span>
+          <div class="header-text">
+            <h2>Refill Stock</h2>
+            <p>{{ selectedProduct?.name || 'Manage product stock levels' }}</p>
           </div>
         </div>
-        <div class="form-actions">
-          <button 
-            @click="submitRefill" 
-            class="add-stock-button"
-          >
-            Add Stock
+        <div class="header-buttons">
+          <button @click="openProductSelection" class="user-manual-button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 6H16L14 4H10L8 6H4C2.9 6 2 6.9 2 8V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V8C22 6.9 21.1 6 20 6Z" fill="currentColor"/>
+            </svg>
+            Select Product
           </button>
-          <button @click="closeModal" class="cancel-button">Cancel</button>
+          <button type="button" @click.stop="closeModal" class="close-button">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div v-if="selectedProduct" class="refill-section">
+          <div class="selected-product-card">
+            <div class="product-summary">
+              <h4>{{ selectedProduct?.name }}</h4>
+              <div class="summary-grid">
+                <div class="summary-item">
+                  <span class="summary-label">Current Stock</span>
+                  <span class="summary-value">{{ selectedProduct?.stock_quantity || 0 }} units</span>
+                </div>
+                <div class="summary-item">
+                  <span class="summary-label">Selling Price</span>
+                  <span class="summary-value">{{ selectedProduct?.selling_price || 0 }}.00 LKR</span>
+                </div>
+                <div class="summary-item">
+                  <span class="summary-label">Product Code</span>
+                  <span class="summary-value">{{ selectedProduct?.code || '' }}</span>
+                </div>
+                <div class="summary-item">
+                  <span class="summary-label">Barcode</span>
+                  <span class="summary-value">{{ selectedProduct?.barcode || '' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="refill-form">
+            <div class="form-group">
+              <label for="quantity" class="form-label">Quantity to Add</label>
+              <div class="quantity-input-group">
+                <button type="button" @click="decreaseQuantity" class="quantity-btn" :disabled="!quantity || quantity <= 1">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </button>
+                <input 
+                  v-model="quantity" 
+                  type="number" 
+                  id="quantity" 
+                  placeholder="Enter quantity" 
+                  class="quantity-input"
+                  :class="{ 'error': showError }"
+                  min="1"
+                />
+                <button type="button" @click="increaseQuantity" class="quantity-btn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </button>
+              </div>
+              <span v-if="showError" class="error-message">The stock field is required.</span>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="cancel-btn" @click="closeModal">
+                Cancel
+              </button>
+              <button 
+                class="submit-btn" 
+                :disabled="!quantity || quantity <= 0" 
+                @click="submitRefill"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Add Stock
+              </button>
+            </div>
+          </div>
+        </div>
+        <div v-else class="empty-state">
+          <div class="empty-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 6H16L14 4H10L8 6H4C2.9 6 2 6.9 2 8V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V8C22 6.9 21.1 6 20 6Z" fill="currentColor"/>
+            </svg>
+          </div>
+          <h3>No Product Selected</h3>
+          <p>Please select a product to refill stock</p>
+          <button @click="openProductSelection" class="select-product-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 6H16L14 4H10L8 6H4C2.9 6 2 6.9 2 8V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V8C22 6.9 21.1 6 20 6Z" fill="currentColor"/>
+            </svg>
+            Select Product
+          </button>
         </div>
       </div>
     </div>
   </div>
   
   <!-- Combined Product Selection and Refill Modal -->
-  <div v-if="isRefillModalOpen" class="modal-overlay">
-    <div class="pos-modal-content">
+  <div v-if="isRefillModalOpen" class="modal-overlay" @click.self="$emit('close')">
+    <div class="modal-content-large">
+      <!-- Modern Header -->
       <div class="modal-header">
-        <h2>{{ selectedProductId ? 'Refill Stock' : 'Select Product' }}</h2>
-        <div v-if="!selectedProductId" class="search-bar">
-          <input v-model="search" type="text" placeholder="Search products..." @input="fetchProducts(1)" />
+        <div class="header-left">
+          <div class="header-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 6H16L14 4H10L8 6H4C2.9 6 2 6.9 2 8V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V8C22 6.9 21.1 6 20 6Z" fill="currentColor"/>
+            </svg>
+          </div>
+          <div class="header-text">
+            <h2>{{ selectedProductId ? 'Add Stock' : 'Select Product' }}</h2>
+            <p>{{ selectedProductId ? 'Manage inventory levels' : 'Choose a product to refill stock' }}</p>
+          </div>
         </div>
-        <button @click="$emit('close')" class="close-button" title="Close">×</button>
+        <button type="button" @click.stop="$emit('close')" class="close-button">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Search Section -->
+      <div v-if="!selectedProductId" class="search-section">
+        <div class="search-container">
+          <div class="search-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
+              <path d="21 21L16.65 16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <input 
+            v-model="search" 
+            type="text" 
+            placeholder="Search products by name, code, or barcode..." 
+            @input="handleSearchInput"
+            class="search-input"
+          />
+        </div>
       </div>
       <div class="modal-body">
         <div class="pos-layout">
           <!-- Product Selection Section -->
           <div v-if="!selectedProductId" class="product-selection-section">
-            <div class="filter-options">
-              <select
-                v-model="selectedCategory"
-                @change="fetchProducts(1)"
-                class="px-6 py-3 text-xl font-normal tracking-wider text-blue-600 bg-white rounded-lg cursor-pointer custom-select"
-              >
-                <option value="">Filter by Category</option>
-                <option
-                  v-for="category in allcategories"
-                  :key="category.id"
-                  :value="category.id"
-                >
-                  {{
-                    category.hierarchy_string
-                      ? category.hierarchy_string + " ----> " + category.name
-                      : category.name
-                  }}
+        <!-- Filter Section -->
+        <div v-if="!selectedProductId" class="filter-section">
+          <div class="filter-grid">
+            <div class="filter-item">
+              <label class="filter-label">Category</label>
+              <select v-model="selectedCategory" @change="fetchProducts(1)" class="filter-select">
+                <option value="">All Categories</option>
+                <option v-for="category in allcategories" :key="category.id" :value="category.id">
+                  {{ category.hierarchy_string ? category.hierarchy_string + " → " + category.name : category.name }}
                 </option>
               </select>
+            </div>
 
-              <select
-                v-model="stockStatus"
-                @change="fetchProducts(1)"
-                class="px-6 py-3 text-xl font-normal tracking-wider text-blue-600 bg-white rounded-lg cursor-pointer custom-select"
-              >
-                <option value="">Filter by Stock</option>
+            <div class="filter-item">
+              <label class="filter-label">Stock Status</label>
+              <select v-model="stockStatus" @change="fetchProducts(1)" class="filter-select">
+                <option value="">All Stock</option>
                 <option value="in">In Stock</option>
                 <option value="out">Out of Stock</option>
               </select>
+            </div>
 
-              <select
-                v-model="sort"
-                @change="fetchProducts(1)"
-                class="px-6 py-3 text-xl font-normal tracking-wider text-blue-600 bg-white rounded-lg cursor-pointer custom-select"
-              >
-                <option value="">Filter by Price</option>
-                <option value="asc">Ascending</option>
-                <option value="desc">Descending</option>
+            <div class="filter-item">
+              <label class="filter-label">Price Order</label>
+              <select v-model="sort" @change="fetchProducts(1)" class="filter-select">
+                <option value="">Default</option>
+                <option value="asc">Low to High</option>
+                <option value="desc">High to Low</option>
               </select>
+            </div>
 
-              <select
-                v-model="color"
-                @change="fetchProducts(1)"
-                class="px-6 py-3 text-xl font-normal tracking-wider text-blue-600 bg-white rounded-lg cursor-pointer custom-select"
-              >
-                <option value="">Filter by Color</option>
-                <option
-                  v-for="colorOption in colors"
-                  :key="colorOption.id"
-                  :value="colorOption.name"
-                >
+            <div class="filter-item">
+              <label class="filter-label">Color</label>
+              <select v-model="color" @change="fetchProducts(1)" class="filter-select">
+                <option value="">All Colors</option>
+                <option v-for="colorOption in colors" :key="colorOption.id" :value="colorOption.name">
                   {{ colorOption.name }}
                 </option>
               </select>
+            </div>
 
-              <select
-                v-model="size"
-                @change="fetchProducts(1)"
-                class="px-6 py-3 text-xl font-normal tracking-wider text-blue-600 bg-white rounded-lg cursor-pointer custom-select"
-              >
-                <option value="">Filter by Size</option>
-                <option
-                  v-for="sizeOption in sizes"
-                  :key="sizeOption.id"
-                  :value="sizeOption.name"
-                >
+            <div class="filter-item">
+              <label class="filter-label">Size</label>
+              <select v-model="size" @change="fetchProducts(1)" class="filter-select">
+                <option value="">All Sizes</option>
+                <option v-for="sizeOption in sizes" :key="sizeOption.id" :value="sizeOption.name">
                   {{ sizeOption.name }}
                 </option>
               </select>
-
-              <span
-                @click="resetFilters"
-                class="px-6 py-3 text-xl font-normal tracking-wider text-white text-center bg-blue-600 rounded-lg cursor-pointer custom-select"
-              >
-                Reset
-              </span>
             </div>
+
+            <div class="filter-item">
+              <button @click="resetFilters" class="reset-button">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3 12A9 9 0 1 0 12 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <path d="M3 3L12 12L8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Reset Filters
+              </button>
+            </div>
+          </div>
+        </div>
 
             <!-- Loading State -->
             <div v-if="loading" class="loading-state">
               <p>Loading products...</p>
             </div>
 
-            <!-- Products Grid -->
-            <div v-else-if="products.length > 0" class="horizontal-product-scroll">
-              <div class="product-grid">
-                <label 
-                  v-for="product in products" 
-                  :key="product.id" 
-                  class="product-card"
-                >
-                  <input 
-                    type="radio" 
-                    :value="product.id" 
-                    v-model="selectedProductId" 
-                    :name="'product-select'"
-                    class="radio-input"
-                  >
-                  <div class="product-card-content">
-                    <h3>{{ product.name }}</h3>
-                    <div class="product-info">
-                      <div class="info-line">Price: {{ product.selling_price }}.00 LKR</div>
-                      <div class="info-line">Stock: {{ product.stock_quantity }}</div>
-                      <div class="info-line">code: {{ product.code}}</div>
-                      <div class="info-line barcode">Barcode: {{ product.barcode }}</div>
-                    </div>
-                    <div class="select-circle">
-                      <div class="inner-circle"></div>
-                    </div>
-                  </div>
-                </label>
+        <!-- Product Grid -->
+        <div v-else-if="!selectedProductId" class="products-container">
+          <div v-if="products.length > 0" class="product-grid">
+            <label v-for="product in products" :key="product.id" class="product-card" :class="{ 'selected': selectedProductId === product.id }">
+              <input type="radio" :value="product.id" v-model="selectedProductId" class="product-radio">
+              
+              <div class="product-header">
+                <h3 class="product-name">{{ product.name }}</h3>
+                <div class="product-status" :class="{ 'in-stock': product.stock_quantity > 0, 'out-of-stock': product.stock_quantity === 0 }">
+                  <div class="status-dot"></div>
+                  {{ product.stock_quantity > 0 ? 'In Stock' : 'Out of Stock' }}
+                </div>
               </div>
+
+              <div class="product-details">
+                <div class="detail-row">
+                  <span class="detail-label">Price</span>
+                  <span class="detail-value price">{{ product.selling_price }}.00 LKR</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Stock</span>
+                  <span class="detail-value stock" :class="{ 'low-stock': product.stock_quantity < 10 }">
+                    {{ product.stock_quantity }} units
+                  </span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Code</span>
+                  <span class="detail-value">{{ product.code }}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Barcode</span>
+                  <span class="detail-value barcode">{{ product.barcode }}</span>
+                </div>
+              </div>
+
+              <div class="selection-indicator">
+                <div class="selection-circle">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+              </div>
+            </label>
+          </div>
+          
+          <div v-else class="empty-state">
+            <div class="empty-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
+                <path d="21 21L16.65 16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
             </div>
+            <h3>No Products Found</h3>
+            <p>Try adjusting your search criteria or filters</p>
+          </div>
+        </div>
 
             <!-- No Products -->
             <div v-else class="no-products">
@@ -214,53 +321,84 @@
             </div>
           </div>
           
-          <!-- Refill Stock Form Section -->
-          <div v-else class="refill-form-section">
-            <div class="selected-product-header">
-              <h3>Add Stock for {{ selectedProduct?.name }}</h3>
-              <button @click="selectedProductId = null" class="change-product-button">
-                Change Product
-              </button>
-            </div>
-            
-            <div class="selected-product-details">
-              <div class="info-row">
-                <span class="info-label">Current Stock:</span>
-                <span class="info-value">{{ selectedProduct?.stock_quantity || 0 }}</span>
+        <!-- Refill Form -->
+        <div v-else class="refill-section">
+          <div class="refill-header">
+            <button @click="selectedProductId = null" class="back-button">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Back to Products
+            </button>
+            <h3 class="refill-title">Add Stock: {{ selectedProduct?.name }}</h3>
+          </div>
+
+          <div class="selected-product-card">
+            <div class="product-summary">
+              <h4>{{ selectedProduct?.name }}</h4>
+              <div class="summary-grid">
+                <div class="summary-item">
+                  <span class="summary-label">Current Stock</span>
+                  <span class="summary-value">{{ selectedProduct?.stock_quantity || 0 }} units</span>
+                </div>
+                <div class="summary-item">
+                  <span class="summary-label">Selling Price</span>
+                  <span class="summary-value">{{ selectedProduct?.selling_price || 0 }}.00 LKR</span>
+                </div>
+                <div class="summary-item">
+                  <span class="summary-label">Product Code</span>
+                  <span class="summary-value">{{ selectedProduct?.code || '' }}</span>
+                </div>
+                <div class="summary-item">
+                  <span class="summary-label">Barcode</span>
+                  <span class="summary-value">{{ selectedProduct?.barcode || '' }}</span>
+                </div>
               </div>
-              <div class="info-row">
-                <span class="info-label">Price:</span>
-                <span class="info-value">{{ selectedProduct?.selling_price || 0 }}.00 LKR</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Barcode:</span>
-                <span class="info-value">{{ selectedProduct?.barcode || '' }}</span>
-              </div>
-            </div>
-            
-            <div class="form-group">
-              <label for="stock">Stock Quantity to Add</label>
-              <input 
-                v-model="stockQuantity" 
-                type="number" 
-                id="stock" 
-                placeholder="Enter stock quantity" 
-                class="form-input"
-                min="1"
-              />
-            </div>
-            
-            <div class="form-actions">
-              <button 
-                class="submit-button" 
-                :disabled="!stockQuantity" 
-                @click="submitStock"
-              >
-                Submit
-              </button>
-              <button class="cancel-button" @click="$emit('close')">Cancel</button>
             </div>
           </div>
+
+          <div class="refill-form">
+            <div class="form-group">
+              <label for="stock" class="form-label">Quantity to Add</label>
+              <div class="quantity-input-group">
+                <button type="button" @click="decreaseStockQuantity" class="quantity-btn" :disabled="!stockQuantity || stockQuantity <= 1">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </button>
+                <input 
+                  v-model="stockQuantity" 
+                  type="number" 
+                  id="stock" 
+                  placeholder="Enter quantity" 
+                  class="quantity-input"
+                  min="1"
+                />
+                <button type="button" @click="increaseStockQuantity" class="quantity-btn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="cancel-btn" @click="$emit('close')">
+                Cancel
+              </button>
+              <button 
+                class="submit-btn" 
+                :disabled="!stockQuantity || stockQuantity <= 0" 
+                @click="submitStock"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Add Stock
+              </button>
+            </div>
+          </div>
+        </div>
         </div>
       </div>
     </div>
@@ -482,6 +620,37 @@ const resetFilters = () => {
   fetchProducts(1);
 };
 
+// Handle search input with debouncing
+let searchTimeout = null;
+const handleSearchInput = () => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    fetchProducts(1);
+  }, 500);
+};
+
+// Quantity control functions for main modal
+const increaseQuantity = () => {
+  quantity.value = (quantity.value || 0) + 1;
+};
+
+const decreaseQuantity = () => {
+  if (quantity.value > 1) {
+    quantity.value--;
+  }
+};
+
+// Quantity control functions for product selection modal
+const increaseStockQuantity = () => {
+  stockQuantity.value = (stockQuantity.value || 0) + 1;
+};
+
+const decreaseStockQuantity = () => {
+  if (stockQuantity.value > 1) {
+    stockQuantity.value--;
+  }
+};
+
 // Reset form when modal is closed
 watch(() => props.modelValue, (newValue) => {
   if (!newValue) {
@@ -499,20 +668,19 @@ watch(() => props.isRefillModalOpen, (newVal) => {
 </script>
 
 <style scoped>
-/* Success Notification Styles */
+/* Success Notification */
 .success-notification {
   position: fixed;
-  top: 20px;
-  right: 20px;
-  background: linear-gradient(135deg, #28a745, #20c997);
+  top: 24px;
+  right: 24px;
+  background: linear-gradient(135deg, #10b981, #059669);
   color: white;
   padding: 16px 24px;
   border-radius: 12px;
-  box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+  box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
   z-index: 2000;
   animation: slideInRight 0.3s ease-out;
-  max-width: 400px;
-  min-width: 300px;
+  backdrop-filter: blur(8px);
 }
 
 .success-content {
@@ -524,18 +692,13 @@ watch(() => props.isRefillModalOpen, (newVal) => {
 .success-icon {
   background: rgba(255, 255, 255, 0.2);
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  font-size: 14px;
-}
-
-.success-text {
-  font-weight: 500;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 @keyframes slideInRight {
@@ -549,380 +712,725 @@ watch(() => props.isRefillModalOpen, (newVal) => {
   }
 }
 
+/* Modal Overlay */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  padding: 20px;
 }
 
 .modal-content {
   background: white;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 500px;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 600px;
   max-height: 90vh;
-  overflow-y: auto;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
 }
 
+.modal-content-large {
+  background: white;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 1400px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Modal Header */
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 20px;
-  border-bottom: 1px solid #e0e0e0;
+  padding: 24px 32px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
 }
 
-.modal-header h2 {
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.header-text h2 {
   margin: 0;
-  font-size: 20px;
-  color: #333;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.header-text p {
+  margin: 4px 0 0 0;
+  opacity: 0.9;
+  font-size: 14px;
+}
+
+.header-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .user-manual-button {
-  background-color: #28a745;
-  color: white;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.2);
   border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
+  border-radius: 8px;
+  color: white;
   cursor: pointer;
-  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.user-manual-button:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .close-button {
-  background: none;
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.2);
   border: none;
-  font-size: 24px;
-  color: #666;
+  border-radius: 12px;
+  color: white;
   cursor: pointer;
-  padding: 0 8px;
-}
-
-.selected-product-info {
-  padding: 20px;
-}
-
-.selected-product-info h3 {
-  margin: 0 0 20px 0;
-  color: #333;
-  font-size: 18px;
-}
-
-.info-grid {
-  margin-bottom: 20px;
-}
-
-.info-row {
-  display: grid;
-  grid-template-columns: 120px 1fr;
+  display: flex;
   align-items: center;
-  margin-bottom: 10px;
-}
-
-.info-label {
-  color: #666;
-  font-weight: 500;
-}
-
-.info-value {
-  color: #333;
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 8px;
-  color: #333;
-}
-
-.form-input {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-.form-input.error {
-  border-color: #dc3545;
-}
-
-.error-message {
-  color: #dc3545;
-  font-size: 14px;
-  margin-top: 5px;
-  display: block;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  padding: 15px 20px;
-  border-top: 1px solid #e0e0e0;
-}
-
-.add-stock-button {
-  background-color: #28a745;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.cancel-button {
-  background-color: #6c757d;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.pos-modal-content {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  width: 95%;
-  height: 90vh;
-  max-width: 1200px;
-  overflow-y: auto;
-}
-
-.pos-layout {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  height: 100%;
-}
-
-.product-selection-section {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  height: 100%;
-}
-
-.filter-options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.custom-select {
-  flex: 1;
-  min-width: 150px;
-}
-
-.loading-state, .no-products {
-  text-align: center;
-  padding: 60px 20px;
-  color: #666;
-  font-size: 16px;
-}
-
-.horizontal-product-scroll {
-  overflow-x: auto;
-  padding: 15px;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  background-color: #f9f9f9;
-  flex-grow: 1;
-}
-
-.product-grid {
-  display: flex;
-  gap: 15px;
-  width: max-content;
-  min-width: 100%;
-}
-
-.product-card {
-  display: block;
-  background-color: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  padding: 15px;
-  cursor: pointer;
-  position: relative;
+  justify-content: center;
   transition: all 0.2s ease;
-  min-width: 250px;
-  flex-shrink: 0;
 }
 
-.radio-input {
+.close-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+/* Search Section */
+.search-section {
+  padding: 24px 32px 0;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.search-container {
+  position: relative;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.search-icon {
   position: absolute;
-  opacity: 0;
-  cursor: pointer;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  z-index: 1;
 }
 
-.product-card:hover {
-  border-color: #2196F3;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.search-input {
+  width: 100%;
+  padding: 16px 16px 16px 48px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 16px;
+  background: white;
+  transition: all 0.2s ease;
 }
 
-.product-card-content {
+.search-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Modal Body */
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 32px;
+}
+
+/* Filter Section */
+.filter-section {
+  margin-bottom: 24px;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  align-items: end;
+}
+
+.filter-item {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.product-card-content h3 {
-  margin: 0;
+.filter-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.filter-select {
+  padding: 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 14px;
+  background: white;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.reset-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  height: fit-content;
+}
+
+.reset-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+}
+
+/* Loading */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  gap: 16px;
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-text {
+  color: #64748b;
   font-size: 16px;
-  color: #333;
+  margin: 0;
+}
+
+/* Products Container */
+.products-container {
+  min-height: 400px;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.product-card {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.product-card:hover {
+  border-color: #667eea;
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+}
+
+.product-card.selected {
+  border-color: #10b981;
+  background: linear-gradient(135deg, #ecfdf5, #f0fdf4);
+}
+
+.product-radio {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.product-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.product-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+  flex: 1;
+  line-height: 1.4;
+}
+
+.product-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.product-status.in-stock {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.product-status.out-of-stock {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.product-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.detail-label {
+  font-size: 14px;
+  color: #6b7280;
   font-weight: 500;
 }
 
-.product-info {
+.detail-value {
+  font-size: 14px;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.detail-value.price {
+  color: #059669;
+}
+
+.detail-value.stock.low-stock {
+  color: #dc2626;
+}
+
+.detail-value.barcode {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+}
+
+.selection-indicator {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+
+.selection-circle {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #d1d5db;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.product-card.selected .selection-circle {
+  border-color: #10b981;
+  background: #10b981;
+  color: white;
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.empty-icon {
+  width: 64px;
+  height: 64px;
+  color: #d1d5db;
+  margin-bottom: 16px;
+}
+
+.empty-state h3 {
+  font-size: 20px;
+  color: #374151;
+  margin: 0 0 8px 0;
+}
+
+.empty-state p {
+  color: #6b7280;
+  margin: 0 0 24px 0;
+}
+
+.select-product-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.select-product-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+/* Refill Section */
+.refill-section {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.refill-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #f3f4f6;
+  border: none;
+  border-radius: 8px;
+  color: #374151;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.back-button:hover {
+  background: #e5e7eb;
+}
+
+.refill-title {
+  font-size: 24px;
+  color: #1f2937;
+  margin: 0;
+  font-weight: 700;
+}
+
+.selected-product-card {
+  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+  border: 2px solid #0ea5e9;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.product-summary h4 {
+  font-size: 20px;
+  color: #0c4a6e;
+  margin: 0 0 16px 0;
+  font-weight: 700;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.summary-item {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.info-line {
-  color: #666;
-  font-size: 14px;
+.summary-label {
+  font-size: 12px;
+  color: #0369a1;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.barcode {
-  color: #888;
-  font-size: 13px;
+.summary-value {
+  font-size: 16px;
+  color: #0c4a6e;
+  font-weight: 700;
 }
 
-.select-circle {
-  position: absolute;
-  top: 50%;
-  right: 15px;
-  transform: translateY(-50%);
-  width: 20px;
-  height: 20px;
-  border: 2px solid #ccc;
-  border-radius: 50%;
+/* Refill Form */
+.refill-form {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-label {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 12px;
+}
+
+.quantity-input-group {
+  display: flex;
+  align-items: center;
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.quantity-btn {
+  width: 48px;
+  height: 48px;
+  background: white;
+  border: none;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  color: #6b7280;
+  transition: all 0.2s ease;
 }
 
-.radio-input:checked + .product-card-content .select-circle {
-  border-color: #2196F3;
+.quantity-btn:hover:not(:disabled) {
+  background: #f3f4f6;
+  color: #374151;
 }
 
-.radio-input:checked + .product-card-content .select-circle .inner-circle {
-  width: 12px;
-  height: 12px;
-  background-color: #2196F3;
-  border-radius: 50%;
-}
-
-.pos-pagination {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 20px;
-  background-color: #f5f5f5;
-  border-radius: 4px;
-  margin: 0 20px;
-}
-
-.pagination-button {
-  padding: 8px 16px;
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  color: #333;
-  cursor: pointer;
-  font-weight: 500;
-}
-
-.pagination-button:disabled {
+.quantity-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.pagination-button:not(:disabled):hover {
-  background-color: #e0e0e0;
+.quantity-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 12px 16px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
 }
 
-.pagination-info {
+.quantity-input:focus {
+  outline: none;
+}
+
+.error-message {
+  color: #dc2626;
   font-size: 14px;
-  color: #666;
+  margin-top: 8px;
+  display: block;
 }
 
-.search-bar input {
-  width: 300px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
 }
 
-.refill-form-section {
-  padding: 20px;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  background-color: #f9f9f9;
+.cancel-btn {
+  padding: 12px 24px;
+  background: #f3f4f6;
+  border: none;
+  border-radius: 10px;
+  color: #374151;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.selected-product-header {
+.cancel-btn:hover {
+  background: #e5e7eb;
+}
+
+.submit-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Pagination */
+.pagination {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-top: 32px;
+  padding: 20px 0;
+  border-top: 1px solid #e5e7eb;
 }
 
-.selected-product-header h3 {
-  margin: 0;
-  color: #333;
-  font-size: 18px;
-}
-
-.change-product-button {
-  background-color: #ffc107;
-  color: #212529;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.change-product-button:hover {
-  background-color: #e0a800;
-}
-
-.selected-product-details {
-  margin-bottom: 20px;
-  padding: 15px;
-  background-color: #fff;
-  border-radius: 4px;
-  border: 1px solid #e0e0e0;
-}
-
-.submit-button {
-  background-color: #4CAF50;
-  color: white;
-  border: none;
+.pagination-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 10px 20px;
-  border-radius: 5px;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  color: #374151;
   cursor: pointer;
-  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
 }
 
-.submit-button:disabled {
-  background-color: #ccc;
+.pagination-btn:hover:not(:disabled) {
+  border-color: #667eea;
+  background: #667eea;
+  color: white;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .modal-content, .modal-content-large {
+    margin: 10px;
+    max-width: none;
+    width: calc(100% - 20px);
+  }
+
+  .modal-header {
+    padding: 20px;
+  }
+
+  .modal-body {
+    padding: 20px;
+  }
+
+  .filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .product-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .header-buttons {
+    flex-direction: column;
+    gap: 8px;
+  }
 }
 </style>

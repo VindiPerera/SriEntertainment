@@ -114,23 +114,39 @@
                         <div class="flex items-center justify-between w-full">
                             <h2 class="md:text-5xl text-4xl font-bold text-black">Billing Details</h2>
                             <div class="flex items-center">
-                              <select
-                                v-model="selectedManualType"
-                                class="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              >
-                                <option value="products">Products</option>
-                                <option value="newspapers">Newspapers</option>
-                                 <option value="photocopy">Photocopy</option>
-                                 <option value="printout">Printout</option>
-                                 <option value="binding">Binding</option>
-                                 <option value="Laminating">Laminating</option>
-                              </select>
-                              <button
-                                @click="openModalBasedOnType"
-                                class="ml-4 px-6 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                              >
-                                Open
-                              </button>
+                              <!-- Custom Dropdown Button -->
+                              <div class="relative">
+                                <button
+                                  @click="isDropdownOpen = !isDropdownOpen"
+                                  class="flex items-center gap-3 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg transition-all duration-200 min-w-[130px]"
+                                >
+                                  <span>User Manual</span>
+                                  <svg 
+                                    :class="['w-4 h-4 transition-transform duration-200', isDropdownOpen ? 'rotate-180' : '']"
+                                    fill="none" 
+                                    stroke="currentColor" 
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                  </svg>
+                                </button>
+                                
+                                <!-- Dropdown Menu -->
+                                <div 
+                                  v-show="isDropdownOpen"
+                                  class="absolute top-full left-0 mt-2 w-full bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50"
+                                >
+                                  <button
+                                    v-for="option in dropdownOptions"
+                                    :key="option.value"
+                                    @click="selectOption(option.value)"
+                                    class="w-full px-4 py-3 text-left text-gray-700 hover:bg-gray-100 flex items-center gap-3 transition-colors duration-150"
+                                  >
+                                    <span>{{ option.icon }}</span>
+                                    <span>{{ option.label }}</span>
+                                  </button>
+                                </div>
+                              </div>
                             </div>
                         </div>
 
@@ -990,6 +1006,16 @@ const employee_id = ref("");
 const selectedPaymentMethod = ref("cash");
 const selectedManualType = ref("products");
 const isSelectProductModalOpen = ref(false);
+const isDropdownOpen = ref(false);
+
+const dropdownOptions = ref([
+  { value: 'products', label: 'Products', icon: '🛍️' },
+  { value: 'newspapers', label: 'Newspapers', icon: '📰' },
+  { value: 'photocopy', label: 'Photocopy', icon: '📄' },
+  { value: 'printout', label: 'Printout', icon: '🖨️' },
+  { value: 'binding', label: 'Binding', icon: '📖' },
+  { value: 'Laminating', label: 'Laminating', icon: '🛡️' }
+]);
 const isSelectNewspaperModalOpen = ref(false);
 const isSelectPhotocopyModalOpen = ref(false);
 const isSelectPrintoutModalOpen = ref(false);
@@ -1245,9 +1271,18 @@ const handleScannerInput = (event) => {
     }, 100); // Adjust timeout based on scanner speed
 };
 
+// Handle click outside dropdown to close it
+const handleClickOutside = (event) => {
+  const dropdown = event.target.closest('.relative');
+  if (!dropdown) {
+    isDropdownOpen.value = false;
+  }
+};
+
 // Attach the keypress event listener when the component is mounted
 onMounted(() => {
     document.addEventListener("keypress", handleScannerInput);
+    document.addEventListener("click", handleClickOutside);
     console.log(props.products);
 });
 
@@ -1285,6 +1320,12 @@ const handleSelectedProducts = (selectedProducts) => {
             });
         }
     });
+};
+
+const selectOption = (optionValue) => {
+  selectedManualType.value = optionValue;
+  isDropdownOpen.value = false;
+  openModalBasedOnType();
 };
 
 const openModalBasedOnType = () => {
