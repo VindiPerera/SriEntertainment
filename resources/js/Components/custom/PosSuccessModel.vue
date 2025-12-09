@@ -289,7 +289,7 @@ const productRows = props.products
   <body>
       <div class="receipt-container">
                 <div class="header">
-                  <img src="/images/billlogo.png" style="width: 130px; height: 130px;" />
+                  
            ${companyInfo?.value?.name ? `<h1>${companyInfo.value.name}</h1>` : ''}
   ${companyInfo?.value?.address ? `<p>${companyInfo.value.address}</p>` : ''}
   ${(companyInfo?.value?.phone || companyInfo?.value?.phone2 || companyInfo?.value?.email)

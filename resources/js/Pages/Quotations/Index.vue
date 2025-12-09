@@ -676,7 +676,7 @@ const downloadPdf = async () => {
   // Add Logo (positioned top-right)
   try {
     const logoImg = new Image();
-    logoImg.src = '/images/billlogo-white.png';
+   
     logoImg.crossOrigin = 'Anonymous';
 
     await new Promise((resolve, reject) => {
@@ -700,7 +700,6 @@ const downloadPdf = async () => {
   } catch (error) {
     console.error('Error adding logo to PDF:', error);
     pdf.setFontSize(12);
-    pdf.text('Company Logo', pageWidth - 60, 20);
   }
 
   // --- CMSPORTS-style Right-Side Contact Info ---
