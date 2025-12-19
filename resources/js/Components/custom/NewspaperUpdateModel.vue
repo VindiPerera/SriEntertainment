@@ -377,6 +377,21 @@ const props = defineProps({
   },
 });
 
+const suppliers = ref([]);
+
+// Function to fetch suppliers
+async function fetchSuppliers() {
+  try {
+    const response = await fetch('/newspapers/suppliers');
+    if (response.ok) {
+      const data = await response.json();
+      suppliers.value = data;
+    }
+  } catch (error) {
+    console.error('Error fetching suppliers:', error);
+  }
+}
+
 const form = useForm({
   name: "",
   productcode: "",
@@ -423,6 +438,16 @@ watch(
     }
   },
   { immediate: true }
+);
+
+// Watch for open prop to fetch suppliers
+watch(
+  () => props.open,
+  (newValue) => {
+    if (newValue) {
+      fetchSuppliers();
+    }
+  }
 );
 
 const submit = () => {

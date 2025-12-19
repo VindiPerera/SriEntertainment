@@ -525,6 +525,7 @@ const successMessage = ref("");
 const showStoreModal = ref(false);
 const storeNewspapers = ref([]);
 const newNewspaperName = ref("");
+const suppliers = ref([]);
 
 // Utility function to limit to 2 decimal points
 function limitToTwoDecimals(value) {
@@ -699,10 +700,24 @@ async function fetchStoreNewspapers() {
   }
 }
 
+// Function to fetch suppliers
+async function fetchSuppliers() {
+  try {
+    const response = await fetch('/newspapers/suppliers');
+    if (response.ok) {
+      const data = await response.json();
+      suppliers.value = data;
+    }
+  } catch (error) {
+    console.error('Error fetching suppliers:', error);
+  }
+}
+
 // Load store newspapers on component mount
 watch(() => props.open, (newValue) => {
   if (newValue) {
     fetchStoreNewspapers();
+    fetchSuppliers();
   }
 });
 
