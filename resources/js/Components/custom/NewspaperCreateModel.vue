@@ -654,6 +654,19 @@ async function addNewspaperToStore() {
       setTimeout(() => {
         successMessage.value = '';
       }, 3000);
+    } else if (response.status === 422) {
+      // Handle validation errors (422 Unprocessable Entity)
+      const errorData = await response.json();
+      console.error('Validation errors:', errorData);
+      
+      // Extract validation errors
+      if (errorData.errors && errorData.errors.name) {
+        alert(`Error: ${errorData.errors.name[0]}`);
+      } else if (errorData.message) {
+        alert(`Error: ${errorData.message}`);
+      } else {
+        alert('The name has already been taken.');
+      }
     } else {
       const errorData = await response.text();
       console.error('Server response:', errorData);

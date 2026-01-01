@@ -115,13 +115,14 @@ class NewspaperController extends Controller
     {
         \Log::info('Store newspaper request received:', $request->all());
         
+        // Validate first - let Laravel handle validation errors with 422 response
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:store_newspapers,name',
+        ]);
+
+        \Log::info('Validation passed:', $validated);
+
         try {
-            $validated = $request->validate([
-                'name' => 'required|string|max:255|unique:store_newspapers,name',
-            ]);
-
-            \Log::info('Validation passed:', $validated);
-
             $storeNewspaper = \App\Models\StoreNewspaper::create([
                 'name' => $validated['name'],
             ]);
@@ -141,7 +142,7 @@ class NewspaperController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:newspapers,name',
             'productcode' => 'required|string|max:255',
             'barcode' => 'nullable|string|max:255',
             'batch_no' => 'nullable|string|max:255',
