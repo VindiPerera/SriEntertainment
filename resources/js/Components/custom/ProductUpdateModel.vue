@@ -64,6 +64,22 @@
                       }}</span>
                     </div>
                   </div>
+                  
+                  <div class="flex items-center gap-8 mt-6">
+                    <div class="w-full">
+                      <label class="block text-sm font-medium text-gray-300"
+                        >Product Description:</label
+                      >
+                      <textarea
+                        v-model="form.description"
+                        id="description"
+                        rows="3"
+                        placeholder="Enter Product Description (Optional)"
+                        class="w-full px-4 py-2 mt-2 text-black rounded-md focus:outline-none focus:ring focus:ring-blue-600"
+                      ></textarea>
+                      <span v-if="form.errors.description" class="mt-2 text-red-500">{{ form.errors.description }}</span>
+                    </div>
+                  </div>
                   <div class="w-full">
                     <label class="block text-sm font-medium text-gray-300"
                       >Batch No:</label
@@ -541,6 +557,7 @@ const form = useForm({
   supplier_id: "",
   stock_quantity: "",
   name: "",
+  description: "",
   code: "",
   size_id: "",
   color_id: "",
@@ -629,6 +646,7 @@ watch(
     if (newValue) {
       form.category_id = newValue.category_id || "";
       form.name = newValue.name || "";
+      form.description = newValue.description || "";
       form.code = newValue.code || "";
       form.supplier_id = newValue.supplier_id || "";
       form.stock_quantity = newValue.stock_quantity || null;

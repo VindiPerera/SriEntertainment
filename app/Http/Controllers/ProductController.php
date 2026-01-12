@@ -194,6 +194,7 @@ $productsQuery = Product::with('category', 'color', 'size', 'supplier')
         $validated = $request->validate([
             'category_id' => 'nullable|exists:categories,id',
             'name' => 'required|string|max:255',
+            'description' => 'nullable|string|max:1000',
             'code' => 'nullable|max:50',
             // 'code' => [
             //     'string',
@@ -408,6 +409,7 @@ $productsQuery = Product::with('category', 'color', 'size', 'supplier')
         $validated = $request->validate([
             'category_id' => 'nullable|exists:categories,id',
             'name' => 'string|max:255',
+            'description' => 'nullable|string|max:1000',
             // 'code' => 'nullable|string|max:50',
             // 'code' => 'string|max:50|unique:products,code,' . $product->id . ',id,deleted_at,NULL',
             'size_id' => 'nullable|exists:sizes,id',

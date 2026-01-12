@@ -360,6 +360,25 @@
                     </div>
                 </div>
                 
+                <!-- Description Field -->
+                <div class="flex items-center gap-8">
+                  <div class="w-full">
+                    <label class="block text-sm font-medium text-gray-300"
+                      >Product Description:</label
+                    >
+                    <textarea
+                      v-model="form.description"
+                      id="description"
+                      rows="3"
+                      placeholder="Enter Product Description (Optional)"
+                      class="w-full px-4 py-2 mt-2 text-black rounded-md focus:outline-none focus:ring focus:ring-blue-600"
+                    ></textarea>
+                    <span v-if="form.errors.description" class="mt-2 text-red-500">{{
+                      form.errors.description
+                    }}</span>
+                  </div>
+                </div>
+                
                 <div>
                   <div class="flex items-center gap-8">
                     <!-- First select box with label and error -->
@@ -653,6 +672,7 @@ const form = useForm({
   category_id: "",
   supplier_id: "",
   name: "",
+  description: "",
   code: "",
   size_id: "",
   color_id: "",
