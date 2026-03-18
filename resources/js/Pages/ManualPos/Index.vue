@@ -32,106 +32,145 @@
               <div class="mb-3">
                 <input
                   v-model="customer.name"
-                  type="text"
+            <title>Sri Entertainment</title>
                   placeholder="Enter Customer Name"
                   class="w-full px-4 py-4 text-black placeholder-black bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                @page {
+                  size: 80mm auto;
+                  margin: 4mm;
+                }
                 />
               </div>
-              <div class="flex gap-2 mb-3 text-black">
                 <input
+                  print-color-adjust: exact;
                   v-model="customer.contactNumber"
                   type="text"
+              * {
+                box-sizing: border-box;
+                color: #000;
+              }
                   placeholder="Enter Customer Contact Number"
-                  class="flex-grow px-4 py-4 text-black placeholder-black bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
               </div>
               <div class="text-black">
-                <input
+                padding: 0;
+                background: #fff;
+                font-size: 11px;
                   v-model="customer.email"
                   type="email"
+              .receipt-container {
+                width: 72mm;
+                margin: 0 auto;
+                padding: 6px;
+              }
                   placeholder="Enter Customer Email"
                   class="w-full px-4 py-4 text-black placeholder-black bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                margin-bottom: 4px;
               </div>
 
-              <div class="text-black">
-                <select
-                  required
+                margin: 2px 0;
+                font-size: 18px;
+                font-weight: 800;
+                letter-spacing: 0.4px;
                   v-model="employee_id"
                   id="employee_id"
                   class="w-full px-4 py-4 text-black placeholder-black bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
+                margin: 2px 0;
                   <option value="" disabled selected>Select an Employee</option>
-                  <option
-                    v-for="employee in allemployee"
-                    :key="employee.id"
-                    :value="employee.id"
+              .logo {
+                width: 46mm;
+                max-height: 22mm;
+                object-fit: contain;
+                margin: 0 auto 4px;
+                display: block;
                   >
-                    {{ employee.name }}
+              .dash {
+                border-top: 1px dashed #000;
+                margin: 6px 0;
+              }
+              .bill-title {
+                text-align: center;
+                font-size: 16px;
+                font-weight: 800;
+                letter-spacing: 0.6px;
+                margin: 2px 0;
+              }
+              .meta-center {
+                text-align: center;
+                font-size: 10px;
+                line-height: 1.2;
+              }
+              .meta-line {
                   </option>
                 </select>
-              </div>
-            </div>
+                gap: 8px;
+                font-size: 10px;
+                margin: 2px 0;
           </div>
-          
-        </div>
-        <div class="flex md:w-1/2 w-full p-8 border-4 border-black rounded-3xl">
+              .meta-line strong {
+                font-weight: 700;
           <div class="flex flex-col items-start justify-center w-full md:px-12">
-            <div class="flex items-center justify-between w-full">
-              <h2 class="text-5xl font-bold text-black">Billing Details</h2>
-            </div>
-
+              .items {
             <div class="w-full pt-6 space-y-2">
-             <div class="w-full flex flex-col  ">
               <div class="flex flex-col w-full pt-4 pb-4 ">
-                <p class="text-xl text-black">Product Name</p>
+                table-layout: fixed;
               <span>
-                <input
-                  v-model="product_name"
-                  type="text"
+              .items th, .items td {
+                padding: 2px 0;
+                font-size: 10px;
                   placeholder="Enter Product Name"
-                  class="w-full px-4 py-4 text-black placeholder-black bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              .items th:first-child,
+              .items td:first-child {
+                width: 56%;
                 />
+                word-break: break-word;
               </span>
-              </div>
-            <div class="w-full flex space-x-4 border-b border-black">
-              <div class="flex flex-col w-1/2 pt-4 pb-4 ">
-                <p class="text-xl text-black">quantity</p>
-                <span>
+              .items th:nth-child(2),
+              .items td:nth-child(2) {
+                width: 14%;
+                text-align: center;
+              }
+              .items th:last-child,
+              .items td:last-child {
+                width: 30%;
+                text-align: right;
                   <input
                   v-model="product_quantity"
-                  type="Number"
-                  placeholder="Enter quantity"
-                  min="1"
+                margin-top: 2px;
+                font-size: 11px;
                   class="w-full px-4 py-4 text-black placeholder-black bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+              .total-row {
                 </span>
               </div>
-              <div class="flex flex-col w-1/2  pt-4 pb-4">
+                margin: 2px 0;
+                font-weight: 600;
                 <p class="text-xl text-black">Unit Price</p>
-                <span>
-                  <input
-                  v-model="product_unit_price"
+              .grand {
+                font-size: 18px;
+                font-weight: 800;
                   type="Number"
                   placeholder="Enter unit price"
                   class="w-full px-4 py-4 text-black placeholder-black bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                
+                font-size: 9px;
+                margin-top: 6px;
+                line-height: 1.3;
                 </span>
               </div>
-            </div>
+                margin: 3px 0;
             
-             </div>
+              .footer .notice {
+                font-size: 10px;
               
+                font-weight: 700;
               <div class="flex items-center justify-center w-full px-16 py-4">
                 <button
                     @click="addProduct"
                     class="w-full px-6 py-3 text-xl font-bold text-white bg-black rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
                 >
-                    <i class="pr-2 ri-add-circle-line"></i>
-                    Add Product
-                </button>
-                </div>
+
+            <div class="header">
+              <img src="/images/billlogo.jpeg" class="logo" alt="Company Logo" />
+              <h1>${props.companyInfo?.name || 'PLAY AREA'}</h1>
+              <p>${props.companyInfo?.address || ''}</p>
               
               <div class="flex items-center justify-between w-full px-16 pt-4 pb-4" v-for="(product, index) in products" :key="index"  >
               
@@ -143,37 +182,23 @@
                   <div class="flex space-x-4">
                     <p
                       @click="incrementQuantity(product)"
+
+                  <div class="dash"></div>
+                  <div class="meta-center">${orderId.value}</div>
+                  <div class="meta-center">${new Date().toLocaleString()}</div>
+                  <div class="dash"></div>
                       class="flex items-center justify-center w-8 h-8 text-white bg-black rounded cursor-pointer"
-                    >
-                      <i class="ri-add-line"></i>
-                    </p>
-                    <p
-                      class="bg-[#D9D9D9] border-2 border-black h-8 w-8 text-black flex justify-center items-center rounded"
-                    >
-                     {{ product.quantity }}
-                    </p>
-                    <p
-                      @click="decrementQuantity(product)"
-                      class="flex items-center justify-center w-8 h-8 text-white bg-black rounded cursor-pointer"
-                    >
-                      <i class="ri-subtract-line"></i>
-                    </p>
-                  </div>
-                  
-                </div>
-              </div>
-              <div class="flex justify-end w-1/6">
-                <p
-                  @click="removeProduct(index)"
-                  class="text-3xl text-black border-2 border-black rounded-full cursor-pointer"
-                >
-                  <i class="ri-close-line"></i>
-                </p>
+                  <div class="meta-line"><span><strong>Customer</strong></span><span>${customer.value.name || 'Walk-in'}</span></div>
+                  <div class="meta-line"><span><strong>Cashier</strong></span><span>${props.loggedInUser?.name || '-'}</span></div>
+
+                  <div class="dash"></div>
+
+                  <table class="items">
               </div>
             </div>
-
-              <div class="flex items-center justify-between w-full px-16">
-                <p class="text-xl">Sub Total</p>
+                          <th>Item</th>
+                          <th>Qty</th>
+                          <th>Price</th>
                 <p class="text-xl">{{ subtotal }} LKR</p>
               </div>
             
@@ -182,42 +207,32 @@
                 <span>
                   <CurrencyInput
                     v-model="custom_discount"
-                  />
-                  <span class="ml-2">LKR</span>
+                              <td>${product.quantity}</td>
+                              <td>LKR ${product.unitPrice}</td>
                 </span>
               </div>
               <div class="flex items-center justify-between w-full px-16 pt-4 pb-4 border-b border-black">
                 <p class="text-xl text-black">Cash</p>
-                <span>
-                  <CurrencyInput
+                    </table>
+
+                  <div class="dash"></div>
                     v-model="cash"
                     :options="{ currency: 'EUR' }"
-                  />
-                  <span class="ml-2">LKR</span>
-                </span>
-              </div>
-              <div class="flex items-center justify-between w-full px-16 pt-4">
-                <p class="text-3xl text-black">Total</p>
-                <p class="text-3xl text-black">{{ total }} LKR</p>
-              </div>
-              
-              
-              <div
-                class="flex items-center justify-between w-full px-16 pt-4 pb-4 border-b border-black"
-              >
-                <p class="text-xl text-black">Balance</p>
-                <p>{{ balance }} LKR</p>
-              </div>
-            </div>
-
-           <div class="flex flex-col w-full space-y-8">
-              <div
+                    <div class="total-row"><span>Sub Total</span><span>LKR ${subtotal.value}</span></div>
+                    <div class="total-row"><span>Custom Discount</span><span>LKR ${custom_discount.value}</span></div>
+                    <div class="total-row grand"><span>TOTAL</span><span>LKR ${total.value}</span></div>
+                    <div class="total-row"><span>Cash</span><span>LKR ${cash.value}</span></div>
+                    <div class="total-row"><span>Balance</span><span>LKR ${balance.value}</span></div>
                 class="flex items-center justify-center w-full pt-8 space-x-8"
+
+                  <div class="dash"></div>
+                  <div class="meta-line"><span><strong>Payment Method:</strong></span><span>${selectedPaymentMethod.value === 'card' ? 'Card' : 'Cash'}</span></div>
+                  <div class="dash"></div>
               >
                 <p class="text-xl text-black">Payment Method :</p>
-                <div
-                  @click="selectedPaymentMethod = 'cash'"
-                  :class="[
+                    <p class="notice">මාරු කිරීම සඳහා දින 07 ඇතුලත බිල්පත සමග පැමිණෙන්න.</p>
+                    <p>THANK YOU COME AGAIN</p>
+                    <p>Powered by JAAN Network (Pvt) Ltd.</p>
                     'cursor-pointer w-[100px]  border border-black rounded-xl flex flex-col justify-center items-center text-center',
                     selectedPaymentMethod === 'cash'
                       ? 'bg-yellow-500 font-bold'
@@ -505,195 +520,198 @@ const openPrintSlip = () => {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Receipt</title>
+    <title>Sri Entertainment</title>
         <style>
             @media print {
+        @page {
+          size: 80mm auto;
+          margin: 4mm;
+        }
                 body {
                     margin: 0;
-                    padding: 0;
                     -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
                 }
             }
+      * {
+        box-sizing: border-box;
+        color: #000;
+      }
             body {
-                background-color: #ffffff;
-                font-size: 12px;
                 font-family: 'Arial', sans-serif;
                 margin: 0;
-                padding: 10px;
-                color: #000;
-            }
-            .header {
-                text-align: center;
-                margin-bottom: 16px;
-            }
-            .header h1 {
-                font-size: 20px;
-                font-weight: bold;
-                margin: 0;
-            }
-            .header p {
-                font-size: 10px;
-                margin: 4px 0;
-            }
-            .section {
-                margin-bottom: 16px;
-                padding-top: 8px;
-                border-top: 1px solid #000;
-            }
-            .info-row {
+        padding: 0;
+        background: #fff;
+        font-size: 11px;
+      }
+      .receipt-container {
+        width: 72mm;
+        margin: 0 auto;
+        padding: 6px;
+        background: #fff;
+      }
+      .logo-wrap {
+        text-align: center;
+        margin-bottom: 4px;
+      }
+      .logo-wrap img {
+        width: 46mm;
+        max-height: 22mm;
+        object-fit: contain;
+      }
+      .company {
+        text-align: center;
+        font-size: 10px;
+        line-height: 1.2;
+      }
+      .company h1 {
+        margin: 2px 0;
+        font-size: 18px;
+        font-weight: 800;
+        letter-spacing: 0.4px;
+      }
+      .dash {
+        border-top: 1px dashed #000;
+        margin: 6px 0;
+      }
+      .title {
+        text-align: center;
+        font-size: 16px;
+        font-weight: 800;
+        letter-spacing: 0.6px;
+        margin: 2px 0;
+      }
+      .meta-center {
+        text-align: center;
+        font-size: 10px;
+        line-height: 1.2;
+      }
+      .meta-row {
                 display: flex;
                 justify-content: space-between;
-                font-size: 12px;
-                margin-top: 8px;
+        gap: 8px;
+        font-size: 10px;
+        margin: 2px 0;
             }
-            .info-row p {
-                margin: 0;
-                font-weight: bold;
-            }
-            .info-row small {
-                font-weight: normal;
-            }
-            table {
+      .items {
                 width: 100%;
-                font-size: 12px;
                 border-collapse: collapse;
-                margin-top: 8px;
+        table-layout: fixed;
             }
-            table th, table td {
-                padding: 6px 8px;
-                border-bottom: 1px solid #ddd;
+      .items th,
+      .items td {
+        padding: 2px 0;
+        font-size: 10px;
             }
-            table th {
+      .items th:first-child,
+      .items td:first-child {
+        width: 56%;
                 text-align: left;
+        word-break: break-word;
             }
-            table td {
-                text-align: right;
+      .items th:nth-child(2),
+      .items td:nth-child(2) {
+        width: 14%;
+        text-align: center;
             }
-            table td:first-child {
-                text-align: left;
+      .items th:last-child,
+      .items td:last-child {
+        width: 30%;
+        text-align: right;
             }
             .totals {
-                border-top: 1px solid #000;
-                padding-top: 8px;
-                font-size: 12px;
+        margin-top: 2px;
+        font-size: 11px;
             }
-            .totals div {
+      .total-row {
                 display: flex;
                 justify-content: space-between;
-                margin-bottom: 8px;
+        margin: 2px 0;
+        font-weight: 600;
             }
-            .totals div:nth-child(4) {
-                font-size: 14px;
-                font-weight: bold;
+      .grand {
+        font-size: 18px;
+        font-weight: 800;
             }
             .footer {
                 text-align: center;
-                font-size: 10px;
-                margin-top: 16px;
+        font-size: 9px;
+        margin-top: 6px;
+        line-height: 1.3;
             }
-            .footer p {
-                margin: 6px 0;
-            }
-            .footer .italic {
+      .notice {
+        font-size: 10px;
                 font-style: italic;
+        font-weight: 700;
+        margin-bottom: 3px;
             }
         </style>
       </head>
       <body>
         <div class="receipt-container">
 
-        <div class="header">
-          <h1>${props.companyInfo?.name || 'Company Name'}</h1>
-          <p>${props.companyInfo?.address || ''}</p>
-          ${props.companyInfo?.phone || props.companyInfo?.phone2 || props.companyInfo?.email 
-            ? `
-              <p>
-                ${props.companyInfo?.phone ? props.companyInfo.phone : ''}
-                ${props.companyInfo?.phone && props.companyInfo?.phone2 ? ' | ' : ''}
-                ${props.companyInfo?.phone2 ? props.companyInfo.phone2 : ''}
-                ${(props.companyInfo?.phone || props.companyInfo?.phone2) && props.companyInfo?.email ? ' | ' : ''}
-                ${props.companyInfo?.email ? props.companyInfo.email : ''}
-              </p>
-              `
-            : ''
-          }
-        </div>
+      <div class="logo-wrap">
+      <img src="/images/billlogo.jpeg" alt="Company Logo" />
+      </div>
 
-          <div class="section">
-              <div class="info-row">
-                  <div>
-                      <p>Date:</p>
-                      <small>${new Date().toLocaleString()}</small>
-                  </div>
-                  <div>
-                      <p>Order No:</p>
-                      <small>${orderId.value}</small>
-                  </div>
-              </div>
-              <div class="info-row">
-                  <div>
-                      <p>Customer:</p>
-                      <small>${customer.value.name}</small>
-                  </div>
-                  <div>
-                      <p>Cashier:</p>
-                      <small>${props.loggedInUser?.name || ''}</small>
-                  </div>
-              </div>
-          </div>
+      <div class="company">
+      <h1>Sri Entertainment</h1>
+      <div>80b Hosptel Road, Kalubowala, Dehiwala</div>
+      <div>0777244467 | 0766877444</div>
+      <div>amirth055@gmail.com</div>
+      </div>
 
-          <div class="section">
-              <table>
-                  <thead>
-                      <tr>
-                          <th>Description</th>
-                          <th style="text-align: center;">Qty</th>
-                          <th style="text-align: right;">Price</th>
-                      </tr>
-                  </thead>
-                  <tbody>
-                      ${products.value
-                          .map(
-                              (product) => `
-                              <tr>
-                                  <td>${product.name}</td>
-                                  <td style="text-align: center;">${product.quantity}</td>
-                                  <td>${product.unitPrice}</td>
-                              </tr>`
-                          )
-                          .join("")}
-                  </tbody>
-              </table>
-          </div>
-         
-          <div class="totals">
-              <div>
-                  <span>Sub Total</span>
-                  <span>${subtotal.value} LKR</span>
-              </div>
-              <div>
-                  <span>Custom Discount</span>
-                  <span>${custom_discount.value} LKR</span>
-              </div>
-              <div>
-                  <span>Total</span>
-                  <span>${total.value} LKR</span>
-              </div>
-              <div>
-                  <span>Cash</span>
-                  <span>${cash.value} LKR</span>
-              </div>
-              <div style="font-weight: bold;">
-                  <span>Balance</span>
-                  <span>${balance.value} LKR</span>
-              </div>
-          </div>
-          
-          <div class="footer">
-              <p>THANK YOU COME AGAIN</p>
-              <p class="italic">Let the quality define its own standards</p>
-              <p style="font-weight: bold;">Powered by JAAN Network (Pvt) Ltd.</p>
-          </div>
+      <div class="dash"></div>
+      <div class="meta-center">${orderId.value || '-'}</div>
+      <div class="meta-center">${new Date().toLocaleString()}</div>
+      <div class="dash"></div>
+
+      <div class="meta-row"><span><strong>Customer</strong></span><span>${customer.value?.name || 'Walk-in'}</span></div>
+      <div class="meta-row"><span><strong>Cashier</strong></span><span>${props.loggedInUser?.name || '-'}</span></div>
+
+      <div class="dash"></div>
+
+      <table class="items">
+      <thead>
+        <tr>
+        <th>Item</th>
+        <th>Qty</th>
+        <th>Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${products.value
+        .map(
+          (product) => `
+          <tr>
+            <td>${product.name}</td>
+            <td style="text-align:center;">${product.quantity}</td>
+            <td style="text-align:right;">LKR ${Number(product.unitPrice || 0).toFixed(2)}</td>
+          </tr>`
+        )
+        .join("")}
+      </tbody>
+      </table>
+
+      <div class="dash"></div>
+
+      <div class="totals">
+      <div class="total-row"><span>Sub Total</span><span>LKR ${Number(subtotal.value || 0).toFixed(2)}</span></div>
+      <div class="total-row"><span>Custom Discount</span><span>LKR ${Number(custom_discount.value || 0).toFixed(2)}</span></div>
+      <div class="total-row grand"><span>TOTAL</span><span>LKR ${Number(total.value || 0).toFixed(2)}</span></div>
+      <div class="total-row"><span>Cash</span><span>LKR ${Number(cash.value || 0).toFixed(2)}</span></div>
+      <div class="total-row"><span>Balance</span><span>LKR ${Number(balance.value || 0).toFixed(2)}</span></div>
+      </div>
+
+      <div class="dash"></div>
+      <div class="meta-row"><span><strong>Payment Method:</strong></span><span>${selectedPaymentMethod.value === 'card' ? 'Card' : 'Cash'}</span></div>
+      <div class="dash"></div>
+
+      <div class="footer">
+      <div class="notice">මාරු කිරීම සඳහා දින 07 ඇතුලත බිල්පත සමග පැමිණෙන්න.</div>
+      <div>THANK YOU COME AGAIN</div>
+      <div>Powered by JAAN Network Ltd.</div>
+      </div>
         </div>
       </body>
     </html>

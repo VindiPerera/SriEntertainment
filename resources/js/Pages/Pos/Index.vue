@@ -811,7 +811,7 @@
         :employee="employee" :cashier="loggedInUser" :customer="customer" :orderid="orderid" :cash="cash"
         :balance="balance" :subTotal="subtotal" :totalDiscount="totalDiscount" :total="total"
         :custom_discount_type="custom_discount_type"
-        :custom_discount="custom_discount" />
+        :custom_discount="custom_discount" :payment_method="selectedPaymentMethod" />
     <AlertModel v-model:open="isAlertModalOpen" :message="message" />
 
     <SelectProductModel

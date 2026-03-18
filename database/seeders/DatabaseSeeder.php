@@ -46,7 +46,6 @@ if (!\App\Models\User::where('email', 't1@cashier.com')->exists()) {
     ]);
 }
 
-
- 
+        $this->call(ServicesSeeder::class);
     }
 }

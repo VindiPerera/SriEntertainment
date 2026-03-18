@@ -12,11 +12,11 @@ class ServicesSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('services')->insert([
-            ['id' => 1, 'name' => 'Photocopy'],
-            ['id' => 2, 'name' => 'Printout'],
-            ['id' => 3, 'name' => 'Laminating'],
-            ['id' => 4, 'name' => 'Binding'],
+        DB::table('services')->insertOrIgnore([
+            ['id' => 1, 'name' => 'Photocopy', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 2, 'name' => 'Printout', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 3, 'name' => 'Laminating', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 4, 'name' => 'Binding', 'created_at' => now(), 'updated_at' => now()],
         ]);
     }
 }

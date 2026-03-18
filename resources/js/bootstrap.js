@@ -1,7 +1,7 @@
 /**
  * We'll load the axios HTTP library which allows us to easily issue requests
  * to our Laravel back-end. This library automatically handles sending the
- * CSRF token as a header based on the value of the "XSRF" token cookie.
+ * CSRF token as a header based on the value of the "XSRF-TOKEN" cookie.
  */
 
 import axios from 'axios';
@@ -9,13 +9,13 @@ window.axios = axios;
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
-// Set CSRF token for axios
-const token = document.head.querySelector('meta[name="csrf-token"]');
-if (token) {
-    window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
-} else {
-    console.error('CSRF token not found in meta tag');
-}
+// Axios automatically reads the "XSRF-TOKEN" cookie that Laravel sets on every
+// response and sends it as the "X-XSRF-TOKEN" request header. Laravel's
+// VerifyCsrfToken middleware accepts this header, so no manual meta-tag handling
+// is needed. This approach is more reliable because the cookie is always fresh.
+window.axios.defaults.withCredentials = true;
+window.axios.defaults.xsrfCookieName = 'XSRF-TOKEN';
+window.axios.defaults.xsrfHeaderName = 'X-XSRF-TOKEN';
 
 /**
  * Echo exposes an expressive API for subscribing to channels and listening

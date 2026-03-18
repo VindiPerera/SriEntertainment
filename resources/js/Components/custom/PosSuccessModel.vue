@@ -94,326 +94,287 @@ const props = defineProps({
     totalDiscount: String,
     total: String,
     custom_discount: Number,
-    custom_discount_type: String
+    custom_discount_type: String,
+    payment_method: { type: String, default: 'cash' }
 });
 
 const handlePrintReceipt = () => {
-    // Calculate totals from props.products
-    const subTotal = props.products.reduce(
-        (sum, product) =>
-            sum + parseFloat(product.selling_price) * product.quantity,
-        0
-    );
-    const customDiscount = Number(props.custom_discount || 0);
-    const totalDiscount = props.products
-        .reduce((total, item) => {
-            // Check if item has a discount
-            if (item.discount && item.discount > 0 && item.apply_discount == true) {
-                const discountAmount =
-                    (parseFloat(item.selling_price) - parseFloat(item.discounted_price)) *
-                    item.quantity;
-                return total + discountAmount;
+    const companyContacts = [
+        companyInfo?.value?.phone,
+        companyInfo?.value?.phone2,
+        companyInfo?.value?.email,
+    ]
+        .filter(Boolean)
+        .join(" | ");
+
+    const now = new Date();
+    const billDate = now.toLocaleDateString();
+    const billTime = now.toLocaleTimeString();
+
+    const productRows = props.products
+        .map((product) => {
+            const isPack = Number(product.is_promotion) === 1;
+
+            const parentRow = `
+                <tr>
+                    <td style="text-align:left; font-weight:600;">${product.name}</td>
+                    <td style="text-align:center;">${Number(product.quantity || 0)}</td>
+                    <td style="text-align:right;">
+                        ${
+                            product.discount > 0 && product.apply_discount
+                                ? `<div style="font-weight:700;font-size:9px;border:1px solid #000;display:inline-block;padding:1px 4px;margin-bottom:2px;">${product.discount}% OFF</div>`
+                                : ""
+                        }
+                        <div>${Number(product.selling_price || 0).toFixed(2)}</div>
+                    </td>
+                </tr>
+            `;
+
+            const items = Array.isArray(product.promotion_items)
+                ? product.promotion_items
+                : Array.isArray(product.promotionItems)
+                    ? product.promotionItems
+                    : [];
+
+            let childRows = "";
+            if (isPack && items.length) {
+                const headingRow = `
+                    <tr>
+                        <td colspan="3" style="text-align:left; font-weight:700; font-size:11px;">Pack Includes</td>
+                    </tr>
+                `;
+
+                const children = items
+                    .map((pi) => {
+                        const compName =
+                            pi.product && pi.product.name
+                                ? pi.product.name
+                                : `#${pi.product_id}`;
+                        const compQty =
+                            (Number(pi.quantity) || 1) *
+                            (Number(product.quantity) || 1);
+
+                        return `
+                            <tr>
+                                <td style="padding-left:16px; text-align:left; font-size:11px; font-style:italic;">* ${compName}</td>
+                                <td style="text-align:center; font-size:11px;">${compQty}</td>
+                                <td style="text-align:right; font-size:11px;">-</td>
+                            </tr>
+                        `;
+                    })
+                    .join("");
+
+                childRows = headingRow + children;
             }
-            return total; // If no discount, return total as-is
-        }, 0)
-        .toFixed(2); // Ensures two decimal places
 
-    const discount = 0; // Example discount (can be dynamic)
-    const total = subTotal - totalDiscount - customDiscount;
+            return parentRow + childRows;
+        })
+        .join("");
 
-const productRows = props.products
-    .map((product) => {
-      const isPack = Number(product.is_promotion) === 1;
-
-      const parentRow = `
-        <tr>
-          <td>
-            ${product.name}
-            ${isPack ? `` : ``}
-          </td>
-          <td style="text-align:center;">${Number(product.quantity || 0)}</td>
-          <td>
-            ${
-              (product.discount > 0 && product.apply_discount)
-                ? `<div style="font-weight:bold;font-size:7px;background-color:black;color:white;text-align:center;">${product.discount}% off</div>`
-                : ``
-            }
-            <div>${Number(product.selling_price || 0).toFixed(2)}</div>
-          </td>
-        </tr>
-      `;
-
-      // Support both snake_case and camelCase from API
-      const items = Array.isArray(product.promotion_items)
-        ? product.promotion_items
-        : (Array.isArray(product.promotionItems) ? product.promotionItems : []);
-
-      let childRows = ``;
-      if (isPack && items.length) {
-        // Heading (NOT full width): first column only; keep other columns empty
-        const headingRow = `
-          <tr class="pack-heading">
-           <td class="pack-heading-cell" colspan="3">Pack Include</td>
-
-          </tr>
-        `;
-
-        const children = items.map((pi) => {
-          const compName = (pi.product && pi.product.name) ? pi.product.name : `#${pi.product_id}`;
-          const compQty = (Number(pi.quantity) || 1) * (Number(product.quantity) || 1);
-          return `
-            <tr class="pack-child">
-              <td style="padding-left:14px; background:#f1f5f9; border:1px solid #ccc; border-radius:4px; font-size:11px;">
-               * ${compName}
-              </td>
-           
-              <td style="text-align:center; background:#f1f5f9; border:1px solid #ccc; font-size:11px;">
-                ${compQty}
-              </td>
-
-            </tr>
-          `;
-        }).join('');
-
-        childRows = headingRow + children;
-      }
-
-      return parentRow + childRows;
-    })
-    .join("");
-
-
-    // Generate the receipt HTML
     const receiptHTML = `
-  <!DOCTYPE html>
-  <html lang="en">
-  <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Receipt</title>
-      <style>
-          @media print {
-              body {
-                  margin: 0;
-                  padding: 0;
-                  -webkit-print-color-adjust: exact;
-              }
-          }
-          body {
-              background-color: #ffffff;
-              font-size: 12px;
-              font-family: 'Arial', sans-serif;
-              margin: 0;
-              padding: 10px;
-              color: #000;
-          }
-          .header {
-              text-align: center;
-              margin-bottom: 16px;
-          }
-          .header h1 {
-              font-size: 20px;
-              font-weight: bold;
-              margin: 0;
-          }
-          .header p {
-              font-size: 12px;
-              margin: 4px 0;
-          }
-          .section {
-              margin-bottom: 16px;
-              padding-top: 8px;
-              border-top: 1px solid #000;
-          }
-          .info-row {
-              display: flex;
-              justify-content: space-between;
-              font-size: 14px;
-              margin-top: 8px;
-          }
-          .info-row p {
-              margin: 0;
-              font-weight: bold;
-          }
-          .info-row small {
-              font-weight: normal;
-          }
-          table {
-              width: 100%;
-              font-size: 12px;
-              border-collapse: collapse;
-              margin-top: 8px;
-          }
-          table th, table td {
-              padding: 6px 8px;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sri Entertainment</title>
+    <style>
+        @media print {
+            @page {
+                size: 80mm auto;
+                margin: 4mm;
+            }
+            body {
+                margin: 0;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+        * {
+            box-sizing: border-box;
+            color: #000;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #fff;
+            font-size: 11px;
+        }
+        .receipt-container {
+            width: 72mm;
+            margin: 0 auto;
+            padding: 6px;
+            background: #fff;
+        }
+        .logo-wrap {
+            text-align: center;
+            margin-bottom: 4px;
+        }
+        .logo-wrap img {
+            width: 46mm;
+            max-height: 22mm;
+            object-fit: contain;
+        }
+        .company {
+            text-align: center;
+            font-size: 10px;
+            line-height: 1.2;
+        }
+        .company h1 {
+            margin: 2px 0;
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 0.4px;
+        }
+        .dash {
+            border-top: 1px dashed #000;
+            margin: 6px 0;
+        }
+        .title {
+            text-align: center;
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: 0.6px;
+            margin: 2px 0;
+        }
+        .meta-center {
+            text-align: center;
+            font-size: 10px;
+            line-height: 1.2;
+        }
+        .meta-line {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 10px;
+            margin: 2px 0;
+        }
+        .items {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        .items th,
+        .items td {
+            padding: 2px 0;
+            font-size: 10px;
+        }
+        .items th:first-child,
+        .items td:first-child {
+            width: 56%;
+            text-align: left;
+            word-break: break-word;
+        }
+        .items th:nth-child(2),
+        .items td:nth-child(2) {
+            width: 14%;
+            text-align: center;
+        }
+        .items th:last-child,
+        .items td:last-child {
+            width: 30%;
+            text-align: right;
+        }
+        .totals {
+            margin-top: 2px;
+            font-size: 11px;
+        }
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 2px 0;
+            font-weight: 600;
+        }
+        .grand {
+            font-size: 18px;
+            font-weight: 800;
+        }
+        .footer {
+            text-align: center;
+            font-size: 9px;
+            margin-top: 6px;
+            line-height: 1.3;
+        }
+        .footer .notice {
+            font-size: 10px;
+            font-style: italic;
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="receipt-container">
+        <div class="logo-wrap">
+            <img src="/images/billlogo.jpeg" alt="Company Logo" />
+        </div>
 
-          }
-          table th {
-              text-align: left;
-          }
-          table td {
-              text-align: right;
-          }
-          table td:first-child {
-              text-align: left;
-          }
-          .totals {
-              border-top: 1px solid #000;
-              padding-top: 8px;
-              font-size: 12px;
-          }
-          .totals div {
-              display: flex;
-              justify-content: space-between;
-              margin-bottom: 8px;
-          }
-          .totals div:nth-child(4) {
-              font-size: 14px;
-              font-weight: bold;
-          }
-          .footer {
-              text-align: center;
-              font-size: 10px;
-              margin-top: 16px;
-          }
-          .footer p {
-              margin: 6px 0;
-          }
-          .footer .italic {
-              font-style: italic;
-          }
+        <div class="company">
+            <h1>Sri Entertainment</h1>
+            <div>80b Hosptel Road, Kalubowala, Dehiwala</div>
+            <div>0777244467 | 0766877444</div>
+            <div>amirth055@gmail.com</div>
+        </div>
 
+        <div class="dash"></div>
+        <div class="meta-center">${props.orderid || "-"}</div>
+        <div class="meta-center">${billDate} ${billTime}</div>
+        <div class="dash"></div>
 
-      </style>
-  </head>
-  <body>
-      <div class="receipt-container">
-                <div class="header">
-                  
-           ${companyInfo?.value?.name ? `<h1>${companyInfo.value.name}</h1>` : ''}
-  ${companyInfo?.value?.address ? `<p>${companyInfo.value.address}</p>` : ''}
-  ${(companyInfo?.value?.phone || companyInfo?.value?.phone2 || companyInfo?.value?.email)
-            ? `<p>${companyInfo.value.phone || ''} | ${companyInfo.value.phone2 || ''}  ${companyInfo.value.email || ''}</p>`
-            : ''}
+        <div class="meta-line"><span><strong>Customer</strong></span><span>${props.customer?.name || "Walk-in"}</span></div>
+        <div class="meta-line"><span><strong>Cashier</strong></span><span>${props.cashier?.name || "-"}</span></div>
 
-          </div>
+        <div class="dash"></div>
 
+        <table class="items">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${productRows}
+            </tbody>
+        </table>
 
+        <div class="dash"></div>
 
+        <div class="totals">
+            <div class="total-row"><span>Sub Total</span><span>LKR ${(Number(props.subTotal) || 0).toFixed(2)}</span></div>
+            <div class="total-row"><span>Discount</span><span>LKR ${(Number(props.totalDiscount) || 0).toFixed(2)}</span></div>
+            <div class="total-row"><span>Custom Discount</span><span>${(Number(props.custom_discount) || 0).toFixed(2)} ${props.custom_discount_type === "percent" ? "%" : "LKR"}</span></div>
+            <div class="total-row grand"><span>TOTAL</span><span>LKR ${(Number(props.total) || 0).toFixed(2)}</span></div>
+            <div class="total-row"><span>Cash</span><span>LKR ${(Number(props.cash) || 0).toFixed(2)}</span></div>
+            <div class="total-row"><span>Balance</span><span>LKR ${(Number(props.balance) || 0).toFixed(2)}</span></div>
+        </div>
 
+        <div class="dash"></div>
+        <div class="meta-line"><span><strong>Payment Method:</strong></span><span>${props.payment_method === 'card' ? 'Card' : 'Cash'}</span></div>
+        <div class="dash"></div>
 
-          <div class="section">
-              <div class="info-row">
-                  <div>
-                      <p>Date:</p>
-                      <small>${new Date().toLocaleDateString()} </small>
-                  </div>
-                  <div>
-                      <p>Order No:</p>
-                      <small>${props.orderid}</small>
-                  </div>
-              </div>
-              <div class="info-row">
-                  <div>
-                      <p>Customer:</p>
-                      <small>${props.customer.name}</small>
-                  </div>
-                  <div>
-                      <p>Cashier:</p>
-                      <small>${props.cashier.name}</small>
-                  </div>
-              </div>
-          </div>
-
-
-
- <div class="section">
-      <table>
-        <!-- fixed column widths -->
-        <colgroup>
-          <col style="width:60%;">
-          <col style="width:15%;">
-          <col style="width:25%;">
-        </colgroup>
-        <thead>
-          <tr>
-            <th>Items</th>
-            <th style="text-align:center;">Qty</th>
-            <th style="text-align:right;">Price</th>
-          </tr>
-        </thead>
-        <tbody style="font-size:11px;">
-          ${productRows}
-        </tbody>
-      </table>
+        <div class="footer">
+            <div class="notice">මාරු කිරීම සඳහා දින 07 ඇතුලත බිල්පත සමග පැමිණෙන්න.</div>
+            <div>THANK YOU COME AGAIN</div>
+            <div>Powered by JAAN Network Ltd.</div>
+        </div>
     </div>
+</body>
+</html>
+`;
 
-
-
-
-
-
-
-
-
-
-          <div class="totals">
-              <div>
-                  <span>Sub Total</span>
-                  <span>${(Number(props.subTotal) || 0).toFixed(2)} LKR</span>
-              </div>
-              <div>
-                  <span>Discount</span>
-                  <span>${(Number(props.totalDiscount) || 0).toFixed(2)} LKR</span>
-              </div>
-              <div>
-                  <span>Custom Discount</span>
-                  <span>
-                    ${(Number(props.custom_discount) || 0).toFixed(2)}
-                    ${props.custom_discount_type === 'percent' ? '%' :
-                    props.custom_discount_type === 'fixed' ? 'LKR' : ''}
-                  </span>
-              </div>
-              <div>
-                  <span>Total</span>
-                  <span>${(Number(props.total) || 0).toFixed(2)} LKR</span>
-              </div>
-              <div>
-                  <span>Cash</span>
-                  <span>${(Number(props.cash) || 0).toFixed(2)} LKR</span>
-              </div>
-              <div style="font-weight: bold;">
-                  <span>Balance</span>
-                  <span>${(Number(props.balance) || 0).toFixed(2)} LKR</span>
-              </div>
-          </div>
-          <div class="footer">
- <p style="font-weight:bold; font-style:italic; padding:4px 0; font-size:14px; color:#000;">
-  මාරු කිරීම සඳහා දින 07 ඇතුලත බිල්පත සමග පැමිණෙන්න.
-</p>
-              <p>THANK YOU COME AGAIN</p>
-              <p class="italic">Let the quality define its own standards</p>
-               <p style="font-weight: bold;">Powered by JAAN Network Ltd.</p>
-               <p>${new Date().toLocaleTimeString()} </p>
-          </div>
-      </div>
-  </body>
-  </html>
-  `;
-
-    // Open a new window
     const printWindow = window.open("", "_blank");
     if (!printWindow) {
         alert("Failed to open print window. Please check your browser settings.");
         return;
     }
 
-    // Write the content to the new window
     printWindow.document.open();
     printWindow.document.write(receiptHTML);
     printWindow.document.close();
 
-    // Wait for the content to load before triggering print
     printWindow.onload = () => {
         printWindow.focus();
         printWindow.print();
