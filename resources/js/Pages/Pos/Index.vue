@@ -331,6 +331,17 @@
                                 </span>
                             </div>
 
+                            <div class="flex items-center justify-between w-full px-8 pt-4 pb-4 border-b border-black">
+                                <p class="text-xl text-black">Warranty Period</p>
+                                <select v-model="warrantyPeriod" class="px-4 py-1 border-black rounded-md text-black text-md">
+                                    <option value="">None</option>
+                                    <option value="One Month">One Month</option>
+                                    <option value="3 Months">3 Months</option>
+                                    <option value="6 Months">6 Months</option>
+                                    <option value="1 Year">1 Year</option>
+                                </select>
+                            </div>
+
 
 
 
@@ -811,7 +822,8 @@
         :employee="employee" :cashier="loggedInUser" :customer="customer" :orderid="orderid" :cash="cash"
         :balance="balance" :subTotal="subtotal" :totalDiscount="totalDiscount" :total="total"
         :custom_discount_type="custom_discount_type"
-        :custom_discount="custom_discount" :payment_method="selectedPaymentMethod" />
+        :custom_discount="custom_discount" :payment_method="selectedPaymentMethod"
+        :warranty_period="warrantyPeriod" />
     <AlertModel v-model:open="isAlertModalOpen" :message="message" />
 
     <SelectProductModel
@@ -883,6 +895,7 @@ const message = ref("");
 const appliedCoupon = ref(null);
 const cash = ref(0);
 const custom_discount = ref(0);
+const warrantyPeriod = ref("");
 const isSelectModalOpen = ref(false);
 const custom_discount_type = ref('percent');
 const orderid = computed(() => generateOrderId());
