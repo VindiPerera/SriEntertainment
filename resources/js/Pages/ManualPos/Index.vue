@@ -1,284 +1,194 @@
 <template>
   <Head title="Manual POS" />
   <Banner />
-  <div class="flex flex-col items-center justify-start min-h-screen py-8 space-y-4 bg-gray-100 md:px-36 px-16">
+
+  <div class="flex flex-col items-center justify-start min-h-screen px-6 py-8 space-y-6 bg-gray-100 md:px-16">
     <Header />
-    <div class="w-full md:w-5/6 py-12 space-y-16">
-        <div class="flex items-center justify-between space-x-4">
-        <div class="flex w-full space-x-4">
-          <Link href="/">
-            <img src="/images/back-arrow.png" class="w-14 h-14" />
-          </Link>
-          <p class="pt-3 text-4xl font-bold tracking-wide text-black uppercase">
-            PoS
-          </p>
+
+    <div class="flex items-center justify-between w-full max-w-6xl">
+      <div class="flex items-center space-x-4">
+        <Link href="/">
+          <img src="/images/back-arrow.png" class="w-12 h-12" />
+        </Link>
+        <p class="text-3xl font-bold tracking-wide text-black uppercase">POS</p>
+      </div>
+      <div class="flex items-center space-x-4">
+        <p class="text-2xl font-bold text-black">Order ID: #{{ orderId }}</p>
+        <i @click="refreshData" class="text-2xl text-black cursor-pointer ri-restart-line"></i>
+      </div>
+    </div>
+
+    <div class="grid w-full max-w-6xl grid-cols-1 gap-6 lg:grid-cols-2">
+      <div class="p-6 space-y-4 bg-black rounded-2xl">
+        <p class="text-3xl font-bold text-white">Customer Details</p>
+
+        <input
+          v-model="customer.name"
+          type="text"
+          placeholder="Enter Customer Name"
+          class="w-full px-4 py-3 text-black placeholder-black bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+
+        <input
+          v-model="customer.contactNumber"
+          type="text"
+          placeholder="Enter Customer Contact Number"
+          class="w-full px-4 py-3 text-black placeholder-black bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+
+        <input
+          v-model="customer.email"
+          type="email"
+          placeholder="Enter Customer Email"
+          class="w-full px-4 py-3 text-black placeholder-black bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+
+        <select
+          v-model="employee_id"
+          id="employee_id"
+          class="w-full px-4 py-3 text-black bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="" disabled>Select an Employee</option>
+          <option v-for="employee in props.allemployee" :key="employee.id" :value="employee.id">
+            {{ employee.name }}
+          </option>
+        </select>
+      </div>
+
+      <div class="p-6 space-y-4 bg-white shadow-lg rounded-2xl">
+        <p class="text-2xl font-bold text-black">Products</p>
+
+        <input
+          v-model="product_name"
+          type="text"
+          placeholder="Enter Product Name"
+          class="w-full px-4 py-3 text-black placeholder-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+
+        <div class="grid grid-cols-2 gap-4">
+          <input
+            v-model="product_quantity"
+            type="number"
+            min="1"
+            placeholder="Qty"
+            class="w-full px-4 py-3 text-black placeholder-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <input
+            v-model="product_unit_price"
+            type="number"
+            min="0"
+            step="0.01"
+            placeholder="Unit Price"
+            class="w-full px-4 py-3 text-black placeholder-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
         </div>
-        <div class="flex items-center justify-between w-full space-x-4">
-          <p class="text-3xl font-bold tracking-wide text-black">
-            Order ID : #{{ orderId }}
-          </p>
-          <p class="text-3xl text-black cursor-pointer">
-            <i @click="refreshData" class="ri-restart-line"></i>
-          </p>
+
+        <button
+          @click="addProduct"
+          type="button"
+          class="w-full px-4 py-3 font-bold text-white bg-black rounded-md hover:bg-gray-800"
+        >
+          Add Product
+        </button>
+
+        <div class="space-y-2">
+          <div
+            v-for="(item, index) in products"
+            :key="index"
+            class="flex items-center justify-between p-3 border border-gray-200 rounded-md"
+          >
+            <div class="w-1/2">
+              <p class="font-semibold text-black">{{ item.name }}</p>
+              <p class="text-sm text-gray-700">LKR {{ item.unitPrice }}</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button @click="decrementQuantity(item)" type="button" class="w-8 h-8 text-white bg-black rounded">-</button>
+              <span class="w-6 text-center">{{ item.quantity }}</span>
+              <button @click="incrementQuantity(item)" type="button" class="w-8 h-8 text-white bg-black rounded">+</button>
+              <button @click="removeProduct(index)" type="button" class="px-3 py-1 text-white bg-red-600 rounded">X</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-2 space-y-2 border-t border-gray-200">
+          <div class="flex items-center justify-between">
+            <p class="font-semibold text-black">Sub Total</p>
+            <p class="text-black">{{ subtotal }} LKR</p>
+          </div>
+          <div class="flex items-center justify-between">
+            <p class="font-semibold text-black">Custom Discount</p>
+            <div class="w-40">
+              <CurrencyInput v-model="custom_discount" :options="{ currency: 'EUR' }" />
+            </div>
+          </div>
+          <div class="flex items-center justify-between">
+            <p class="font-semibold text-black">Cash</p>
+            <div class="w-40">
+              <CurrencyInput v-model="cash" :options="{ currency: 'EUR' }" />
+            </div>
+          </div>
+          <div class="flex items-center justify-between text-xl font-bold">
+            <p class="text-black">Total</p>
+            <p class="text-black">{{ total }} LKR</p>
+          </div>
+          <div class="flex items-center justify-between">
+            <p class="font-semibold text-black">Balance</p>
+            <p class="text-black">{{ balance }} LKR</p>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-center pt-2 space-x-6">
+          <div
+            @click="selectedPaymentMethod = 'cash'"
+            :class="[
+              'cursor-pointer w-[100px] border border-black rounded-xl flex flex-col justify-center items-center text-center p-2',
+              selectedPaymentMethod === 'cash' ? 'bg-yellow-500 font-bold' : 'text-black',
+            ]"
+          >
+            <img src="/images/money-stack.png" alt="Cash" class="w-16" />
+            <p>Cash</p>
+          </div>
+
+          <div
+            @click="selectedPaymentMethod = 'card'"
+            :class="[
+              'cursor-pointer w-[100px] border border-black rounded-xl flex flex-col justify-center items-center text-center p-2',
+              selectedPaymentMethod === 'card' ? 'bg-yellow-500 font-bold' : 'text-black',
+            ]"
+          >
+            <img src="/images/bank-card.png" alt="Card" class="w-16" />
+            <p>Card</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-3 pt-3 md:grid-cols-2">
+          <button
+            type="button"
+            @click="openPrintSlip"
+            class="w-full py-3 text-lg font-bold text-black uppercase border border-black rounded-xl"
+          >
+            Print Slip
+          </button>
+          <button
+            type="button"
+            @click="submitOrder"
+            :disabled="products.length === 0"
+            :class="[
+              'w-full py-3 text-lg font-bold text-white uppercase rounded-xl',
+              products.length === 0 ? 'bg-gray-500 cursor-not-allowed' : 'bg-black',
+            ]"
+          >
+            Confirm Order
+          </button>
         </div>
       </div>
     </div>
 
-     <div class="flex md:flex-row flex-col w-full gap-4 md:px-32">
-        <div class="flex flex-col md:w-1/2 w-full">
-          <div class="flex flex-col w-full">
-            <div class="p-16 space-y-8 bg-black shadow-lg rounded-3xl">
-              <p class="mb-4 text-5xl font-bold text-white">Customer Details</p>
-              <div class="mb-3">
-                <input
-                  v-model="customer.name"
-            <title>Sri Entertainment</title>
-                  placeholder="Enter Customer Name"
-                  class="w-full px-4 py-4 text-black placeholder-black bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                @page {
-                  size: 80mm auto;
-                  margin: 4mm;
-                }
-                />
-              </div>
-                <input
-                  print-color-adjust: exact;
-                  v-model="customer.contactNumber"
-                  type="text"
-              * {
-                box-sizing: border-box;
-                color: #000;
-              }
-                  placeholder="Enter Customer Contact Number"
-              </div>
-              <div class="text-black">
-                padding: 0;
-                background: #fff;
-                font-size: 11px;
-                  v-model="customer.email"
-                  type="email"
-              .receipt-container {
-                width: 72mm;
-                margin: 0 auto;
-                padding: 6px;
-              }
-                  placeholder="Enter Customer Email"
-                  class="w-full px-4 py-4 text-black placeholder-black bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                margin-bottom: 4px;
-              </div>
+    <PosSuccessModel :isOpen="isSuccessModalOpen" @update:isOpen="handleModalOpenUpdate" />
+    <AlertModel :isOpen="isAlertModalOpen" :message="message" @update:isOpen="isAlertModalOpen = $event" />
 
-                margin: 2px 0;
-                font-size: 18px;
-                font-weight: 800;
-                letter-spacing: 0.4px;
-                  v-model="employee_id"
-                  id="employee_id"
-                  class="w-full px-4 py-4 text-black placeholder-black bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                margin: 2px 0;
-                  <option value="" disabled selected>Select an Employee</option>
-              .logo {
-                width: 46mm;
-                max-height: 22mm;
-                object-fit: contain;
-                margin: 0 auto 4px;
-                display: block;
-                  >
-              .dash {
-                border-top: 1px dashed #000;
-                margin: 6px 0;
-              }
-              .bill-title {
-                text-align: center;
-                font-size: 16px;
-                font-weight: 800;
-                letter-spacing: 0.6px;
-                margin: 2px 0;
-              }
-              .meta-center {
-                text-align: center;
-                font-size: 10px;
-                line-height: 1.2;
-              }
-              .meta-line {
-                  </option>
-                </select>
-                gap: 8px;
-                font-size: 10px;
-                margin: 2px 0;
-          </div>
-              .meta-line strong {
-                font-weight: 700;
-          <div class="flex flex-col items-start justify-center w-full md:px-12">
-              .items {
-            <div class="w-full pt-6 space-y-2">
-              <div class="flex flex-col w-full pt-4 pb-4 ">
-                table-layout: fixed;
-              <span>
-              .items th, .items td {
-                padding: 2px 0;
-                font-size: 10px;
-                  placeholder="Enter Product Name"
-              .items th:first-child,
-              .items td:first-child {
-                width: 56%;
-                />
-                word-break: break-word;
-              </span>
-              .items th:nth-child(2),
-              .items td:nth-child(2) {
-                width: 14%;
-                text-align: center;
-              }
-              .items th:last-child,
-              .items td:last-child {
-                width: 30%;
-                text-align: right;
-                  <input
-                  v-model="product_quantity"
-                margin-top: 2px;
-                font-size: 11px;
-                  class="w-full px-4 py-4 text-black placeholder-black bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              .total-row {
-                </span>
-              </div>
-                margin: 2px 0;
-                font-weight: 600;
-                <p class="text-xl text-black">Unit Price</p>
-              .grand {
-                font-size: 18px;
-                font-weight: 800;
-                  type="Number"
-                  placeholder="Enter unit price"
-                  class="w-full px-4 py-4 text-black placeholder-black bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                font-size: 9px;
-                margin-top: 6px;
-                line-height: 1.3;
-                </span>
-              </div>
-                margin: 3px 0;
-            
-              .footer .notice {
-                font-size: 10px;
-              
-                font-weight: 700;
-              <div class="flex items-center justify-center w-full px-16 py-4">
-                <button
-                    @click="addProduct"
-                    class="w-full px-6 py-3 text-xl font-bold text-white bg-black rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
-                >
-
-            <div class="header">
-              <img src="/images/billlogo.jpeg" class="logo" alt="Company Logo" />
-              <h1>${props.companyInfo?.name || 'PLAY AREA'}</h1>
-              <p>${props.companyInfo?.address || ''}</p>
-              
-              <div class="flex items-center justify-between w-full px-16 pt-4 pb-4" v-for="(product, index) in products" :key="index"  >
-              
-              <div class="flex flex-col justify-start w-4/6">
-                <p class="text-3xl text-black">
-                  {{ product.name }}
-                </p>
-                <div class="flex items-end justify-between w-full">
-                  <div class="flex space-x-4">
-                    <p
-                      @click="incrementQuantity(product)"
-
-                  <div class="dash"></div>
-                  <div class="meta-center">${orderId.value}</div>
-                  <div class="meta-center">${new Date().toLocaleString()}</div>
-                  <div class="dash"></div>
-                      class="flex items-center justify-center w-8 h-8 text-white bg-black rounded cursor-pointer"
-                  <div class="meta-line"><span><strong>Customer</strong></span><span>${customer.value.name || 'Walk-in'}</span></div>
-                  <div class="meta-line"><span><strong>Cashier</strong></span><span>${props.loggedInUser?.name || '-'}</span></div>
-
-                  <div class="dash"></div>
-
-                  <table class="items">
-              </div>
-            </div>
-                          <th>Item</th>
-                          <th>Qty</th>
-                          <th>Price</th>
-                <p class="text-xl">{{ subtotal }} LKR</p>
-              </div>
-            
-              <div class="flex items-center justify-between w-full px-16 pt-4 pb-4 border-b border-black">
-                <p class="text-xl text-black">Custom Discount</p>
-                <span>
-                  <CurrencyInput
-                    v-model="custom_discount"
-                              <td>${product.quantity}</td>
-                              <td>LKR ${product.unitPrice}</td>
-                </span>
-              </div>
-              <div class="flex items-center justify-between w-full px-16 pt-4 pb-4 border-b border-black">
-                <p class="text-xl text-black">Cash</p>
-                    </table>
-
-                  <div class="dash"></div>
-                    v-model="cash"
-                    :options="{ currency: 'EUR' }"
-                    <div class="total-row"><span>Sub Total</span><span>LKR ${subtotal.value}</span></div>
-                    <div class="total-row"><span>Custom Discount</span><span>LKR ${custom_discount.value}</span></div>
-                    <div class="total-row grand"><span>TOTAL</span><span>LKR ${total.value}</span></div>
-                    <div class="total-row"><span>Cash</span><span>LKR ${cash.value}</span></div>
-                    <div class="total-row"><span>Balance</span><span>LKR ${balance.value}</span></div>
-                class="flex items-center justify-center w-full pt-8 space-x-8"
-
-                  <div class="dash"></div>
-                  <div class="meta-line"><span><strong>Payment Method:</strong></span><span>${selectedPaymentMethod.value === 'card' ? 'Card' : 'Cash'}</span></div>
-                  <div class="dash"></div>
-              >
-                <p class="text-xl text-black">Payment Method :</p>
-                    <p class="notice">මාරු කිරීම සඳහා දින 07 ඇතුලත බිල්පත සමග පැමිණෙන්න.</p>
-                    <p>THANK YOU COME AGAIN</p>
-                    <p>Powered by JAAN Network (Pvt) Ltd.</p>
-                    'cursor-pointer w-[100px]  border border-black rounded-xl flex flex-col justify-center items-center text-center',
-                    selectedPaymentMethod === 'cash'
-                      ? 'bg-yellow-500 font-bold'
-                      : 'text-black',
-                  ]"
-                >
-                  <img src="/images/money-stack.png" alt="" class="w-24" />
-                </div>
-                <div
-                  @click="selectedPaymentMethod = 'card'"
-                  :class="[
-                    'cursor-pointer w-[100px] border border-black rounded-xl flex flex-col justify-center items-center text-center',
-                    selectedPaymentMethod === 'card'
-                      ? 'bg-yellow-500 font-bold'
-                      : 'text-black',
-                  ]"
-                >
-                  <img src="/images/bank-card.png" alt="" class="w-24" />
-                </div>
-              </div>
-
-              <div class="flex items-center justify-center w-full">
-                <button
-                type="button"
-                @click="openPrintSlip"
-                :class="[
-                    'w-full bg-black py-4 text-2xl font-bold tracking-wider text-center text-white uppercase rounded-xl',
-                    products.length === 0
-                    ? ' cursor-not-allowed'
-                    : ' cursor-pointer',
-                ]"
-                >
-                <i class="pr-4 ri-add-circle-fill"></i> Confirm Order
-                </button>
-
-              </div>
-            </div>
-
-            
-          </div>
-        </div>
-      </div>
-
-    
+    <Footer />
   </div>
-
 </template>
 
 <script setup>
@@ -288,7 +198,7 @@ import Banner from "@/Components/Banner.vue";
 import PosSuccessModel from "@/Components/custom/PosSuccessModel.vue";
 import AlertModel from "@/Components/custom/AlertModel.vue";
 import { useForm, router } from "@inertiajs/vue3";
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, onBeforeUnmount, computed, watch } from "vue";
 import { Head } from "@inertiajs/vue3";
 import { Link } from "@inertiajs/vue3";
 import axios from "axios";
@@ -299,6 +209,7 @@ import ProductAutoComplete from "@/Components/custom/ProductAutoComplete.vue";
 const product = ref(null);
 const error = ref(null);
 const products = ref([]);
+const appliedCoupon = ref(null);
 const isSuccessModalOpen = ref(false);
 const isAlertModalOpen = ref(false);
 const message = ref("");
@@ -471,6 +382,23 @@ const couponForm = useForm({
 let barcode = "";
 let timeout; // Timeout to detect the end of the scan
 
+const handleScannerInput = (event) => {
+  if (event.key === "Enter") {
+    form.barcode = barcode;
+    barcode = "";
+    return;
+  }
+
+  if (event.key.length === 1) {
+    barcode += event.key;
+  }
+
+  clearTimeout(timeout);
+  timeout = setTimeout(() => {
+    barcode = "";
+  }, 100);
+};
+
 const submitCoupon = async () => {
   try {
     const response = await axios.post(route("pos.getCoupon"), {
@@ -510,7 +438,10 @@ watch([cash, custom_discount], ([newCash, newDiscount]) => {
 // Attach the keypress event listener when the component is mounted
 onMounted(() => {
   document.addEventListener("keypress", handleScannerInput);
-  console.log(props.products);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("keypress", handleScannerInput);
 });
 
 const openPrintSlip = () => {
