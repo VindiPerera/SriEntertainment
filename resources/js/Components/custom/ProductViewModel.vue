@@ -230,7 +230,10 @@ const formattedDate = computed(() =>
     : ""
 );
 
-function generateAndPrintBarcodes() {
+
+
+
+ function generateAndPrintBarcodes() {
   const barcode = selectedProduct?.barcode;
   const count = parseInt(barcodeCount.value, 10);
 
@@ -243,20 +246,17 @@ function generateAndPrintBarcodes() {
     return;
   }
 
-  // Sizing constants (mm/px)
+  // Exact 30mm × 18mm sticker size - 1 per row guaranteed
   const MM_TO_PX = 3.78;
   const LABEL_W_MM = 30;
   const LABEL_H_MM = 18;
-  const INNER_PADDING_MM = 0.5;
-  const GUTTER_MM = 0; // Removed gap - configured in printer
-  const BARCODE_H_MM = 8; // Reduced from 12
-  const NAME_FZ_PX = 9;
-  const PRICE_FZ_PX = 16; // Increased for better visibility
+  const BARCODE_H_MM = 7;
 
   // Build labels HTML
   const labelsHtml = Array.from({ length: count }).map((_, idx) => `
     <div class="barcode-label">
-      <div class="product-name">${selectedProduct?.code || 'N/A'}</div>
+      <div class="product-name">${selectedProduct?.name || 'N/A'}</div>
+
       <div class="barcode-svg"><svg id="barcode${idx + 1}"></svg></div>
       <div class="bottom-info">${(selectedProduct?.selling_price ?? 'N/A')} LKR</div>
     </div>
@@ -265,39 +265,52 @@ function generateAndPrintBarcodes() {
   const htmlContent = `
     <html>
     <head>
-      <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+      <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
       <style>
         * { margin:0; padding:0; box-sizing:border-box; }
-        html, body { background:white; margin:0; padding:0; padding-top: 3mm; }
-        body { font-family:"Poppins", sans-serif; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+        html, body {
+          background: white;
+          margin: 0;
+          padding: 0;
+        }
+        body {
+          font-family: "Poppins", sans-serif;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
 
         .barcode-container {
-          width: 100%;
-          margin: 0;
-          margin-top: 2mm;
-          padding: 0;
+          width: 36mm; /* Exactly 1 sticker × 30mm + padding */
+          margin: 0 auto;
+          padding: 3mm;
           display: flex;
           flex-wrap: wrap;
-          gap: ${GUTTER_MM}mm;
+          justify-content: center;
           align-content: flex-start;
-          justify-content: flex-start;
+          gap: 0;
         }
 
         .barcode-label {
           width: ${LABEL_W_MM}mm;
           height: ${LABEL_H_MM}mm;
+          min-width: ${LABEL_W_MM}mm;
+          max-width: ${LABEL_W_MM}mm;
+          min-height: ${LABEL_H_MM}mm;
+          max-height: ${LABEL_H_MM}mm;
           background: white;
-          padding: ${INNER_PADDING_MM}mm;
+          padding: 0.8mm;
           display: flex;
           flex-direction: column;
           align-items: center;
-          justify-content: center;
+          justify-content: space-between;
           overflow: hidden;
-          margin: 0;
+          page-break-inside: avoid;
+          flex-shrink: 0;
+          flex-grow: 0;
         }
 
         .product-name {
-          font-size: ${NAME_FZ_PX}px;
+          font-size: 8px;
           font-weight: 600;
           line-height: 1.1;
           width: 100%;
@@ -305,8 +318,15 @@ function generateAndPrintBarcodes() {
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
-          margin: 0;
-          padding: 0;
+        }
+
+        .product-code {
+          font-size: 7px;
+          font-weight: 500;
+          width: 100%;
+          text-align: center;
+          color: #333;
+          line-height: 1;
         }
 
         .barcode-svg {
@@ -315,39 +335,33 @@ function generateAndPrintBarcodes() {
           display: flex;
           align-items: center;
           justify-content: center;
-          overflow: hidden;
-          margin: 0;
-          padding: 0;
+          flex-shrink: 0;
         }
         .barcode-svg svg {
-          width: 100%;
+          width: 95%;
           height: 100%;
-          display: block;
         }
 
         .bottom-info {
-          font-size: ${PRICE_FZ_PX}px;
+          font-size: 11px;
           font-weight: 700;
           line-height: 1;
-          white-space: nowrap;
           width: 100%;
           text-align: center;
-          margin: 0;
-          padding: 0;
         }
 
         @media print {
           @page {
-            margin: 0;
-            padding: 0;
+            margin: 3mm;
+            size: auto;
           }
-          html, body { 
-            margin: 0; 
-            padding: 0; 
+          html, body {
+            padding: 0;
+            margin: 0;
           }
           .barcode-container {
-            margin: 0;
-            padding: 0;
+            margin: 0 auto;
+            padding: 2mm;
           }
         }
       </style>
@@ -371,7 +385,7 @@ function generateAndPrintBarcodes() {
       JsBarcode(svg, barcode, {
         format: 'CODE128',
         lineColor: '#000',
-        width: 1,
+        width: 1.3,
         height: Math.round(BARCODE_H_MM * MM_TO_PX),
         displayValue: false,
         margin: 0,
@@ -382,7 +396,7 @@ function generateAndPrintBarcodes() {
       printWindow.focus();
       printWindow.print();
       printWindow.close();
-    }, 400);
+    }, 500);
   };
 }
 </script>
