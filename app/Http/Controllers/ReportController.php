@@ -62,7 +62,7 @@ class ReportController extends Controller
     // 2. Sales Query (with date range if present)
     // =========================
     $salesQuery = Sale::whereHas('saleItems.product.category')
-        ->with(['saleItems.product.category', 'employee']);
+        ->with(['saleItems.product.category', 'employee', 'customer']);
 
     $salesQuantitiesQuery = SaleItem::query()->whereHas('sale');
 

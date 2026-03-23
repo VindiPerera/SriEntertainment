@@ -499,7 +499,7 @@
   </div>
 
 
-  <div class="overflow-x-auto max-h-[400px] border rounded-xl mt-4">
+  <div class="overflow-x-auto border rounded-xl mt-4">
     <table
       id="stockQtyTbl"
       class="w-full text-gray-800 bg-white border border-gray-300 rounded-lg shadow-md table-auto"
@@ -554,6 +554,79 @@
   </div>
 </div>
 
+    </div>
+
+    <!-- Sales Summary -->
+    <div class="w-full bg-white border-4 border-black rounded-xl p-6">
+      <h2 class="text-2xl font-semibold text-slate-700 text-center pb-4">Sales Summary</h2>
+
+      <!-- Stat Cards -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+          <p class="text-sm text-gray-600">Total Transactions</p>
+          <p class="text-2xl font-bold text-blue-600">{{ totalTransactions }}</p>
+        </div>
+        <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded">
+          <p class="text-sm text-gray-600">Total Sales</p>
+          <p class="text-2xl font-bold text-green-600">{{ Number(totalSaleAmount).toLocaleString() }} LKR</p>
+        </div>
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+          <p class="text-sm text-gray-600">Total Discount</p>
+          <p class="text-2xl font-bold text-red-600">{{ (Number(totalDiscount) + Number(customeDiscount)).toLocaleString() }} LKR</p>
+        </div>
+        <div class="bg-purple-50 border-l-4 border-purple-500 p-4 rounded">
+          <p class="text-sm text-gray-600">Net Profit</p>
+          <p class="text-2xl font-bold text-purple-600">{{ Number(netProfit).toLocaleString() }} LKR</p>
+        </div>
+      </div>
+
+      <!-- Download PDF -->
+      <div class="flex justify-start pb-4">
+        <button
+          @click="downloadSalesSummaryPDF"
+          class="px-4 py-2 text-md font-semibold text-white bg-orange-600 rounded-lg hover:bg-orange-700 shadow-md"
+        >
+          Download PDF
+        </button>
+      </div>
+
+      <div class="overflow-x-auto border rounded-xl mt-4">
+        <table
+          id="salesSummaryTbl"
+          class="w-full text-gray-800 bg-white border border-gray-300 rounded-lg shadow-md table-auto"
+        >
+          <thead>
+            <tr class="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-700 text-white text-[14px] border-b border-blue-800">
+              <th class="p-3 text-left font-semibold">#</th>
+              <th class="p-3 text-left font-semibold">Order ID</th>
+              <th class="p-3 text-left font-semibold">Sale Date</th>
+              <th class="p-3 text-left font-semibold">Customer</th>
+              <th class="p-3 text-left font-semibold">Employee</th>
+              <th class="p-3 text-center font-semibold">Items</th>
+              <th class="p-3 text-center font-semibold">Payment</th>
+              <th class="p-3 text-right font-semibold">Discount (LKR)</th>
+              <th class="p-3 text-right font-semibold">Total (LKR)</th>
+            </tr>
+          </thead>
+          <tbody class="text-[12px] font-medium">
+            <tr
+              v-for="(sale, index) in sales"
+              :key="sale.id"
+              class="border-b transition duration-200 hover:bg-gray-100"
+            >
+              <td class="p-3 text-center">{{ index + 1 }}</td>
+              <td class="p-3 font-bold">{{ sale.order_id || 'N/A' }}</td>
+              <td class="p-3">{{ sale.sale_date ? new Date(sale.sale_date).toLocaleDateString() : 'N/A' }}</td>
+              <td class="p-3">{{ sale.customer?.name || 'Walk-in' }}</td>
+              <td class="p-3">{{ sale.employee?.name || 'N/A' }}</td>
+              <td class="p-3 text-center">{{ sale.sale_items?.length || 0 }}</td>
+              <td class="p-3 text-center capitalize">{{ sale.payment_method || 'N/A' }}</td>
+              <td class="p-3 text-right">{{ ((Number(sale.discount) || 0) + (Number(sale.custom_discount) || 0)).toFixed(2) }}</td>
+              <td class="p-3 text-right font-bold">{{ Number(sale.total_amount || 0).toFixed(2) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- Return Items Table -->
@@ -1377,6 +1450,58 @@ const downloadPDFTable = () => {
 
   // Save the PDF
   doc.save("Top_Products_Stock.pdf");
+};
+
+const downloadSalesSummaryPDF = () => {
+  const doc = new jsPDF('l', 'mm', 'a4');
+
+  doc.setFontSize(18);
+  doc.text('Sales Summary', 14, 15);
+
+  if (startDate.value && endDate.value) {
+    doc.setFontSize(12);
+    doc.text(`Date Range: ${startDate.value} to ${endDate.value}`, 14, 25);
+  }
+
+  const tableColumn = ['#', 'Order ID', 'Sale Date', 'Customer', 'Employee', 'Items', 'Payment', 'Discount (LKR)', 'Total (LKR)'];
+
+  const tableRows = sales.value.map((sale, index) => [
+    index + 1,
+    sale.order_id || 'N/A',
+    sale.sale_date ? new Date(sale.sale_date).toLocaleDateString() : 'N/A',
+    sale.customer?.name || 'Walk-in',
+    sale.employee?.name || 'N/A',
+    sale.sale_items?.length || 0,
+    sale.payment_method || 'N/A',
+    ((Number(sale.discount) || 0) + (Number(sale.custom_discount) || 0)).toFixed(2),
+    Number(sale.total_amount || 0).toFixed(2),
+  ]);
+
+  const grandTotal = sales.value.reduce((sum, s) => sum + Number(s.total_amount || 0), 0);
+  tableRows.push(['', '', '', '', '', '', 'Grand Total', '', grandTotal.toFixed(2)]);
+
+  doc.autoTable({
+    head: [tableColumn],
+    body: tableRows,
+    startY: startDate.value && endDate.value ? 35 : 25,
+    theme: 'striped',
+    styles: { fontSize: 9 },
+    headStyles: { fillColor: [44, 62, 80] },
+    columnStyles: {
+      0: { cellWidth: 8 },
+      1: { cellWidth: 30 },
+      2: { cellWidth: 25 },
+      3: { cellWidth: 35 },
+      4: { cellWidth: 30 },
+      5: { cellWidth: 12 },
+      6: { cellWidth: 18 },
+      7: { cellWidth: 25 },
+      8: { cellWidth: 25 },
+    },
+    margin: { left: 5, right: 5, top: 20 },
+  });
+
+  doc.save('Sales_Summary.pdf');
 };
 
 const downloadReturnItemsPDF = () => {
@@ -2392,10 +2517,11 @@ const downloadExpensePDF = () => {
 
 $(document).ready(function () {
   let table = $("#stockQtyTbl").DataTable({
-    dom: "Bfrtip",
+    dom: "lfrtip",
     buttons: [],
-    paging: false, // Disable pagination
-    buttons: [],
+    paging: true,
+    pageLength: 10,
+    lengthMenu: [10, 25, 50, 100],
     columnDefs: [
       {
         targets: 0, // Adjust the target column if needed
@@ -2820,6 +2946,25 @@ $(document).ready(function () {
     language: {
       search: "",
       emptyTable: "No printout services found for the selected date range"
+    },
+  });
+
+  // Initialize DataTable for Sales Summary
+  $("#salesSummaryTbl").DataTable({
+    dom: "lfrtip",
+    paging: true,
+    pageLength: 10,
+    lengthMenu: [10, 25, 50, 100],
+    columnDefs: [
+      { targets: 0, searchable: false, orderable: false },
+    ],
+    initComplete: function () {
+      let searchInput = $("div.dataTables_filter input");
+      searchInput.attr("placeholder", "Search ...");
+    },
+    language: {
+      search: "",
+      emptyTable: "No sales found for the selected date range",
     },
   });
 });

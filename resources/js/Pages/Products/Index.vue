@@ -221,17 +221,17 @@
             </div>
             <div class="px-2 py-4 space-y-4">
               <div
-                class="flex items-start space-x-3 justify-between text-[11px] font-bold tracking-wide"
+                class="flex items-start space-x-3 justify-between text-sm font-bold tracking-wide"
               >
-                <p class="text-justify">{{ product.name || "N/A" }}</p>
+                <p class="text-justify text-xl">{{ product.name || "N/A" }}</p>
                 <p
-                  class="px-3 text-white bg-green-700 py-2 rounded-full flex items-center"
+                  class="px-3 text-white bg-green-700 py-2 rounded-full flex items-center text-lg"
                 >
                   {{ product.selling_price || "N/A" }}
                 </p>
               </div>
 
-              <div class="flex justify-center space-x-2 items-start w-full">
+              <div class="flex justify-center space-x-2 items-start w-full text-base">
                 <div class="flex space-x-1 text-gray-400">
                   <p class="font-bold">Color:</p>
 
@@ -248,7 +248,7 @@
 
               <div class="flex items-center justify-center w-full space-x-4">
                 <p
-                  class="flex items-center space-x-2 text-justify text-gray-400"
+                  class="flex items-center space-x-2 text-justify text-gray-400 text-base"
                 >
                   Supplier :
 
