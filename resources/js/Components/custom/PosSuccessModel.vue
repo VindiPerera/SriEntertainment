@@ -95,7 +95,8 @@ const props = defineProps({
     total: String,
     custom_discount: Number,
     custom_discount_type: String,
-    payment_method: { type: String, default: 'cash' }
+    payment_method: { type: String, default: 'cash' },
+    warranty_period: { type: String, default: '' }
 });
 
 const handlePrintReceipt = () => {
@@ -199,31 +200,35 @@ const handlePrintReceipt = () => {
             margin: 0;
             padding: 0;
             background: #fff;
-            font-size: 11px;
+            font-size: 12px;
         }
         .receipt-container {
-            width: 72mm;
+            width: 78mm;
             margin: 0 auto;
-            padding: 6px;
+            padding: 8px;
             background: #fff;
         }
         .logo-wrap {
             text-align: center;
-            margin-bottom: 4px;
+            margin-bottom: 0;
         }
         .logo-wrap img {
-            width: 46mm;
-            max-height: 22mm;
-            object-fit: contain;
+            width: 44mm;
+            height: 16mm;
+            max-height: none;
+            display: block;
+            margin: 0 auto;
+            object-fit: cover;
+            object-position: center;
         }
         .company {
             text-align: center;
-            font-size: 10px;
+            font-size: 11px;
             line-height: 1.2;
         }
         .company h1 {
             margin: 2px 0;
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 800;
             letter-spacing: 0.4px;
         }
@@ -233,7 +238,7 @@ const handlePrintReceipt = () => {
         }
         .title {
             text-align: center;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 800;
             letter-spacing: 0.6px;
             margin: 2px 0;
@@ -287,7 +292,7 @@ const handlePrintReceipt = () => {
             font-weight: 600;
         }
         .grand {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 800;
         }
         .footer {
@@ -307,12 +312,12 @@ const handlePrintReceipt = () => {
 <body>
     <div class="receipt-container">
         <div class="logo-wrap">
-            <img src="/images/billlogo.jpeg" alt="Company Logo" />
+            <img src="/images/billlogo.png?v=2" alt="Company Logo" />
         </div>
 
         <div class="company">
             <h1>Sri Entertainment</h1>
-            <div>80b Hosptel Road, Kalubowala, Dehiwala</div>
+            <div>80b Hosptel Road, Kalubowila, Dehiwala</div>
             <div>0777244467 | 0766877444</div>
             <div>amirth055@gmail.com</div>
         </div>
@@ -356,7 +361,7 @@ const handlePrintReceipt = () => {
         <div class="dash"></div>
 
         <div class="footer">
-            <div class="notice">මාරු කිරීම සඳහා දින 07 ඇතුලත බිල්පත සමග පැමිණෙන්න.</div>
+            <div class="notice">${props.warranty_period ? `Selected warranty period: ${props.warranty_period}. To return the product, need the bill.` : ''}</div>
             <div>THANK YOU COME AGAIN</div>
             <div>Powered by JAAN Network Ltd.</div>
         </div>
