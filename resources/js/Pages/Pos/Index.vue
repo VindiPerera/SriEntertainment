@@ -215,8 +215,19 @@
                             <div class="flex flex-col justify-between w-5/6">
                                 <p class="text-xl text-black">
                                     {{ item.name }}
-
-
+                                </p>
+                                <p
+                                    v-if="item.stock_quantity !== undefined && item.stock_quantity !== null"
+                                    :class="[
+                                        'text-sm font-semibold mt-0.5',
+                                        (item.stock_quantity - item.quantity) <= 0
+                                            ? 'text-red-600'
+                                            : (item.stock_quantity - item.quantity) <= 5
+                                                ? 'text-orange-500'
+                                                : 'text-green-600'
+                                    ]"
+                                >
+                                    Remaining Stock: {{ Math.max(0, item.stock_quantity - item.quantity) }}
                                 </p>
 
                                 <div
@@ -1054,6 +1065,11 @@ const removeCoupon = () => {
 const incrementQuantity = (id) => {
     const product = products.value.find((item) => item.id === id);
     if (product) {
+        if (product.stock_quantity !== undefined && product.stock_quantity !== null && product.quantity >= product.stock_quantity) {
+            isAlertModalOpen.value = true;
+            message.value = `Insufficient stock. Only ${product.stock_quantity} available for "${product.name}".`;
+            return;
+        }
         product.quantity += 1;
     }
 };
