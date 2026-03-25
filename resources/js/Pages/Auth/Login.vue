@@ -68,7 +68,7 @@ const submit = () => {
               required
               autofocus
               placeholder="Enter Name"
-              autocomplete="username"
+              autocomplete="off"
             />
           </div>
 
@@ -80,8 +80,7 @@ const submit = () => {
               class="w-full px-3 py-2 mt-1 text-2xl border rounded-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
               placeholder="Enter password"
-
-              autocomplete="current-password"
+              autocomplete="new-password"
             />
             <!-- <InputError class="mt-2 font-bold text-center" :message="form.errors.email" /> -->
             <InputError class="mt-2 font-bold text-center" :message="form.errors.identity" />
