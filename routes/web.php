@@ -12,6 +12,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ColorController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\SizeController;
+use App\Http\Controllers\UserController;
 
 use App\Http\Controllers\ExpenseController;
 
@@ -126,6 +127,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('coupons', CouponController::class);
     Route::resource('sizes', SizeController::class);
     Route::resource('employees', EmployeeController::class);
+    Route::resource('users', UserController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('transactionHistory', TransactionHistoryController::class );
     Route::post('/transactions/delete', [TransactionHistoryController::class, 'destroy'])->name('transactions.delete');
     Route::resource('stock-transition', StockTransactionController::class);

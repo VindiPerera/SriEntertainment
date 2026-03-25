@@ -327,6 +327,27 @@
         </div>
       </Link>
 
+      <Link href="/users" v-if="HasRole(['Admin'])">
+        <div class="dashboard-card group bg-gradient-to-br from-violet-600 to-violet-700 hover:from-violet-500 hover:to-violet-600">
+          <div class="card-content">
+            <div class="icon-container">
+              <img
+                src="/images/dashboard/cashier.png"
+                class="icon"
+                alt="User Management"
+              />
+            </div>
+            <div class="text-container">
+              <p class="title">User Management</p>
+              <p class="description">
+                Manage Admin, Manager & Cashier accounts
+              </p>
+            </div>
+          </div>
+          <div class="card-glow"></div>
+        </div>
+      </Link>
+
       <Link href="/expenses" v-if="HasRole(['Admin', 'Manager'])">
         <div class="dashboard-card bg-[#2E86C6]">
           <div class="card-content">
